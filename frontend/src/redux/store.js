@@ -1,20 +1,20 @@
-import { createStore, compose } from "redux";
-import Reducer from "./reducers";
+import { createStore, compose } from 'redux';
+import Reducer from './reducers';
 
-export function configureStore(initialState = {}) {
-  // Middleware and store enhancers
-  const middlewares = [];
+export default function configureStore(initialState = {}) {
+	// Middleware and store enhancers
+	// const middlewares = [];
 
-  const enhancers = [];
+	const enhancers = [];
 
-  if (process.env.NODE_ENV === "development") {
-    // Enable DevTools only when rendering during development.
-    if (window.devToolsExtension) {
-      enhancers.push(window.devToolsExtension());
-    }
-  }
+	if (process.env.NODE_ENV === 'development') {
+		// Enable DevTools only when rendering during development.
+		if (window.devToolsExtension) {
+			enhancers.push(window.devToolsExtension());
+		}
+	}
 
-  const store = createStore(Reducer, initialState, compose(...enhancers));
+	const store = createStore(Reducer, initialState, compose(...enhancers));
 
-  return store;
+	return store;
 }

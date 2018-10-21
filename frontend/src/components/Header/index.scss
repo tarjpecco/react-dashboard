@@ -1,0 +1,25 @@
+.content-header {
+	display: flex;
+	-ms-flex-pack: justify;
+	justify-content: space-between;
+	-ms-flex-align: center;
+	align-items: center;
+	margin: 0 auto;
+	height: 4.375rem;
+	padding-left: 0.875rem;
+	padding-right: 0.875rem;
+}
+@media (min-width: 1200px) {
+	.content-header {
+		max-width: 96%;
+	}
+}
+@media (min-width: 768px) {
+	.content-header {
+		padding-left: 1.75rem;
+		padding-right: 1.75rem;
+	}
+}
+.btn:not(:disabled):not(.disabled) {
+	cursor: pointer;
+}

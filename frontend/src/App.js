@@ -1,22 +1,15 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import Dashboard from './screens/Dashboard';
+import { Route, Switch } from 'react-router-dom';
 
+import LogIn from './screens/LogIn';
+import AppTemplate from './screens/AppTemplate';
 import './App.scss';
 
-const App = ({ store }) => (
-	<Provider store={store}>
-		<Router>
-			<Route exact path="/" component={Dashboard} />
-		</Router>
-	</Provider>
+const App = () => (
+	<Switch>
+		<Route exact path="/" component={LogIn} />
+		<Route component={AppTemplate} />
+	</Switch>
 );
-
-const { shape } = PropTypes;
-App.propTypes = {
-	store: shape({}).isRequired,
-};
 
 export default App;

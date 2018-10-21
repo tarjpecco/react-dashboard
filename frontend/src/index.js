@@ -1,12 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { Provider } from 'react-redux';
 import './index.scss';
 import App from './App';
 import configureStore from './redux/store';
 import * as serviceWorker from './serviceWorker';
+import './assets/styles/dashmix.min.css';
 
 const store = configureStore();
-ReactDOM.render(<App store={store} />, document.getElementById('root'));
+ReactDOM.render(
+	<Router>
+		<Provider store={store}>
+			<App />
+		</Provider>
+	</Router>,
+	document.getElementById('root')
+);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

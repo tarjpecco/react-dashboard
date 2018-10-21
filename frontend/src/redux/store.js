@@ -3,7 +3,6 @@ import Reducer from './reducers';
 
 export default function configureStore(initialState = {}) {
 	// Middleware and store enhancers
-	// const middlewares = [];
 
 	const enhancers = [];
 

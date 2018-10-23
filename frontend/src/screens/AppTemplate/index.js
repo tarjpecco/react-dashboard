@@ -5,6 +5,7 @@ import classNames from 'classnames';
 
 import { Route, Switch } from 'react-router-dom';
 import GCDashboard from '../GC/Dashboard';
+import SubDashboard from '../Sub/Dashboard';
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 
@@ -20,7 +21,7 @@ const AppTemplate = ({ showSideBar }) => (
 
 		<Header />
 		<Switch>
-			<Route exact path="/dashboard" component={GCDashboard} />
+			<Route exact path="/dashboard" component={SubDashboard} />
 		</Switch>
 	</div>
 );

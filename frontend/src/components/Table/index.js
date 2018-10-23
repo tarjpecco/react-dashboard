@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './index.scss';
 
 class Table extends React.PureComponent {
@@ -8,33 +9,23 @@ class Table extends React.PureComponent {
 	}
 
 	render() {
+		const { tableName, children } = this.props;
 		return (
 			<div className="block block-rounded block-bordered">
 				<div className="block-header block-header-default">
-					<h3 className="block-title">Tasks to be completed</h3>
+					<h3 className="block-title">{tableName}</h3>
 				</div>
 				<div className="block-content">
-					<table className="table table-vcenter">
-						<tbody>
-							<tr>
-								<th className="text-center" scope="row">
-									1
-								</th>
-								<td className="font-w600">
-									<p className="text-info">New Quote Received</p>
-								</td>
-								<td className="review">
-									<button type="button" className="btn btn-primary">
-										Review
-									</button>
-								</td>
-							</tr>
-						</tbody>
-					</table>
+					<table className="table table-vcenter">{children}</table>
 				</div>
 			</div>
 		);
 	}
 }
 
+const { string, node } = PropTypes;
+Table.propTypes = {
+	tableName: string.isRequired,
+	children: node.isRequired,
+};
 export default Table;

@@ -1,0 +1,11 @@
+.table td,
+.table th {
+	border-top: none !important;
+}
+.review {
+	display: flex;
+	justify-content: flex-end;
+}
+td p {
+	margin-bottom: 0 !important;
+}

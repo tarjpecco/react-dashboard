@@ -1,4 +1,5 @@
 import React from 'react';
+import logoImg from '../../assets/media/logo.png';
 // eslint-disable-next-line react/prefer-stateless-function
 class Sidebar extends React.Component {
 	render() {
@@ -13,7 +14,9 @@ class Sidebar extends React.Component {
 									href="index.html"
 								>
 									<span className="smini-hidden">
-										<span className="text-white-75">Company</span>
+										<span className="text-white-75">
+											<img src={logoImg} style={{ width: 120 }} alt="logo" />
+										</span>
 									</span>
 								</a>
 							</div>

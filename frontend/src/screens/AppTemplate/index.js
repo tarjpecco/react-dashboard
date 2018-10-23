@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import { Route, Switch } from 'react-router-dom';
-import Dashboard from '../Dashboard';
+import GCDashboard from '../GC/Dashboard';
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 
@@ -20,7 +20,7 @@ const AppTemplate = ({ showSideBar }) => (
 
 		<Header />
 		<Switch>
-			<Route exact path="/dashboard" component={Dashboard} />
+			<Route exact path="/dashboard" component={GCDashboard} />
 		</Switch>
 	</div>
 );

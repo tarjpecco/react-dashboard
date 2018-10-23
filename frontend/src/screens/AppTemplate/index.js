@@ -21,7 +21,8 @@ const AppTemplate = ({ showSideBar }) => (
 
 		<Header />
 		<Switch>
-			<Route exact path="/dashboard" component={SubDashboard} />
+			<Route exact path="/dashboard" component={GCDashboard} />
+			<Route exact path="/subdashboard" component={SubDashboard} />
 		</Switch>
 	</div>
 );

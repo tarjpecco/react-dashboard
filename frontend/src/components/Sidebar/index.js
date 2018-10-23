@@ -9,10 +9,7 @@ class Sidebar extends React.Component {
 					<div className="simplebar-content">
 						<div className="bg-header-dark">
 							<div className="content-header bg-white-10">
-								<a
-									className="link-fx font-w600 font-size-lg text-white"
-									href="index.html"
-								>
+								<a className="link-fx font-w600 font-size-lg text-white" href="/">
 									<span className="smini-hidden">
 										<span className="text-white-75">
 											<img src={logoImg} style={{ width: 120 }} alt="logo" />

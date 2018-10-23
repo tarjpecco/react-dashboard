@@ -18,7 +18,7 @@
 - Dev API Environment
 `yarn start:api`
 - Master Environment
-`yarn start:build`
+`yarn build`
 
 ## ESlint
 - `yarn eslint`

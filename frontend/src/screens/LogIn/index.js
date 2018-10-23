@@ -1,4 +1,5 @@
 import React from 'react';
+import logoImg from '../../assets/media/logo.png';
 
 class LogIn extends React.PureComponent {
 	constructor(props) {
@@ -17,10 +18,9 @@ class LogIn extends React.PureComponent {
 									<div className="mb-3 text-center">
 										<a
 											className="link-fx font-w700 font-size-h1"
-											href="index.html"
+											href="/dashboard"
 										>
-											<span className="text-dark">Dash</span>
-											<span className="text-primary">mix</span>
+											<img src={logoImg} style={{ width: 200 }} alt="logo" />
 										</a>
 										<p className="text-uppercase font-w700 font-size-sm text-muted">
 											Sign In
@@ -31,7 +31,7 @@ class LogIn extends React.PureComponent {
 										<div className="col-sm-8 col-xl-6">
 											<form
 												className="js-validation-signin"
-												action="be_pages_auth_all.html"
+												action="#"
 												method="post"
 											>
 												<div className="py-3">

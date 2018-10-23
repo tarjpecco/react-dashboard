@@ -59,7 +59,23 @@ const Dashboard = () => {
 				</div>
 			</div>
 			<div className="content">
-				<Table />
+				<Table tableName="Tasks to be completed">
+					<tbody>
+						<tr>
+							<th className="text-center" scope="row">
+								1
+							</th>
+							<td className="font-w600">
+								<p className="text-info">New Quote Received</p>
+							</td>
+							<td className="review">
+								<button type="button" className="btn btn-primary">
+									Review
+								</button>
+							</td>
+						</tr>
+					</tbody>
+				</Table>
 			</div>
 		</div>
 	);

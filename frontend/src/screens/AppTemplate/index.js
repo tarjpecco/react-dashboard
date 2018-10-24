@@ -7,6 +7,7 @@ import { Route, Switch } from 'react-router-dom';
 import GCDashboard from '../GC/Dashboard';
 import MyInsurance from '../GC/MyInsurance';
 import SubDashboard from '../Sub/Dashboard';
+import Projects from '../GC/Projects';
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 
@@ -24,6 +25,7 @@ const AppTemplate = ({ showSideBar }) => (
 		<Switch>
 			<Route exact path="/dashboard" component={GCDashboard} />
 			<Route exact path="/insurance" component={MyInsurance} />
+			<Route exact path="/projects" component={Projects} />
 			<Route exact path="/subdashboard" component={SubDashboard} />
 		</Switch>
 	</div>

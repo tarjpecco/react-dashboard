@@ -1,5 +1,7 @@
 import React from 'react';
-import Table from '../../components/Table';
+import Table from '../../../components/Table';
+
+import './index.scss';
 
 const Billing = () => {
 	return (
@@ -17,15 +19,38 @@ const Billing = () => {
 			<div className="content">
 				<div className="row">
 					<div className="col-md-6 col-xl-6">
-						<a className="block block-rounded block-link-shadow  bg-gd-dusk">
+						<a className="block block-rounded block-link-shadow  bg-gd-dusk card-content">
 							<div className="block-content block-content-full d-flex align-items-center justify-content-between">
 								<div>
 									<p className="text-white"> Card</p>
 								</div>
 								<div className="ml-3 text-right">
-									<p className="text-white font-size-h3 font-w300 mb-0">14</p>
-									<p className="text-white-75 mb-0">Active subs</p>
+									<button
+										type="button"
+										className="btn btn-sm btn-hero-dark mr-1 mb-3"
+									>
+										<i className="fa fa-pencil-alt" /> Edit Card
+									</button>
 								</div>
+							</div>
+							<div className="block-content block-content-full d-flex align-items-center justify-content-center">
+								<h1 className="text-white">XXXX XXXX XXXX 1234</h1>
+							</div>
+							<div className="block-content block-content-full d-flex align-items-center justify-content-around">
+								<span>Name Surname</span>
+								<span className="text-white">Valid till 10/22</span>
+							</div>
+							<div className="block-content-full d-flex align-items-center justify-content-around card-white">
+								<span className="caption">
+									<i className="fa fa-balance-scale" />
+									<div>Current balance</div>
+									<div>$1234.00</div>
+								</span>
+								<span className="caption">
+									<i className="fa fa-calculator" />
+									<div>Next charge date</div>
+									<div>10/31/2018</div>
+								</span>
 							</div>
 						</a>
 					</div>
@@ -53,9 +78,11 @@ const Billing = () => {
 									<td className="text-center">$2233.00</td>
 								</tr>
 								<tr className="text-center">
-									<button type="button" className="btn btn-primary">
-										Download invoices
-									</button>
+									<td colSpan="2">
+										<button type="button" className="btn btn-primary">
+											Download invoices
+										</button>
+									</td>
 								</tr>
 							</tbody>
 						</Table>

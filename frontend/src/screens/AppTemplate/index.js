@@ -10,6 +10,7 @@ import SubDashboard from '../Sub/Dashboard';
 import Projects from '../GC/Projects';
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
+import GCBilling from '../GC/Billing';
 
 const AppTemplate = ({ showSideBar }) => (
 	<div
@@ -24,6 +25,7 @@ const AppTemplate = ({ showSideBar }) => (
 		<Header />
 		<Switch>
 			<Route exact path="/dashboard" component={GCDashboard} />
+			<Route exact path="/billing" component={GCBilling} />
 			<Route exact path="/insurance" component={MyInsurance} />
 			<Route exact path="/projects" component={Projects} />
 			<Route exact path="/subdashboard" component={SubDashboard} />

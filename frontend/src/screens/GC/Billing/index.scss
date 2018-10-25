@@ -1,0 +1,29 @@
+.btn-hero-dark {
+	text-transform: unset !important;
+	font-size: 1rem !important;
+	font-weight: 300 !important;
+}
+p.text-white {
+	font-size: 1.3rem !important;
+	font-weight: 700 !important;
+}
+
+.card-content {
+	padding: 3px;
+	margin: 0;
+}
+
+.card-white {
+	background-color: white;
+	padding: 0.75rem;
+	border-radius: 0 0 0.25rem 0.25rem;
+}
+.caption {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	i {
+		font-size: 30px;
+	}
+}

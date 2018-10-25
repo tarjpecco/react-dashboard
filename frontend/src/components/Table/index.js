@@ -5,18 +5,36 @@ import './index.scss';
 class Table extends React.PureComponent {
 	constructor(props) {
 		super(props);
-		this.state = {};
+		this.state = { tableName: props.tableName };
+		this.onChangeHandler.bind(this);
 	}
 
+	onChangeHandler = e => {
+		const value = e.target.value;
+		this.setState({ tableName: value });
+	};
+
 	render() {
-		const { tableName, children } = this.props;
+		const { children, tableStyle, editable } = this.props;
+		const { tableName } = this.state;
+		const classname = `table table-vcenter ${tableStyle}`;
 		return (
 			<div className="block block-rounded block-bordered">
 				<div className="block-header block-header-default">
-					<h3 className="block-title">{tableName}</h3>
+					<h3 className="block-title">
+						{editable === '' && (
+							<input
+								className="tableTitle"
+								type="text"
+								value={tableName}
+								onChange={this.onChangeHandler}
+							/>
+						)}
+						{editable === 'disable' && tableName}
+					</h3>
 				</div>
 				<div className="block-content">
-					<table className="table table-vcenter">{children}</table>
+					<table className={classname}>{children}</table>
 				</div>
 			</div>
 		);
@@ -26,6 +44,8 @@ class Table extends React.PureComponent {
 const { string, node } = PropTypes;
 Table.propTypes = {
 	tableName: string.isRequired,
+	tableStyle: string.isRequired,
+	editable: string.isRequired,
 	children: node.isRequired,
 };
 export default Table;

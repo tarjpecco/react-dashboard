@@ -14,7 +14,7 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import GCBilling from '../GC/Billing';
 
-const AppTemplate = ({ showSideBar }) => (
+const AppTemplate = ({ showSideBar, location }) => (
 	<div
 		id="page-container"
 		className={classNames(
@@ -22,7 +22,7 @@ const AppTemplate = ({ showSideBar }) => (
 			{ 'sidebar-o': showSideBar }
 		)}
 	>
-		<Sidebar />
+		<Sidebar location={location} />
 
 		<Header />
 		<Switch>
@@ -47,4 +47,8 @@ AppTemplate.propTypes = {
 	showSideBar: bool.isRequired,
 };
 
+const { node } = PropTypes;
+AppTemplate.propTypes = {
+	location: node.isRequired,
+};
 export default connect(mapStateToProps)(AppTemplate);

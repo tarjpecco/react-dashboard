@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import logoImg from '../../assets/media/logo.png';
+import './index.scss';
 
 // eslint-disable-next-line react/prefer-stateless-function
 class Sidebar extends React.Component {

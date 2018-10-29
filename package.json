@@ -9,7 +9,8 @@
     "start:api": "concurrently --kill-others-on-fail \"REACT_APP_API_URL=\"https://google.com\" yarn client\"",
     "build": "concurrently --kill-others-on-fail \"REACT_APP_API_URL=\"https://prod-server.com\" yarn client_build\"",
     "build:mock": "concurrently --kill-others-on-fail \"REACT_APP_API_URL=\"https://devel-server.com\" yarn client_build\"",
-    "eslint": "eslint ."
+    "eslint": "eslint .",
+    "test": "ls"
   },
   "dependencies": {
     "express": "^4.16.2"

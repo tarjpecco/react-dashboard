@@ -44,6 +44,7 @@ const Header = ({ toggleAction }) => {
 							</div>
 							<ul className="nav-items my-2">
 								<li>
+									{/* eslint-disable-next-line */}
 									<a className="text-dark media py-2">
 										<div className="mx-3">
 											<i className="fa fa-fw fa-check-circle text-success" />
@@ -57,6 +58,7 @@ const Header = ({ toggleAction }) => {
 									</a>
 								</li>
 								<li>
+									{/* eslint-disable-next-line */}
 									<a className="text-dark media py-2">
 										<div className="mx-3">
 											<i className="fa fa-fw fa-user-plus text-info" />
@@ -70,6 +72,7 @@ const Header = ({ toggleAction }) => {
 									</a>
 								</li>
 								<li>
+									{/* eslint-disable-next-line */}
 									<a className="text-dark media py-2">
 										<div className="mx-3">
 											<i className="fa fa-fw fa-times-circle text-danger" />
@@ -83,6 +86,7 @@ const Header = ({ toggleAction }) => {
 									</a>
 								</li>
 								<li>
+									{/* eslint-disable-next-line */}
 									<a className="text-dark media py-2">
 										<div className="mx-3">
 											<i className="fa fa-fw fa-exclamation-circle text-warning" />
@@ -97,6 +101,7 @@ const Header = ({ toggleAction }) => {
 									</a>
 								</li>
 								<li>
+									{/* eslint-disable-next-line */}
 									<a className="text-dark media py-2">
 										<div className="mx-3">
 											<i className="fa fa-fw fa-plus-circle text-primary" />
@@ -111,6 +116,7 @@ const Header = ({ toggleAction }) => {
 								</li>
 							</ul>
 							<div className="p-2 border-top">
+								{/* eslint-disable-next-line */}
 								<a className="btn btn-light btn-block text-center">
 									<i className="fa fa-fw fa-eye mr-1" /> View All
 								</a>

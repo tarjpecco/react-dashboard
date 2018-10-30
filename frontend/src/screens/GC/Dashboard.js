@@ -17,6 +17,7 @@ const Dashboard = () => {
 			<div className="content">
 				<div className="row">
 					<div className="col-md-6 col-xl-3">
+						{/* eslint-disable-next-line */}
 						<a className="block block-rounded block-link-shadow bg-gd-sea">
 							<div className="block-content block-content-full d-flex align-items-center justify-content-between">
 								<div>
@@ -30,6 +31,7 @@ const Dashboard = () => {
 						</a>
 					</div>
 					<div className="col-md-6 col-xl-3">
+						{/* eslint-disable-next-line */}
 						<a className="block block-rounded block-link-shadow  bg-gd-dusk">
 							<div className="block-content block-content-full d-flex align-items-center justify-content-between">
 								<div>
@@ -43,6 +45,7 @@ const Dashboard = () => {
 						</a>
 					</div>
 					<div className="col-md-6 col-xl-3">
+						{/* eslint-disable-next-line */}
 						<a className="block block-rounded block-link-shadow bg-gd-fruit">
 							<div className="block-content block-content-full d-flex align-items-center justify-content-between">
 								<div>

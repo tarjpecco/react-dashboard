@@ -19,6 +19,7 @@ const Billing = () => {
 			<div className="content">
 				<div className="row">
 					<div className="col-md-6 col-xl-6">
+						{/* eslint-disable-next-line */}
 						<a className="block block-rounded block-link-shadow  bg-gd-dusk card-content">
 							<div className="block-content block-content-full d-flex align-items-center justify-content-between">
 								<div>

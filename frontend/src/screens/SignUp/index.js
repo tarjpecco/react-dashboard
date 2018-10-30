@@ -109,6 +109,7 @@ class SignUp extends React.PureComponent {
 																<i className="fa fa-sign-in-alt text-muted mr-1" />{' '}
 																Sign In
 															</a>
+															{/* eslint-disable-next-line */}
 															<a
 																className="btn btn-sm btn-light d-block d-lg-inline-block mb-1"
 																href="#"

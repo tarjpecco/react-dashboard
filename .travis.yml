@@ -1,0 +1,17 @@
+language: node_js
+node_js:
+  - node
+install:
+  - yarn build
+cache: yarn
+before_deploy:
+- cd $TRAVIS_BUILD_DIR/frontend
+deploy:
+  provider: s3
+  local_dir: build
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
+  bucket: go-devel.flexcomply.com
+  skip_cleanup: true
+  on:
+    branch: devel

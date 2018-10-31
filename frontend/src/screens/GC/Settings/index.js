@@ -22,6 +22,9 @@ class Settings extends React.PureComponent {
 		this.onAddLicense.bind(this);
 		this.onDeleteLicense.bind(this);
 		this.onChangeLicenseHandler.bind(this);
+
+		this.textInput = React.createRef();
+		this.focusTextInput = this.focusTextInput.bind(this);
 	}
 
 	handleClickEdit = () => {
@@ -41,6 +44,7 @@ class Settings extends React.PureComponent {
 		const property = e.target.name;
 		const value = e.target.value;
 		this.setState({ [property]: value });
+		this.focusTextInput();
 	};
 
 	onAddLicense = () => {
@@ -73,6 +77,10 @@ class Settings extends React.PureComponent {
 
 	onResetPassword = () => {};
 
+	focusTextInput() {
+		this.textInput.current.focus();
+	}
+
 	render() {
 		const {
 			name,
@@ -104,7 +112,7 @@ class Settings extends React.PureComponent {
 					</div>
 				</div>
 
-				<div className="content">
+				<div className="content settings">
 					<div className="table-tool">
 						<button
 							type="button"
@@ -120,7 +128,7 @@ class Settings extends React.PureComponent {
 						editable={editable}
 					>
 						<tbody>
-							<tr className="text-center">
+							<tr className="text-left">
 								<td className="table-width-20">
 									<p className="text-info">Contact name</p>
 								</td>
@@ -134,7 +142,7 @@ class Settings extends React.PureComponent {
 									/>
 								</td>
 							</tr>
-							<tr className="text-center">
+							<tr className="text-left">
 								<td className="table-width-20">
 									<p className="text-info">Address</p>
 								</td>
@@ -148,7 +156,7 @@ class Settings extends React.PureComponent {
 									/>
 								</td>
 							</tr>
-							<tr className="text-center">
+							<tr className="text-left">
 								<td className="table-width-20">
 									<p className="text-info">Phone</p>
 								</td>
@@ -162,7 +170,7 @@ class Settings extends React.PureComponent {
 									/>
 								</td>
 							</tr>
-							<tr className="text-center">
+							<tr className="text-left">
 								<td className="table-width-20">
 									<p className="text-info">EIN #</p>
 								</td>
@@ -176,7 +184,7 @@ class Settings extends React.PureComponent {
 									/>
 								</td>
 							</tr>
-							<tr className="text-center">
+							<tr className="text-left">
 								<td>
 									<p className="text-info">License number</p>
 								</td>
@@ -187,7 +195,7 @@ class Settings extends React.PureComponent {
 								</td>
 							</tr>
 							{license.map((item, id) => (
-								<tr className="text-center" key={id}>
+								<tr className="text-left" key={id}>
 									<td />
 									<td className="table-width-30">
 										<input
@@ -216,7 +224,7 @@ class Settings extends React.PureComponent {
 											onChange={this.onChangeLicenseHandler(id)}
 										/>
 									</td>
-									<td className="text-center">
+									<td className="text-left">
 										<div className="btn-group">
 											<button
 												type="button"
@@ -232,7 +240,7 @@ class Settings extends React.PureComponent {
 								</tr>
 							))}
 
-							<tr className="text-center">
+							<tr className="text-left">
 								<td>
 									<p className="text-info">Password</p>
 								</td>

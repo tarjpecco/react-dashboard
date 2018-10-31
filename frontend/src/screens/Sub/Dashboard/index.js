@@ -1,5 +1,5 @@
 import React from 'react';
-import Table from '../../components/Table';
+import Table from '../../../components/Table';
 
 const Dashboard = () => {
 	return (
@@ -20,18 +20,10 @@ const Dashboard = () => {
 				<Table tableName="In Progress Projects">
 					<thead>
 						<tr>
-							<th className="text-center" style={{ width: '20%' }}>
-								Project Name
-							</th>
-							<th className="text-center" style={{ width: '20%' }}>
-								Project Address
-							</th>
-							<th className="text-center" style={{ width: '30%' }}>
-								Status
-							</th>
-							<th className="text-center" style={{ width: '30%' }}>
-								View Project
-							</th>
+							<th className="text-center table-width-20">Project Name</th>
+							<th className="text-center table-width-20">Project Address</th>
+							<th className="text-center table-width-30">Status</th>
+							<th className="text-center table-width-30">View Project</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -56,18 +48,10 @@ const Dashboard = () => {
 				<Table tableName="New RFQ/P Received">
 					<thead>
 						<tr>
-							<th className="text-center" style={{ width: '20%' }}>
-								Project Name
-							</th>
-							<th className="text-center" style={{ width: '20%' }}>
-								Project Address
-							</th>
-							<th className="text-center" style={{ width: '30%' }}>
-								Status
-							</th>
-							<th className="text-center" style={{ width: '30%' }}>
-								Respond
-							</th>
+							<th className="text-center table-width-20">Project Name</th>
+							<th className="text-center table-width-20">Project Address</th>
+							<th className="text-center table-width-30">Status</th>
+							<th className="text-center table-width-30">Respond</th>
 						</tr>
 					</thead>
 					<tbody>

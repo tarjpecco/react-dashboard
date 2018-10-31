@@ -38,7 +38,7 @@ const Billing = () => {
 								<h1 className="text-white">XXXX XXXX XXXX 1234</h1>
 							</div>
 							<div className="block-content block-content-full d-flex align-items-center justify-content-around">
-								<span>Name Surname</span>
+								<span className="text-white">Name Surname</span>
 								<span className="text-white">Valid till 10/22</span>
 							</div>
 							<div className="block-content-full d-flex align-items-center justify-content-around card-white">
@@ -56,14 +56,10 @@ const Billing = () => {
 						</a>
 					</div>
 					<div className="col-md-6 col-xl-6">
-						<Table tableName="Billing history">
+						<Table tableName="Billing history" editable="disable" tableStyle="">
 							<thead>
-								<th className="text-center" style={{ width: '20%' }}>
-									Date
-								</th>
-								<th className="text-center" style={{ width: '20%' }}>
-									Amount
-								</th>
+								<th className="text-center table-width-20">Date</th>
+								<th className="text-center table-width-20">Amount</th>
 							</thead>
 							<tbody>
 								<tr>
@@ -77,13 +73,6 @@ const Billing = () => {
 								<tr>
 									<td className="text-center">7/31/2018</td>
 									<td className="text-center">$2233.00</td>
-								</tr>
-								<tr className="text-center">
-									<td colSpan="2">
-										<button type="button" className="btn btn-primary">
-											Download invoices
-										</button>
-									</td>
 								</tr>
 							</tbody>
 						</Table>

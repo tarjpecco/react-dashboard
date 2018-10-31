@@ -16,6 +16,8 @@ import SubSettings from '../Sub/Settings';
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 
+import './index.scss';
+
 const AppTemplate = ({ showSideBar, location }) => (
 	<div
 		id="page-container"

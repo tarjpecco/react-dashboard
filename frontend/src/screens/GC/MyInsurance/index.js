@@ -23,28 +23,18 @@ const MyInsurance = () => {
 			</div>
 			<div className="content">
 				<Table>
-					<thead>
-						<tr>
-							<th className="text-center" style={{ width: '20%' }}>
-								Agent/Broker name
-							</th>
-							<th className="text-center" style={{ width: '15%' }}>
-								Policy type
-							</th>
-							<th className="text-center" style={{ width: '15%' }}>
-								Policy number
-							</th>
-							<th className="text-center" style={{ width: '20%' }}>
-								Renewal Date
-							</th>
-							<th className="text-center" style={{ width: '15%' }}>
-								Status
-							</th>
-							<th className="text-center" style={{ width: '25%' }} />
+					<thead className="thead-light">
+						<tr className="text-left">
+							<th className="table-width-20">Agent/Broker name</th>
+							<th className="table-width-15">Policy type</th>
+							<th className="table-width-15">Policy number</th>
+							<th className="table-width-20">Renewal Date</th>
+							<th className="table-width-15">Status</th>
+							<th />
 						</tr>
 					</thead>
 					<tbody>
-						<tr className="text-center">
+						<tr className="text-left">
 							<td>
 								<p className="text-info">Agent 123</p>
 							</td>
@@ -56,11 +46,11 @@ const MyInsurance = () => {
 							</td>
 							<td>
 								<button type="button" className="btn btn-primary">
-									View or Edit{' '}
+									Go
 								</button>
 							</td>
 						</tr>
-						<tr className="text-center">
+						<tr className="text-left">
 							<td>
 								<p className="text-info">Broker 234</p>
 							</td>
@@ -72,7 +62,7 @@ const MyInsurance = () => {
 							</td>
 							<td>
 								<button type="button" className="btn btn-primary">
-									View or Edit{' '}
+									Go
 								</button>
 							</td>
 						</tr>

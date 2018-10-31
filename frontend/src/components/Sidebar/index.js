@@ -23,7 +23,7 @@ class Sidebar extends React.Component {
 								<a className="link-fx font-w600 font-size-lg text-white" href="/">
 									<span className="smini-hidden">
 										<span className="text-white-75">
-											<img src={logoImg} style={{ width: 120 }} alt="logo" />
+											<img src={logoImg} style={{ width: 170 }} alt="logo" />
 										</span>
 									</span>
 								</a>
@@ -56,25 +56,23 @@ class Sidebar extends React.Component {
 								<li className="nav-main-item">
 									<a
 										className={classnames('nav-main-link', {
+											active: path === '/insurance',
+										})}
+										href="/insurance"
+									>
+										<i className="nav-main-link-icon si si-shield" />
+										<span className="nav-main-link-name">My insurance</span>
+									</a>
+								</li>
+								<li className="nav-main-item">
+									<a
+										className={classnames('nav-main-link', {
 											active: path === '/team',
 										})}
 										href="/team"
 									>
 										<i className="nav-main-link-icon si si-cup" />
 										<span className="nav-main-link-name">Team</span>
-									</a>
-								</li>
-								<li className="nav-main-item">
-									<a
-										className={classnames('nav-main-link', {
-											active: path === '/insurance',
-										})}
-										href="/insurance"
-									>
-										<i className="nav-main-link-icon si si-shield" />
-										<span className="nav-main-link-name">
-											My insurance info
-										</span>
 									</a>
 								</li>
 								<li className="nav-main-item">

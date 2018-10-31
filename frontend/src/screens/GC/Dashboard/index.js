@@ -1,5 +1,7 @@
 import React from 'react';
-import Table from '../../components/Table';
+import Table from '../../../components/Table';
+
+import './index.scss';
 
 const Dashboard = () => {
 	return (
@@ -16,7 +18,7 @@ const Dashboard = () => {
 
 			<div className="content">
 				<div className="row">
-					<div className="col-md-6 col-xl-3">
+					<div className="col-md-6 col-xl-4">
 						{/* eslint-disable-next-line */}
 						<a className="block block-rounded block-link-shadow bg-gd-sea">
 							<div className="block-content block-content-full d-flex align-items-center justify-content-between">
@@ -30,7 +32,7 @@ const Dashboard = () => {
 							</div>
 						</a>
 					</div>
-					<div className="col-md-6 col-xl-3">
+					<div className="col-md-6 col-xl-4">
 						{/* eslint-disable-next-line */}
 						<a className="block block-rounded block-link-shadow  bg-gd-dusk">
 							<div className="block-content block-content-full d-flex align-items-center justify-content-between">
@@ -44,7 +46,7 @@ const Dashboard = () => {
 							</div>
 						</a>
 					</div>
-					<div className="col-md-6 col-xl-3">
+					<div className="col-md-6 col-xl-4">
 						{/* eslint-disable-next-line */}
 						<a className="block block-rounded block-link-shadow bg-gd-fruit">
 							<div className="block-content block-content-full d-flex align-items-center justify-content-between">
@@ -58,16 +60,20 @@ const Dashboard = () => {
 							</div>
 						</a>
 					</div>
-					<div className="col-md-6 col-xl-3" />
 				</div>
 			</div>
 			<div className="content">
-				<Table tableName="Tasks to be completed">
+				<Table tableName="Tasks to be completed" tableStyle="" editable="disable">
+					<thead className="thead-light">
+						<tr className="text-left">
+							<th>Project Name</th>
+							<th>Task</th>
+							<th />
+						</tr>
+					</thead>
 					<tbody>
-						<tr>
-							<th className="text-center" scope="row">
-								1
-							</th>
+						<tr className="text-left">
+							<td />
 							<td className="font-w600">
 								<p className="text-info">New Quote Received</p>
 							</td>

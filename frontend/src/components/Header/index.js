@@ -21,7 +21,7 @@ const Header = ({ toggleAction }) => {
 				<div>
 					<button type="button" className="btn btn-dual" data-toggle="layout">
 						<i className="si si-call-out" />
-						<span className="badge badge-pill">1(855)Flexcomply</span>
+						<span className="badge badge-pill">1( 855 )Flexcomply</span>
 					</button>
 					<div className="dropdown d-inline-block">
 						<button

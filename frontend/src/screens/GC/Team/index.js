@@ -69,9 +69,9 @@ class Team extends React.PureComponent {
 						</div>
 					</div>
 				</div>
-				<div className="content">
+				<div className="content team">
 					<Table tableName="">
-						<thead>
+						<thead className="thead-light">
 							<tr>
 								<th className="width-40">Name</th>
 								<th className="width-30">Email</th>

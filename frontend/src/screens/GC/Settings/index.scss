@@ -1,22 +1,24 @@
-table input {
-	width: 100%;
-	border: none;
-	background: transparent;
-	color: #3c90df;
-}
-table {
-	input[type='text']:disabled {
-		color: #9e9e9e;
+.settings {
+	table input {
+		background: #fff;
+		border: 1px solid #3c90df;
 	}
-	.password {
-		input {
-			display: none;
-			border: 1px solid #929292;
+	table {
+		input[type='text']:disabled {
+			color: #9e9e9e;
+			background: transparent;
+			border: none;
+		}
+		.password {
+			input {
+				display: none;
+				border: 1px solid #929292;
+			}
 		}
 	}
-}
-.table-tool {
-	display: flex;
-	flex-direction: row;
-	justify-content: flex-end;
+	.table-tool {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-end;
+	}
 }

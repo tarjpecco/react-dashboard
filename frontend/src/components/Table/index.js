@@ -20,19 +20,21 @@ class Table extends React.PureComponent {
 		const classname = `table table-vcenter ${tableStyle}`;
 		return (
 			<div className="block block-rounded block-bordered">
-				<div className="block-header block-header-default">
-					<h3 className="block-title">
-						{editable === '' && (
-							<input
-								className="tableTitle"
-								type="text"
-								value={tableName}
-								onChange={this.onChangeHandler}
-							/>
-						)}
-						{editable === 'disable' && tableName}
-					</h3>
-				</div>
+				{tableName && (
+					<div className="block-header block-header-default">
+						<h3 className="block-title">
+							{editable === '' && (
+								<input
+									className="tableTitle"
+									type="text"
+									value={tableName}
+									onChange={this.onChangeHandler}
+								/>
+							)}
+							{editable === 'disable' && tableName}
+						</h3>
+					</div>
+				)}
 				<div className="block-content">
 					<table className={classname}>{children}</table>
 				</div>

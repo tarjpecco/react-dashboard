@@ -2,6 +2,7 @@
 	table input {
 		background: #fff;
 		border: 1px solid #3c90df;
+		width: 80%;
 	}
 	table {
 		input[type='text']:disabled {
@@ -15,7 +16,13 @@
 				border: 1px solid #929292;
 			}
 		}
+		.wrap {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+		}
 	}
+
 	.table-tool {
 		display: flex;
 		flex-direction: row;

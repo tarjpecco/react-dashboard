@@ -195,6 +195,7 @@ class Settings extends React.PureComponent {
 								</td>
 							</tr>
 							{license.map((item, id) => (
+								// eslint-disable-next-line
 								<tr className="text-left" key={id}>
 									<td />
 									<td className="table-width-30">

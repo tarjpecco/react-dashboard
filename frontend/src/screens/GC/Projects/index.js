@@ -22,7 +22,7 @@ const Projects = () => {
 							<th className="table-width-25">Project name</th>
 							<th className="table-width-25">Project address</th>
 							<th className="table-width-15">Active subs</th>
-							<th className="table-width-15">Compilance risks</th>
+							<th className="table-width-15">Compliance risks</th>
 							<th className="table-width-15">Status</th>
 							<th />
 						</tr>

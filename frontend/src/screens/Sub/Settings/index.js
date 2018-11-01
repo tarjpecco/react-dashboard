@@ -120,7 +120,7 @@ class Settings extends React.PureComponent {
 						editable={editable}
 					>
 						<tbody>
-							<tr className="text-center">
+							<tr className="text-left">
 								<td className="table-width-20">
 									<p className="text-info">Contact name</p>
 								</td>
@@ -134,7 +134,7 @@ class Settings extends React.PureComponent {
 									/>
 								</td>
 							</tr>
-							<tr className="text-center">
+							<tr className="text-left">
 								<td className="table-width-20">
 									<p className="text-info">Address</p>
 								</td>
@@ -148,7 +148,7 @@ class Settings extends React.PureComponent {
 									/>
 								</td>
 							</tr>
-							<tr className="text-center">
+							<tr className="text-left">
 								<td className="table-width-20">
 									<p className="text-info">Phone</p>
 								</td>
@@ -162,7 +162,7 @@ class Settings extends React.PureComponent {
 									/>
 								</td>
 							</tr>
-							<tr className="text-center">
+							<tr className="text-left">
 								<td className="table-width-20">
 									<p className="text-info">EIN #</p>
 								</td>
@@ -176,7 +176,7 @@ class Settings extends React.PureComponent {
 									/>
 								</td>
 							</tr>
-							<tr className="text-center">
+							<tr className="text-left">
 								<td>
 									<p className="text-info">License number</p>
 								</td>
@@ -187,6 +187,7 @@ class Settings extends React.PureComponent {
 								</td>
 							</tr>
 							{license.map((item, id) => (
+								// eslint-disable-next-line
 								<tr className="text-center" key={id}>
 									<td />
 									<td className="table-width-30">
@@ -232,7 +233,7 @@ class Settings extends React.PureComponent {
 								</tr>
 							))}
 
-							<tr className="text-center">
+							<tr className="text-left">
 								<td>
 									<p className="text-info">Password</p>
 								</td>

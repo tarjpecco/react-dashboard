@@ -39,7 +39,6 @@ class Team extends React.PureComponent {
 		if (e.target.name === 'name') array[id].name = value;
 		if (e.target.name === 'email') array[id].email = value;
 		this.setState({ members: array });
-		console.log(value);
 	};
 
 	onEnableEditMember = id => {
@@ -81,6 +80,7 @@ class Team extends React.PureComponent {
 						</thead>
 						<tbody>
 							{members.map((item, id) => (
+								// eslint-disable-next-line
 								<tr className="text-center" key={id}>
 									<td className="font-w600">
 										<input

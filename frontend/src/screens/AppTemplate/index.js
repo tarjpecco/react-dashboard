@@ -13,6 +13,10 @@ import Team from '../GC/Team';
 import SubDashboard from '../Sub/Dashboard';
 import SubInsurance from '../Sub/MyInsurance';
 import SubSettings from '../Sub/Settings';
+import AgentDashboard from '../Agent/Dashboard';
+import AgentSettings from '../Agent/Settings';
+import AgentClients from '../Agent/Clients';
+import AgentDetail from '../Agent/Detail';
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 
@@ -39,6 +43,10 @@ const AppTemplate = ({ showSideBar, location }) => (
 			<Route exact path="/subdashboard" component={SubDashboard} />
 			<Route exact path="/subinsurance" component={SubInsurance} />
 			<Route exact path="/subsettings" component={SubSettings} />
+			<Route exact path="/agentdashboard" component={AgentDashboard} />
+			<Route exact path="/agentsettings" component={AgentSettings} />
+			<Route exact path="/agentclients" component={AgentClients} />
+			<Route exact path="/agentdetail" component={AgentDetail} />
 		</Switch>
 	</div>
 );

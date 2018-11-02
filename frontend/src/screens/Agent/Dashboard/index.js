@@ -49,7 +49,7 @@ const Dashboard = () => {
 				</div>
 			</div>
 			<div className="content">
-				<Table tableName="" tableStyle="" editable="disable">
+				<Table tableName="To Do" tableStyle="" editable="disable">
 					<thead className="thead-light">
 						<tr className="text-left">
 							<th className="table-width-25">Company</th>

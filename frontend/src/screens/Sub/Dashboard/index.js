@@ -17,8 +17,8 @@ const Dashboard = () => {
 				</div>
 			</div>
 			<div className="content">
-				<Table tableName="In Progress Projects">
-					<thead>
+				<Table tableName="In Progress Projects" editable="disable">
+					<thead className="thead-light">
 						<tr>
 							<th className="text-center table-width-20">Project Name</th>
 							<th className="text-center table-width-20">Project Address</th>
@@ -45,8 +45,8 @@ const Dashboard = () => {
 						</tr>
 					</tbody>
 				</Table>
-				<Table tableName="New RFQ/P Received">
-					<thead>
+				<Table tableName="New RFQ/P Received" editable="disable">
+					<thead className="thead-light">
 						<tr>
 							<th className="text-center table-width-20">Project Name</th>
 							<th className="text-center table-width-20">Project Address</th>

@@ -23,7 +23,7 @@ const MyInsurance = () => {
 			</div>
 			<div className="content">
 				<Table>
-					<thead>
+					<thead className="thead-light">
 						<tr>
 							<th className="text-center table-width-20">Agent/Broker name</th>
 							<th className="text-center table-width-15">Policy type</th>

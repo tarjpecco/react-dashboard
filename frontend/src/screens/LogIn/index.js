@@ -1,13 +1,27 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { signIn } from '../../redux/actions/global';
+
 import logoImg from '../../assets/media/logo-frontpage.png';
 
 class LogIn extends React.PureComponent {
 	constructor(props) {
 		super(props);
-		this.state = {};
+		this.state = {
+			username: '',
+			password: '',
+		};
+		this.onChangeHandler.bind(this);
 	}
 
+	onChangeHandler = e => {
+		this.setState({ [e.target.name]: e.target.value });
+	};
+
 	render() {
+		const { username, password } = this.state;
+		const { signInAction, history } = this.props;
 		return (
 			<div id="page-container">
 				<main id="main-container">
@@ -37,8 +51,10 @@ class LogIn extends React.PureComponent {
 															type="text"
 															className="form-control form-control-lg form-control-alt"
 															id="login-username"
-															name="login-username"
+															name="username"
 															placeholder="Username"
+															onChange={this.onChangeHandler}
+															value={username}
 														/>
 													</div>
 													<div className="form-group">
@@ -46,21 +62,29 @@ class LogIn extends React.PureComponent {
 															type="password"
 															className="form-control form-control-lg form-control-alt"
 															id="login-password"
-															name="login-password"
+															name="password"
 															placeholder="Password"
+															onChange={this.onChangeHandler}
+															value={password}
 														/>
 													</div>
 												</div>
 												<div className="form-group">
-													<a href="/dashboard">
-														<button
-															type="button"
-															className="btn btn-block btn-hero-lg btn-hero-primary"
-														>
-															<i className="fa fa-fw fa-sign-in-alt mr-1" />{' '}
-															Sign In
-														</button>
-													</a>
+													<button
+														type="button"
+														className="btn btn-block btn-hero-lg btn-hero-primary"
+														onClick={() => {
+															signInAction({
+																username,
+																password,
+															});
+															history.push('/dashboard');
+														}}
+													>
+														<i className="fa fa-fw fa-sign-in-alt mr-1" />{' '}
+														Sign In
+													</button>
+
 													<p className="mt-3 mb-0 d-lg-flex justify-content-lg-between">
 														<a
 															className="btn btn-sm btn-light d-block d-lg-inline-block mb-1"
@@ -101,5 +125,20 @@ class LogIn extends React.PureComponent {
 		);
 	}
 }
+const mapStateToProps = () => ({});
+const mapActionToProps = dispatch => ({
+	signInAction: params => {
+		dispatch(signIn(params));
+	},
+});
 
-export default LogIn;
+const { func, node } = PropTypes;
+LogIn.propTypes = {
+	signInAction: func.isRequired,
+	history: node.isRequired,
+};
+
+export default connect(
+	mapStateToProps,
+	mapActionToProps
+)(LogIn);

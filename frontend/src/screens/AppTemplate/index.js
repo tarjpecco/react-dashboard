@@ -9,6 +9,7 @@ import MyInsurance from '../GC/MyInsurance';
 import Settings from '../GC/Settings';
 import GCBilling from '../GC/Billing';
 import Projects from '../GC/Projects';
+import Detail from '../GC/Detail';
 import Team from '../GC/Team';
 import SubDashboard from '../Sub/Dashboard';
 import SubInsurance from '../Sub/MyInsurance';
@@ -22,7 +23,7 @@ import Sidebar from '../../components/Sidebar';
 
 import './index.scss';
 
-const AppTemplate = ({ showSideBar, location }) => (
+const AppTemplate = ({ showSideBar, location, username }) => (
 	<div
 		id="page-container"
 		className={classNames(
@@ -33,26 +34,39 @@ const AppTemplate = ({ showSideBar, location }) => (
 		<Sidebar location={location} />
 
 		<Header />
-		<Switch>
-			<Route exact path="/dashboard" component={GCDashboard} />
-			<Route exact path="/billing" component={GCBilling} />
-			<Route exact path="/insurance" component={MyInsurance} />
-			<Route exact path="/projects" component={Projects} />
-			<Route exact path="/settings" component={Settings} />
-			<Route exact path="/team" component={Team} />
-			<Route exact path="/subdashboard" component={SubDashboard} />
-			<Route exact path="/subinsurance" component={SubInsurance} />
-			<Route exact path="/subsettings" component={SubSettings} />
-			<Route exact path="/agentdashboard" component={AgentDashboard} />
-			<Route exact path="/agentsettings" component={AgentSettings} />
-			<Route exact path="/agentclients" component={AgentClients} />
-			<Route exact path="/agentdetail" component={AgentDetail} />
-		</Switch>
+		{username === 'gc' && (
+			<Switch>
+				<Route exact path="/dashboard" component={GCDashboard} />
+				<Route exact path="/billing" component={GCBilling} />
+				<Route exact path="/insurance" component={MyInsurance} />
+				<Route exact path="/projects" component={Projects} />
+				<Route exact path="/projectdetail" component={Detail} />
+				<Route exact path="/settings" component={Settings} />
+				<Route exact path="/team" component={Team} />
+			</Switch>
+		)}
+		{username === 'sub' && (
+			<Switch>
+				<Route exact path="/dashboard" component={SubDashboard} />
+				<Route exact path="/insurance" component={SubInsurance} />
+				<Route exact path="/settings" component={SubSettings} />
+			</Switch>
+		)}
+		{username === 'agent' && (
+			<Switch>
+				<Route exact path="/dashboard" component={AgentDashboard} />
+				<Route exact path="/clients" component={AgentClients} />
+				<Route exact path="/agentdetail" component={AgentDetail} />
+				<Route exact path="/settings" component={AgentSettings} />
+			</Switch>
+		)}
 	</div>
 );
 
 const mapStateToProps = state => ({
 	showSideBar: state.global.showSideBar,
+	username: state.global.username,
+	password: state.global.password,
 });
 
 const { bool } = PropTypes;
@@ -61,8 +75,9 @@ AppTemplate.propTypes = {
 	showSideBar: bool.isRequired,
 };
 
-const { node } = PropTypes;
+const { node, string } = PropTypes;
 AppTemplate.propTypes = {
 	location: node.isRequired,
+	username: string.isRequired,
 };
 export default connect(mapStateToProps)(AppTemplate);

@@ -14,7 +14,7 @@ class Sidebar extends React.Component {
 	}
 
 	render() {
-		const { location, username, password } = this.props;
+		const { location, username } = this.props;
 		const path = location.pathname;
 		return (
 			<nav id="sidebar">
@@ -47,7 +47,7 @@ class Sidebar extends React.Component {
 								{username === 'gc' && (
 									<li className="nav-main-item">
 										<Link
-											to="/project"
+											to="/projects"
 											className={classnames('nav-main-link', {
 												active: path === '/projects',
 											})}
@@ -139,7 +139,6 @@ const { node, string } = PropTypes;
 Sidebar.propTypes = {
 	location: node.isRequired,
 	username: string.isRequired,
-	password: string.isRequired,
 };
 
 export default connect(mapStateToProps)(Sidebar);

@@ -1,0 +1,16 @@
+.table td,
+.table th {
+	border-top: none !important;
+}
+.review {
+	display: flex;
+	justify-content: flex-end;
+}
+td p {
+	margin-bottom: 0 !important;
+}
+.tableTitle {
+	border: 1px solid #3c90df;
+	background: #fff;
+	width: 100%;
+}

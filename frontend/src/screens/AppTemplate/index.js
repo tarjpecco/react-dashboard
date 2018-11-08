@@ -9,6 +9,7 @@ import MyInsurance from '../GC/MyInsurance';
 import Settings from '../GC/Settings';
 import GCBilling from '../GC/Billing';
 import Projects from '../GC/Projects';
+import Detail from '../GC/Detail';
 import Team from '../GC/Team';
 import SubDashboard from '../Sub/Dashboard';
 import SubInsurance from '../Sub/MyInsurance';
@@ -39,6 +40,7 @@ const AppTemplate = ({ showSideBar, location, username }) => (
 				<Route exact path="/billing" component={GCBilling} />
 				<Route exact path="/insurance" component={MyInsurance} />
 				<Route exact path="/projects" component={Projects} />
+				<Route exact path="/projectdetail" component={Detail} />
 				<Route exact path="/settings" component={Settings} />
 				<Route exact path="/team" component={Team} />
 			</Switch>

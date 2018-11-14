@@ -1,5 +1,0 @@
-{
-  "editor.formatOnSave": true,
-  "eslint.packageManager": "yarn",
-  "files.eol": "\n"
-}

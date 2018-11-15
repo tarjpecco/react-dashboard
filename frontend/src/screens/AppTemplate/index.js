@@ -1,9 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { withRouter, Route, Switch } from 'react-router-dom';
 
-import { Route, Switch } from 'react-router-dom';
 import GCDashboard from '../GC/Dashboard';
 import MyInsurance from '../GC/MyInsurance';
 import Settings from '../GC/Settings';
@@ -75,9 +76,16 @@ AppTemplate.propTypes = {
 	showSideBar: bool.isRequired,
 };
 
-const { node, string } = PropTypes;
+const { object, string } = PropTypes;
 AppTemplate.propTypes = {
-	location: node.isRequired,
+	// eslint-disable-next-line react/forbid-prop-types
+	location: object.isRequired,
 	username: string.isRequired,
 };
-export default connect(mapStateToProps)(AppTemplate);
+
+const enhance = compose(
+	withRouter,
+	connect(mapStateToProps)
+);
+
+export default enhance(AppTemplate);

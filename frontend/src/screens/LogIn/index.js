@@ -132,10 +132,11 @@ const mapActionToProps = dispatch => ({
 	},
 });
 
-const { func, node } = PropTypes;
+const { func, object } = PropTypes;
 LogIn.propTypes = {
 	signInAction: func.isRequired,
-	history: node.isRequired,
+	// eslint-disable-next-line react/forbid-prop-types
+	history: object.isRequired,
 };
 
 export default connect(

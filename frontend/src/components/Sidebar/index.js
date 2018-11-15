@@ -135,9 +135,10 @@ const mapStateToProps = state => ({
 	password: state.global.password,
 });
 
-const { node, string } = PropTypes;
+const { object, string } = PropTypes;
 Sidebar.propTypes = {
-	location: node.isRequired,
+	// eslint-disable-next-line react/forbid-prop-types
+	location: object.isRequired,
 	username: string.isRequired,
 };
 

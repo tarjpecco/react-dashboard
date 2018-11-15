@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { signIn } from '../../redux/actions/global';
+import { signIn } from '../../redux/ducks';
 
 import logoImg from '../../assets/media/logo-frontpage.png';
 import { getAddress } from '../../api';

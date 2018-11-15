@@ -7,8 +7,17 @@ const TOGGLE_SIDEBAR = 'TOGGLE_SIDEBAR';
 const SIGNIN = 'SIGNIN';
 
 // Action Creators
+export const signIn = payload => ({
+  type: SIGNIN,
+  payload
+});
+
+export const toggleSideBar = () => ({
+  type: TOGGLE_SIDEBAR,
+});
 
 
+// Reducer Intial State
 const initialState = {
   entity: null,
   error: null,

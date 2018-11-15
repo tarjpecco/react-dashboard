@@ -131,13 +131,12 @@ class Sidebar extends React.Component {
 	}
 }
 const mapStateToProps = state => ({
-	username: state.global.username,
-	password: state.global.password,
+	username: state.ducks.username,
+	password: state.ducks.password,
 });
 
 const { object, string } = PropTypes;
 Sidebar.propTypes = {
-	// eslint-disable-next-line react/forbid-prop-types
 	location: object.isRequired,
 	username: string.isRequired,
 };

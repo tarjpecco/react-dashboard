@@ -65,9 +65,9 @@ const AppTemplate = ({ showSideBar, location, username }) => (
 );
 
 const mapStateToProps = state => ({
-	showSideBar: state.global.showSideBar,
-	username: state.global.username,
-	password: state.global.password,
+	showSideBar: state.ducks.showSideBar,
+	username: state.ducks.username,
+	password: state.ducks.password,
 });
 
 const { bool } = PropTypes;
@@ -78,7 +78,6 @@ AppTemplate.propTypes = {
 
 const { object, string } = PropTypes;
 AppTemplate.propTypes = {
-	// eslint-disable-next-line react/forbid-prop-types
 	location: object.isRequired,
 	username: string.isRequired,
 };

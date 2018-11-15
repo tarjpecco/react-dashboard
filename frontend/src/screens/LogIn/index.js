@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { signIn } from '../../redux/actions/global';
 
 import logoImg from '../../assets/media/logo-frontpage.png';
+import { getAddress } from '../../api';
 
 class LogIn extends React.PureComponent {
 	constructor(props) {
@@ -13,6 +14,7 @@ class LogIn extends React.PureComponent {
 			password: '',
 		};
 		this.onChangeHandler.bind(this);
+		getAddress();
 	}
 
 	onChangeHandler = e => {

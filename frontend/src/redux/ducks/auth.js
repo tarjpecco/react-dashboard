@@ -22,12 +22,11 @@ export const signOutAcion = payload => ({
 
 // Reducer Intial State
 const initialState = {
-  entity: null,
   error: null,
   showSideBar: true,
 	user: null,
 };
-
+  
 // Reducer
 export default function reducer(state = initialState, { type, payload }) {
   switch (type){

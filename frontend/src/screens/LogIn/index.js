@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { signIn } from '../../redux/actions/global';
+import { signIn } from '../../redux/ducks/auth';
 
 import logoImg from '../../assets/media/logo-frontpage.png';
+import { getAddress } from '../../api';
 
 class LogIn extends React.PureComponent {
 	constructor(props) {
@@ -13,6 +14,7 @@ class LogIn extends React.PureComponent {
 			password: '',
 		};
 		this.onChangeHandler.bind(this);
+		getAddress();
 	}
 
 	onChangeHandler = e => {
@@ -132,10 +134,11 @@ const mapActionToProps = dispatch => ({
 	},
 });
 
-const { func, node } = PropTypes;
+const { func, object } = PropTypes;
 LogIn.propTypes = {
 	signInAction: func.isRequired,
-	history: node.isRequired,
+	// eslint-disable-next-line react/forbid-prop-types
+	history: object.isRequired,
 };
 
 export default connect(

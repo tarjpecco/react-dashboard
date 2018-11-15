@@ -1,10 +1,15 @@
-import { createStore, compose } from 'redux';
-import Reducer from './reducers';
+import { createStore, compose, applyMiddleware, combineReducers } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+
+import auth from './ducks/auth';
+import global from './ducks/global';
+
+const sagaMiddleware = createSagaMiddleware();
 
 export default function configureStore(initialState = {}) {
 	// Middleware and store enhancers
 
-	const enhancers = [];
+	const enhancers = [applyMiddleware(sagaMiddleware)];
 
 	if (process.env.NODE_ENV === 'development') {
 		// Enable DevTools only when rendering during development.
@@ -13,7 +18,13 @@ export default function configureStore(initialState = {}) {
 		}
 	}
 
-	const store = createStore(Reducer, initialState, compose(...enhancers));
+	const reducer = combineReducers({
+		auth,
+		global
+	});
+	
+	const store = createStore(reducer, initialState, compose(...enhancers));
+	// sagaMiddleware.run(rootSaga);
 
 	return store;
 }

@@ -65,9 +65,9 @@ const AppTemplate = ({ showSideBar, location, username }) => (
 );
 
 const mapStateToProps = state => ({
-	showSideBar: state.ducks.showSideBar,
-	username: state.ducks.username,
-	password: state.ducks.password,
+	showSideBar: state.global.showSideBar,
+	username: state.auth.username,
+	password: state.auth.password,
 });
 
 const { bool } = PropTypes;

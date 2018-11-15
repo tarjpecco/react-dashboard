@@ -1,7 +1,8 @@
 import { createStore, compose, applyMiddleware, combineReducers } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 
-import ducks, { watcherSaga as rootSaga } from './ducks';
+import auth from './ducks/auth';
+import global from './ducks/global';
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -18,11 +19,12 @@ export default function configureStore(initialState = {}) {
 	}
 
 	const reducer = combineReducers({
-		ducks
+		auth,
+		global
 	});
 	
 	const store = createStore(reducer, initialState, compose(...enhancers));
-	sagaMiddleware.run(rootSaga);
+	// sagaMiddleware.run(rootSaga);
 
 	return store;
 }

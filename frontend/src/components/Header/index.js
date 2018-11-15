@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { toggleSideBar } from '../../redux/ducks';
+import { toggleSideBar } from '../../redux/ducks/global';
 
 const Header = ({ toggleAction }) => {
 	return (

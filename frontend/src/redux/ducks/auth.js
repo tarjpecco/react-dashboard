@@ -1,9 +1,7 @@
 import { all } from 'redux-saga/effects';
 
-
 // actions
 const RECEIVE_TOKEN_ERROR = 'RECEIVE_TOKEN_ERROR';
-const TOGGLE_SIDEBAR = 'TOGGLE_SIDEBAR';
 const SIGNIN = 'SIGNIN';
 
 // Action Creators
@@ -11,11 +9,6 @@ export const signIn = payload => ({
   type: SIGNIN,
   payload
 });
-
-export const toggleSideBar = () => ({
-  type: TOGGLE_SIDEBAR,
-});
-
 
 // Reducer Intial State
 const initialState = {
@@ -37,11 +30,6 @@ export default function reducer(state = initialState, { type, payload }) {
           error: payload.error
         }
       );
-    case TOGGLE_SIDEBAR:
-      return {
-        ...state,
-        showSideBar: !state.showSideBar,
-      };
     case SIGNIN:
       return {
         ...state,
@@ -52,13 +40,3 @@ export default function reducer(state = initialState, { type, payload }) {
       return state;
   }
 }
-
-// Sagas
-
-export function* watcherSaga() {
-  yield all([
-    // yield takeEvery(GET_TOKEN, ),
-  ]);
-}
-
-

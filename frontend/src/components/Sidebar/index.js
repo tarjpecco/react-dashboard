@@ -131,8 +131,8 @@ class Sidebar extends React.Component {
 	}
 }
 const mapStateToProps = state => ({
-	username: state.ducks.username,
-	password: state.ducks.password,
+	username: state.auth.username,
+	password: state.auth.password,
 });
 
 const { object, string } = PropTypes;

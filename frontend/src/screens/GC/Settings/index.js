@@ -1,6 +1,16 @@
 import React from 'react';
-import Table from '../../../components/Table';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import * as moment from 'moment';
 
+import {
+	createUserLicense,
+	updateUserLicense,
+	getUserLicenses,
+	removeUserLicense
+} from '../../../redux/ducks/userlicenses';
+
+import Table from '../../../components/Table';
 import './index.scss';
 
 class Settings extends React.PureComponent {
@@ -12,7 +22,7 @@ class Settings extends React.PureComponent {
 			address: '123 Main Street NY, NY 10001',
 			phone: '555-555-5555',
 			ein: '61-512584',
-			license: [],
+			license: props.userLicenses,
 			btnname: 'Edit',
 			btnicon: 'si si-pencil',
 			password: '',
@@ -25,6 +35,8 @@ class Settings extends React.PureComponent {
 
 		this.textInput = React.createRef();
 		this.focusTextInput = this.focusTextInput.bind(this);
+		const { listUserLicenses } = props;
+		listUserLicenses();
 	}
 
 	handleClickEdit = () => {
@@ -48,14 +60,13 @@ class Settings extends React.PureComponent {
 	};
 
 	onAddLicense = () => {
+		const { createLicense } = this.props;
 		const newelement = {
 			type: 'GC',
 			number: '12345678',
-			expireday: '1/23/19',
+			expire_date: moment().format("YYYY-MM-DD"),
 		};
-		this.setState(prevState => ({
-			license: [...prevState.license, newelement],
-		}));
+		createLicense(newelement);
 	};
 
 	onDeleteLicense = id => {
@@ -66,13 +77,16 @@ class Settings extends React.PureComponent {
 	};
 
 	onChangeLicenseHandler = id => e => {
-		const { value } = e.target;
-		const { license } = this.state;
-		const array = [...license];
-		if (e.target.name === 'type') array[id].type = value;
-		if (e.target.name === 'number') array[id].number = value;
-		if (e.target.name === 'expireday') array[id].expireday = value;
-		this.setState({ license: array });
+		const { value, name: prop } = e.target;
+		const { userLicenses, updateLicense } = this.props;
+		const licenseUrlData = userLicenses[id].url.split('/');
+		const params = userLicenses[id];
+		params[prop] = value;
+		params.expire_date = moment(params.expire_date).format('YYYY-MM-DD');
+		licenseUrlData.pop();
+		const licenseId = licenseUrlData.pop();
+		const userId = licenseUrlData.pop();
+		updateLicense({ userId, licenseId, params });
 	};
 
 	onResetPassword = () => {};
@@ -87,12 +101,12 @@ class Settings extends React.PureComponent {
 			phone,
 			address,
 			ein,
-			license,
 			editable,
 			btnname,
 			btnicon,
 			password,
 		} = this.state;
+		const { userLicenses: license } = this.props;
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -219,14 +233,14 @@ class Settings extends React.PureComponent {
 									<td className="table-width-40">
 										<input
 											type="text"
-											name="expireday"
-											value={item.expireday}
+											name="expire_date"
+											value={moment(item.expire_date).format('MM/DD/YY')}
 											disabled={editable}
 											onChange={this.onChangeLicenseHandler(id)}
 										/>
 									</td>
 									<td className="text-left">
-										<div className="btn-group">
+										<div className="btn-group">	
 											<button
 												type="button"
 												className="btn btn-sm btn-primary js-tooltip-enabled"
@@ -269,4 +283,22 @@ class Settings extends React.PureComponent {
 		);
 	}
 }
-export default Settings;
+
+const mapStateToProps = state => ({
+	userLicenses: state.userlicenses.userLicenses
+});
+
+const mapDispatchToProps = dispatch => ({
+	createLicense: params => dispatch(createUserLicense(params)),
+	listUserLicenses: () => dispatch(getUserLicenses()),
+	updateLicense: params => dispatch(updateUserLicense(params))
+})
+
+Settings.propTypes = {
+	userLicenses: PropTypes.array.isRequired,
+	createLicense: PropTypes.func.isRequired,
+	listUserLicenses: PropTypes.func.isRequired,
+	updateLicense: PropTypes.func.isRequired,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Settings);

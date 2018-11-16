@@ -10,11 +10,72 @@ export const getAddress = () => {
     .then((headers) => axios.get(`${API_URL}/address/`, {
       headers
     }))
-    .then((res) => {
-      console.log('getAddress:', res);
-    })
     .catch(error => {
-      console.log(error);
+      return error;
+    })
+};
+
+export const getUserLicensesForUser = (userPK) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.get(`${API_URL}/user-licenses/${userPK}/`, {
+      headers
+    }))
+    .then(res => res.data)
+    .catch(error => {
+      return error;
+    })
+};
+
+export const createUserLicenseForUser = (userPK, params) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.post(`${API_URL}/user-licenses/${userPK}/`,
+    {
+      ...params,
+    },
+    {
+      headers
+    }))
+    .catch(error => {
+      return error;
+    })
+};
+
+export const updateUserLicenseForUser = (userPK, licenseId, params) => {
+  console.log('userPK', userPK, licenseId, params)
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.put(`${API_URL}/user-licenses/${userPK}/${licenseId}/`,
+    {
+      ...params,
+    },
+    {
+      headers
+    }))
+    .then(res => res.data)
+    .catch(error => {
+      return error;
+    })
+};
+
+export const removeUserLicenseForUser = (userPK, licenseId) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.delete(`${API_URL}/user-licenses/${userPK}/${licenseId}/`,
+    {
+      headers
+    }))
+    .catch(error => {
+      return error;
+    })
+};
+
+export const getCurrentUser = () => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.get(`${API_URL}/users/me/`,
+    {
+      headers
+    }))
+    .then(res => res.data)
+    .catch(error => {
+      return error;
     })
 };
 

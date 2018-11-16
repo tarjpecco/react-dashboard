@@ -33,6 +33,9 @@ export default class AuthHeaderService {
   }
 
   getHeaders = () => {
+    const username = localStorage.getItem('username');
+    const password = localStorage.getItem('password');
+
     const headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
@@ -44,7 +47,7 @@ export default class AuthHeaderService {
       headers.Authorization = `Bearer ${this.getToken()}`;
       return new Promise((resolve) => resolve(headers));
     }
-    return getAuthToken({ username: 'testdev', password: 'password' }).
+    return this.getAuthToken({ username, password }).
       then((res) => {
         headers.Authorization = `Bearer ${res.access}`;
         return headers;

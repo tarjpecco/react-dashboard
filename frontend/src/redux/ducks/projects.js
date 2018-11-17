@@ -1,6 +1,6 @@
 import { createDuck } from 'redux-duck';
 import { List, fromJS } from 'immutable';
-import { takeLatest, call, put, all } from 'redux-saga/effects';
+import { takeEvery, call, put, all } from 'redux-saga/effects';
 import { createSelector } from 'reselect';
 
 import {
@@ -52,7 +52,7 @@ const userProjectsReducer = projectsDuck.createReducer({
 export default userProjectsReducer;
 
 // Sagas
-function* listUserProjectsSaga() {
+function* listProjectsSaga() {
   try {
     const { results: userProjects } = yield call(getProjects);
     yield put({
@@ -70,6 +70,6 @@ function* listUserProjectsSaga() {
 
 export function* projectsSaga() {
   yield all([
-    yield takeLatest(GET_PROJECTS, listUserProjectsSaga),
+    yield takeEvery(GET_PROJECTS, listProjectsSaga),
   ]);
 }

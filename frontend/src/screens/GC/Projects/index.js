@@ -32,6 +32,8 @@ class Projects extends React.Component {
 
 	componentDidMount() {
 		Modal.setAppElement('body');
+		const { listProjects } = this.props;
+		listProjects();
 	}
 
 	openModal() {
@@ -183,6 +185,7 @@ const mapDispatchToProps = dispatch => ({
 
 Projects.propTypes = {
 	projectList: PropTypes.array,
+	listProjects: PropTypes.func.isRequired,
 };
 
 Projects.defaultProps = {

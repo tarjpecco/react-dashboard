@@ -35,13 +35,13 @@ export const createUserLicenseForUser = (userPK, params) => {
     {
       headers
     }))
+    .then(res => res.data)
     .catch(error => {
       return error;
     })
 };
 
 export const updateUserLicenseForUser = (userPK, licenseId, params) => {
-  console.log('userPK', userPK, licenseId, params)
   return authHeaderService.getHeaders()
     .then((headers) => axios.put(`${API_URL}/user-licenses/${userPK}/${licenseId}/`,
     {

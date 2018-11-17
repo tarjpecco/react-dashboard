@@ -140,7 +140,7 @@ function* createUserLicenseSaga({ payload }) {
   try {
     const userInfo = yield call(getCurrentUser);
     const newItem = yield call(createUserLicenseForUser, 'me', { ...payload, user: userInfo.url });
-    const { userLicenses } = yield select(state => state.userlicenses);
+    const userLicenses = yield select(getLicensesSelector);
     userLicenses.push(newItem);
     yield put({
       type: GET_USER_LICENSE_LIST_SUCCESS,

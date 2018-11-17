@@ -84,7 +84,7 @@ class Projects extends React.Component {
 									<td>
 										<p className="text-info">{item.name}</p>
 									</td>
-									<td>{item.address}</td>
+									<td>{item.address.join(' ')}</td>
 									<td>{item.countOfSubs}</td>
 									<td>
 										<p className="badge badge-pill badge-danger">

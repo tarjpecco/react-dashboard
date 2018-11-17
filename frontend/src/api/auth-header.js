@@ -33,8 +33,10 @@ export default class AuthHeaderService {
   }
 
   getHeaders = () => {
-    const username = localStorage.getItem('username');
-    const password = localStorage.getItem('password');
+    let username = localStorage.getItem('username');
+    if (!username) username = 'gc';
+    let password = localStorage.getItem('password');
+    if (!password) password = 'flexcomply12';
 
     const headers = {
       'Accept': 'application/json',

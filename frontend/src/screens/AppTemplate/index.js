@@ -24,7 +24,7 @@ import Sidebar from '../../components/Sidebar';
 
 import './index.scss';
 
-const AppTemplate = ({ showSideBar, location, username }) => (
+const AppTemplate = ({ showSideBar, location, history, username }) => (
 	<div
 		id="page-container"
 		className={classNames(
@@ -34,7 +34,7 @@ const AppTemplate = ({ showSideBar, location, username }) => (
 	>
 		<Sidebar location={location} />
 
-		<Header />
+		<Header history={history} />
 		{username === 'gc' && (
 			<Switch>
 				<Route exact path="/dashboard" component={GCDashboard} />
@@ -79,6 +79,7 @@ AppTemplate.propTypes = {
 const { object, string } = PropTypes;
 AppTemplate.propTypes = {
 	location: object.isRequired,
+	history: object.isRequired,
 	username: string.isRequired,
 };
 

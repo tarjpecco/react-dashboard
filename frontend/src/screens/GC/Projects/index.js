@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import Table from '../../../components/Table';
 import {
 	getProjectsAction,
+	createProjectAction,
 	getProjectsSelector
 } from '../../../redux/ducks/projects';
 
@@ -21,13 +22,16 @@ const customStyles = {
 };
 
 class Projects extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			modalIsOpen: false,
-		};
-		this.openModal = this.openModal.bind(this);
-		this.closeModal = this.closeModal.bind(this);
+	state = {
+		newproject: {
+			budget: 0,
+			name: '',
+			startDate: '',
+			endDate: '',
+			address: '',
+			status: 'act',
+		},
+		modalIsOpen: false,
 	}
 
 	componentDidMount() {
@@ -36,16 +40,33 @@ class Projects extends React.Component {
 		listProjects();
 	}
 
-	openModal() {
+	openModal = () => {
 		this.setState({ modalIsOpen: true });
 	}
 
-	closeModal() {
+	closeModal = () => {
 		this.setState({ modalIsOpen: false });
 	}
 
+	addNewProject = () => {
+		this.closeModal();
+		const { createProject } = this.props;
+		const {
+			newproject
+		} = this.state;
+		createProject(newproject);
+	}
+
+	onNewProjectChange = (prop, value) => {
+		const { newproject } = this.state;
+		newproject[prop] = value;
+		this.setState({
+			newproject
+		});
+	}
+
 	render() {
-		const { modalIsOpen } = this.state;
+		const { modalIsOpen, newproject } = this.state;
 		const { projectList } = this.props;
 		return (
 			<div id="main">
@@ -124,9 +145,11 @@ class Projects extends React.Component {
 							Project Name
 							<input
 								type="text"
+								value={newproject.name}
 								placeholder="Project Name"
 								className="form-control"
 								id="project"
+								onChange={e => this.onNewProjectChange('name', e.target.value)}
 							/>
 						</div>
 						<div className="form-group">
@@ -136,15 +159,29 @@ class Projects extends React.Component {
 								placeholder="Address"
 								className="form-control"
 								id="address"
+								value={newproject.address}
+								onChange={e => this.onNewProjectChange('address', e.target.value)}
 							/>
 						</div>
 						<div className="form-group">
 							Expected Start Date
-							<input type="text" className="form-control" placeholder="dd/mm/yyyy" />
+							<input
+								type="text"
+								className="form-control"
+								placeholder="dd/mm/yyyy"
+								value={newproject.startDate}
+								onChange={e => this.onNewProjectChange('startDate', e.target.value)}
+							/>
 						</div>
 						<div className="form-group">
 							Expected Completion
-							<input type="text" className="form-control" placeholder="dd/mm/yyyy" />
+							<input
+								type="text"
+								className="form-control"
+								placeholder="dd/mm/yyyy"
+								value={newproject.endDate}
+								onChange={e => this.onNewProjectChange('endDate', e.target.value)}
+							/>
 						</div>
 						<div className="form-group">
 							Expected Budget
@@ -158,6 +195,8 @@ class Projects extends React.Component {
 									id="example-group1-input3"
 									name="example-group1-input3"
 									placeholder="00"
+									value={newproject.budget}
+									onChange={e => this.onNewProjectChange('budget', e.target.value)}
 								/>
 								<div className="input-group-append">
 									<span className="input-group-text">,00</span>
@@ -165,7 +204,7 @@ class Projects extends React.Component {
 							</div>
 						</div>
 					</form>
-					<button type="button" className="btn btn-success" onClick={this.closeModal}>
+					<button type="button" className="btn btn-success" onClick={this.addNewProject}>
 						Submit
 					</button>
 				</Modal>
@@ -180,11 +219,13 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
 	listProjects: () => dispatch(getProjectsAction()),
+	createProject: params => dispatch(createProjectAction(params)),
 })
 
 Projects.propTypes = {
 	projectList: PropTypes.array,
 	listProjects: PropTypes.func.isRequired,
+	createProject: PropTypes.func.isRequired,
 };
 
 Projects.defaultProps = {

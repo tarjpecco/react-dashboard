@@ -115,3 +115,15 @@ export const getProjects = () => {
       return error;
     })
 };
+
+export const createProject = () => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.get(`${API_URL}/projects/`,
+    {
+      headers
+    }))
+    .then(res => res.data)
+    .catch(error => {
+      return error;
+    })
+};

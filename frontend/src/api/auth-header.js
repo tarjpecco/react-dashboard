@@ -1,27 +1,10 @@
 import decode from 'jwt-decode';
 
+import { getAuthToken } from './index';
+
 export default class AuthHeaderService {
   constructor(domain) {
     this.domain = domain;
-  }
-
-  getAuthToken = ({ username, password }) => {
-    return fetch(`${this.domain}/token/`, {
-      method: 'post',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        username,
-        password
-      })
-    }).then((response) => {
-      return response.json();
-    }).then(res => {
-      this.setToken(res.access)
-      return res;
-    })
   }
 
   isTokenValid = () => {
@@ -61,7 +44,7 @@ export default class AuthHeaderService {
       headers.Authorization = `Bearer ${this.getToken()}`;
       return new Promise((resolve) => resolve(headers));
     }
-    return this.getAuthToken({ username: 'testdev', password: 'password' }).
+    return getAuthToken({ username: 'testdev', password: 'password' }).
       then((res) => {
         headers.Authorization = `Bearer ${res.access}`;
         return headers;

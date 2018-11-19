@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { signIn } from '../../redux/ducks/auth';
+import { signInAction } from '../../redux/ducks/auth';
 
 import logoImg from '../../assets/media/logo-frontpage.png';
 import { getAddress } from '../../api';
@@ -23,7 +23,7 @@ class LogIn extends React.PureComponent {
 
 	render() {
 		const { username, password } = this.state;
-		const { signInAction, history } = this.props;
+		const { signIn, history } = this.props;
 		return (
 			<div id="page-container">
 				<main id="main-container">
@@ -76,7 +76,7 @@ class LogIn extends React.PureComponent {
 														type="button"
 														className="btn btn-block btn-hero-lg btn-hero-primary"
 														onClick={() => {
-															signInAction({
+															signIn({
 																username,
 																password,
 															});
@@ -129,14 +129,14 @@ class LogIn extends React.PureComponent {
 }
 const mapStateToProps = () => ({});
 const mapActionToProps = dispatch => ({
-	signInAction: params => {
-		dispatch(signIn(params));
+	signIn: params => {
+		dispatch(signInAction(params));
 	},
 });
 
 const { func, object } = PropTypes;
 LogIn.propTypes = {
-	signInAction: func.isRequired,
+	signIn: func.isRequired,
 	// eslint-disable-next-line react/forbid-prop-types
 	history: object.isRequired,
 };

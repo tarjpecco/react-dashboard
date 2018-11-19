@@ -24,7 +24,7 @@ import Sidebar from '../../components/Sidebar';
 
 import './index.scss';
 
-const AppTemplate = ({ showSideBar, location, history, username }) => (
+const AppTemplate = ({ showSideBar, location, history, userRole }) => (
 	<div
 		id="page-container"
 		className={classNames(
@@ -35,7 +35,7 @@ const AppTemplate = ({ showSideBar, location, history, username }) => (
 		<Sidebar location={location} />
 
 		<Header history={history} />
-		{username === 'gc' && (
+		{userRole === 'gc' && (
 			<Switch>
 				<Route exact path="/dashboard" component={GCDashboard} />
 				<Route exact path="/billing" component={GCBilling} />
@@ -46,14 +46,14 @@ const AppTemplate = ({ showSideBar, location, history, username }) => (
 				<Route exact path="/team" component={Team} />
 			</Switch>
 		)}
-		{username === 'sub' && (
+		{userRole === 'sub' && (
 			<Switch>
 				<Route exact path="/dashboard" component={SubDashboard} />
 				<Route exact path="/insurance" component={SubInsurance} />
 				<Route exact path="/settings" component={SubSettings} />
 			</Switch>
 		)}
-		{username === 'agent' && (
+		{userRole === 'agent' && (
 			<Switch>
 				<Route exact path="/dashboard" component={AgentDashboard} />
 				<Route exact path="/clients" component={AgentClients} />
@@ -66,8 +66,7 @@ const AppTemplate = ({ showSideBar, location, history, username }) => (
 
 const mapStateToProps = state => ({
 	showSideBar: state.global.showSideBar,
-	username: state.auth.username,
-	password: state.auth.password,
+	userRole: state.auth.userRole,
 });
 
 const { bool } = PropTypes;
@@ -80,7 +79,7 @@ const { object, string } = PropTypes;
 AppTemplate.propTypes = {
 	location: object.isRequired,
 	history: object.isRequired,
-	username: string.isRequired,
+	userRole: string.isRequired,
 };
 
 const enhance = compose(

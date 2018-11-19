@@ -17,3 +17,22 @@ export const getAddress = () => {
       console.log(error);
     })
 };
+
+export const getAuthToken = ({ username, password }) => {
+  return fetch(`${API_URL}/token/`, {
+    method: 'post',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      username,
+      password
+    })
+  }).then((response) => {
+    return response.json();
+  }).then(res => {
+    this.setToken(res.access)
+    return res;
+  })
+};

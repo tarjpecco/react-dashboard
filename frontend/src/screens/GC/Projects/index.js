@@ -35,6 +35,8 @@ class Projects extends React.Component {
 	}
 
 	componentDidMount() {
+		console.log('component loaded');
+		window.initalizeDatePicker();
 		Modal.setAppElement('body');
 		const { listProjects } = this.props;
 		listProjects();
@@ -63,6 +65,10 @@ class Projects extends React.Component {
 		this.setState({
 			newproject
 		});
+	}
+
+	datepickerChanged = () => {
+		console.log('date picker changed');
 	}
 
 	render() {
@@ -172,6 +178,16 @@ class Projects extends React.Component {
 								value={newproject.startDate}
 								onChange={e => this.onNewProjectChange('startDate', e.target.value)}
 							/>
+							<input
+								type="text"
+								className="js-datepicker form-control js-datepicker-enabled"
+								name="example-datepicker1"
+								data-week-start="1"
+								data-autoclose="true"
+								data-today-highlight="true"
+								data-date-format="mm/dd/yy"
+								onChange={this.datepickerChanged}
+								placeholder="mm/dd/yy" />
 						</div>
 						<div className="form-group">
 							Expected Completion

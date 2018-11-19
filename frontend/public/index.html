@@ -21,6 +21,21 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
   <title>FlexComply - Dashboard</title>
+  <script src="assets/js/dashmix.core.min.js"></script>
+  <script src="assets/js/dashmix.app.min.js"></script>
+  <script src="assets/js/bootstrap-datepicker.min.js"></script>
+  <script>
+    jQuery(function() { setTimeout(() => {
+      Dashmix.helpers(['datepicker']);
+        console.log(' Dashmix.helpers([]) called');
+    }, 3000)
+      });
+    // window.initalizeDatePicker = () => {
+    //   jQuery(function() { Dashmix.helpers(['datepicker']);
+    //     console.log(' Dashmix.helpers([]) called');
+    //   });
+    // }
+  </script>
 </head>
 
 <body>
@@ -28,16 +43,9 @@
     You need to enable JavaScript to run this app.
   </noscript>
   <div id="root"></div>
-  <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+  <div>
+      <input type="text" class="js-datepicker form-control js-datepicker-enabled" id="example-datepicker1" name="example-datepicker1" data-week-start="1" data-autoclose="true" data-today-highlight="true" data-date-format="mm/dd/yy" placeholder="mm/dd/yy">
+  </div>
 </body>
 
 </html>

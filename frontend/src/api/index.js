@@ -36,3 +36,15 @@ export const getAuthToken = ({ username, password }) => {
     return res;
   })
 };
+
+export const getCurrentUser = () => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.get(`${API_URL}/users/me/`,
+    {
+      headers
+    }))
+    .then(res => res.data)
+    .catch(error => {
+      return error;
+    })
+};

@@ -15,7 +15,6 @@ const App = () => (
 		<Route path="/"
 			render={() => {
 				if (localStorage.getItem('id_token') !== null) {
-					console.log('log:',localStorage.getItem('id_token'));
 					return <AppTemplate />;
 				}
 				return <Redirect to="login" />;

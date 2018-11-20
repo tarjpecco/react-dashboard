@@ -1,6 +1,6 @@
 import decode from 'jwt-decode';
 
-import { getAuthToken } from './index';
+import { history } from '../redux/store';
 
 export default class AuthHeaderService {
   constructor(domain) {
@@ -49,10 +49,10 @@ export default class AuthHeaderService {
       headers.Authorization = `Bearer ${this.getToken()}`;
       return new Promise((resolve) => resolve(headers));
     }
-    return this.getAuthToken({ username, password }).
-      then((res) => {
-        headers.Authorization = `Bearer ${res.access}`;
-        return headers;
-      });
+    localStorage.removeItem('user');
+    localStorage.removeItem('id_token');
+    history.push('/login');
+    const error = 'token expired';
+    return new Promise((resolve) => resolve(new Error(error)));
   }
 }

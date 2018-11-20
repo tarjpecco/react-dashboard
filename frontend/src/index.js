@@ -1,16 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import './index.scss';
 import App from './App';
-import configureStore from './redux/store';
+import configureStore, { history } from './redux/store';
 import * as serviceWorker from './serviceWorker';
 import './assets/styles/dashmix.min.css';
 
 const store = configureStore();
 ReactDOM.render(
-	<Router>
+	<Router history={history}>
 		<Provider store={store}>
 			<App />
 		</Provider>

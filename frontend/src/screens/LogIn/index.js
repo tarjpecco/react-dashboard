@@ -1,20 +1,24 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { signIn } from '../../redux/ducks/auth';
+import { signInAction } from '../../redux/ducks/auth';
 
 import logoImg from '../../assets/media/logo-frontpage.png';
-import { getAddress } from '../../api';
 
 class LogIn extends React.PureComponent {
-	constructor(props) {
-		super(props);
-		this.state = {
-			username: '',
-			password: '',
-		};
-		this.onChangeHandler.bind(this);
-		getAddress();
+	state = {
+		username: '',
+		password: '',
+	};
+
+	componentWillReceiveProps(nextProps) {
+		const { history, error, user } = nextProps;
+		if (user && error === null) {
+			history.push('/dashboard');
+			return false;
+		}
+		return true;
 	}
 
 	onChangeHandler = e => {
@@ -23,7 +27,7 @@ class LogIn extends React.PureComponent {
 
 	render() {
 		const { username, password } = this.state;
-		const { signInAction, history } = this.props;
+		const { signIn, error } = this.props;
 		return (
 			<div id="page-container">
 				<main id="main-container">
@@ -32,9 +36,9 @@ class LogIn extends React.PureComponent {
 							<div className="hero-static col-md-6 d-flex align-items-center bg-white">
 								<div className="p-3 w-100">
 									<div className="mb-3 text-center">
-										<a className="link-fx font-w700 font-size-h1" href="/">
+										<Link className="link-fx font-w700 font-size-h1" to="/">
 											<img src={logoImg} style={{ width: 200 }} alt="logo" />
-										</a>
+										</Link>
 										<p className="text-uppercase font-w700 font-size-sm text-muted">
 											Sign In
 										</p>
@@ -44,14 +48,12 @@ class LogIn extends React.PureComponent {
 										<div className="col-sm-8 col-xl-6">
 											<form
 												className="js-validation-signin"
-												action="/dashboard"
-												method="post"
 											>
 												<div className="py-3">
 													<div className="form-group">
 														<input
 															type="text"
-															className="form-control form-control-lg form-control-alt"
+															className={`form-control form-control-lg form-control-alt ${error && 'is-invalid'}`}
 															id="login-username"
 															name="username"
 															placeholder="Username"
@@ -62,13 +64,18 @@ class LogIn extends React.PureComponent {
 													<div className="form-group">
 														<input
 															type="password"
-															className="form-control form-control-lg form-control-alt"
+															className={`form-control form-control-lg form-control-alt ${error && 'is-invalid'}`}
 															id="login-password"
 															name="password"
 															placeholder="Password"
 															onChange={this.onChangeHandler}
 															value={password}
 														/>
+														{error && (
+															<div id="login-password-error" className="invalid-feedback animated fadeIn">
+																{error}
+															</div>
+														)}
 													</div>
 												</div>
 												<div className="form-group">
@@ -76,11 +83,10 @@ class LogIn extends React.PureComponent {
 														type="button"
 														className="btn btn-block btn-hero-lg btn-hero-primary"
 														onClick={() => {
-															signInAction({
+															signIn({
 																username,
 																password,
 															});
-															history.push('/dashboard');
 														}}
 													>
 														<i className="fa fa-fw fa-sign-in-alt mr-1" />{' '}
@@ -88,20 +94,20 @@ class LogIn extends React.PureComponent {
 													</button>
 
 													<p className="mt-3 mb-0 d-lg-flex justify-content-lg-between">
-														<a
+														<Link
 															className="btn btn-sm btn-light d-block d-lg-inline-block mb-1"
-															href="/authreminder"
+															to="/authreminder"
 														>
 															<i className="fa fa-exclamation-triangle text-muted mr-1" />{' '}
 															Forgot password
-														</a>
-														<a
+														</Link>
+														<Link
 															className="btn btn-sm btn-light d-block d-lg-inline-block mb-1"
-															href="/signup"
+															to="/signup"
 														>
 															<i className="fa fa-plus text-muted mr-1" />{' '}
 															New Account
-														</a>
+														</Link>
 													</p>
 												</div>
 											</form>
@@ -127,19 +133,27 @@ class LogIn extends React.PureComponent {
 		);
 	}
 }
-const mapStateToProps = () => ({});
+const mapStateToProps = (state) => ({
+	error: state.auth.error,
+	user: state.auth.user,
+});
 const mapActionToProps = dispatch => ({
-	signInAction: params => {
-		dispatch(signIn(params));
+	signIn: params => {
+		dispatch(signInAction(params));
 	},
 });
 
-const { func, object } = PropTypes;
 LogIn.propTypes = {
-	signInAction: func.isRequired,
-	// eslint-disable-next-line react/forbid-prop-types
-	history: object.isRequired,
+	signIn: PropTypes.func.isRequired,
+	error: PropTypes.string,
+	history: PropTypes.object.isRequired,
+	user: PropTypes.object,
 };
+
+LogIn.defaultProps = {
+	error: null,
+	user: null,
+}
 
 export default connect(
 	mapStateToProps,

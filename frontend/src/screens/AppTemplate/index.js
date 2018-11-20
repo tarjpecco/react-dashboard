@@ -24,50 +24,55 @@ import Sidebar from '../../components/Sidebar';
 
 import './index.scss';
 
-const AppTemplate = ({ showSideBar, location, history, username }) => (
-	<div
-		id="page-container"
-		className={classNames(
-			'enable-page-overlay side-scroll page-header-fixed page-header-dark main-content-narrow side-trans-enabled',
-			{ 'sidebar-o': showSideBar }
-		)}
-	>
-		<Sidebar location={location} />
+const AppTemplate = ({ showSideBar, location, history }) => {
+	const user = JSON.parse(localStorage.getItem('user'));
+	if (user === null) {
+		history.push('/login');
+	}
+	const userRole = user.role.toLowerCase();
+	return (
+		<div
+			id="page-container"
+			className={classNames(
+				'enable-page-overlay side-scroll page-header-fixed page-header-dark main-content-narrow side-trans-enabled',
+				{ 'sidebar-o': showSideBar }
+			)}
+		>
+			<Sidebar location={location} userRole={userRole} />
 
-		<Header history={history} />
-		{username === 'gc' && (
-			<Switch>
-				<Route exact path="/dashboard" component={GCDashboard} />
-				<Route exact path="/billing" component={GCBilling} />
-				<Route exact path="/insurance" component={MyInsurance} />
-				<Route exact path="/projects" component={Projects} />
-				<Route exact path="/projectdetail" component={Detail} />
-				<Route exact path="/settings" component={Settings} />
-				<Route exact path="/team" component={Team} />
-			</Switch>
-		)}
-		{username === 'sub' && (
-			<Switch>
-				<Route exact path="/dashboard" component={SubDashboard} />
-				<Route exact path="/insurance" component={SubInsurance} />
-				<Route exact path="/settings" component={SubSettings} />
-			</Switch>
-		)}
-		{username === 'agent' && (
-			<Switch>
-				<Route exact path="/dashboard" component={AgentDashboard} />
-				<Route exact path="/clients" component={AgentClients} />
-				<Route exact path="/agentdetail" component={AgentDetail} />
-				<Route exact path="/settings" component={AgentSettings} />
-			</Switch>
-		)}
-	</div>
-);
+			<Header history={history} username={user.username} />
+			{userRole === 'gc' && (
+				<Switch>
+					<Route exact path="/dashboard" component={GCDashboard} />
+					<Route exact path="/billing" component={GCBilling} />
+					<Route exact path="/insurance" component={MyInsurance} />
+					<Route exact path="/projects" component={Projects} />
+					<Route exact path="/projectdetail" component={Detail} />
+					<Route exact path="/settings" component={Settings} />
+					<Route exact path="/team" component={Team} />
+				</Switch>
+			)}
+			{userRole === 'sub' && (
+				<Switch>
+					<Route exact path="/dashboard" component={SubDashboard} />
+					<Route exact path="/insurance" component={SubInsurance} />
+					<Route exact path="/settings" component={SubSettings} />
+				</Switch>
+			)}
+			{userRole === 'agent' && (
+				<Switch>
+					<Route exact path="/dashboard" component={AgentDashboard} />
+					<Route exact path="/clients" component={AgentClients} />
+					<Route exact path="/agentdetail" component={AgentDetail} />
+					<Route exact path="/settings" component={AgentSettings} />
+				</Switch>
+			)}
+		</div>
+	);
+};
 
 const mapStateToProps = state => ({
 	showSideBar: state.global.showSideBar,
-	username: state.auth.username,
-	password: state.auth.password,
 });
 
 const { bool } = PropTypes;
@@ -76,11 +81,10 @@ AppTemplate.propTypes = {
 	showSideBar: bool.isRequired,
 };
 
-const { object, string } = PropTypes;
+const { object } = PropTypes;
 AppTemplate.propTypes = {
 	location: object.isRequired,
 	history: object.isRequired,
-	username: string.isRequired,
 };
 
 const enhance = compose(

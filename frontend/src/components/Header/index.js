@@ -19,12 +19,12 @@ class Header extends React.Component {
 		const { logout, history } = this.props;
 		this.showMenu(true);
 		logout();
-		history.push('/');
+		history.push('/login');
 	}
 
 	render() {
 		const { isMenuHidden } = this.state;
-		const	{ toggleAction } = this.props;
+		const	{ toggleAction, username } = this.props;
 		return (
 			<header id="page-header">
 				<div className="content-header">
@@ -155,7 +155,7 @@ class Header extends React.Component {
 								onClick={() => this.showMenu(false)}
 							>
 								<i className="fa fa-fw fa-user d-sm-none" />
-								<span className="d-none d-sm-inline-block">Admin</span>
+								<span className="d-none d-sm-inline-block">{username}</span>
 								<i className="fa fa-fw fa-angle-down ml-1 d-none d-sm-inline-block" />
 							</button>
 							<div className="menu-wrapper" hidden={isMenuHidden} onClick={() => this.showMenu(true)} />
@@ -194,11 +194,12 @@ const mapActionToProps = dispatch => ({
 	logout: () => dispatch(signOutAcion())
 });
 
-const { func, object } = PropTypes;
+const { func, object, string } = PropTypes;
 Header.propTypes = {
 	toggleAction: func.isRequired,
 	logout: func.isRequired,
 	history: object.isRequired,
+	username: string.isRequired,
 };
 
 export default connect(

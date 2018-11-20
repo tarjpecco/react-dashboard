@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+
 import logoImg from '../../assets/media/logo-frontpage.png';
 
 class SignUp extends React.PureComponent {
@@ -17,13 +19,13 @@ class SignUp extends React.PureComponent {
 								<div className="hero-static col-md-6 d-flex align-items-center bg-white">
 									<div className="p-3 w-100">
 										<div className="mb-3 text-center">
-											<a className="link-fx font-w700 font-size-h1" href="/">
+											<Link className="link-fx font-w700 font-size-h1" to="/">
 												<img
 													src={logoImg}
 													style={{ width: 200 }}
 													alt="logo"
 												/>
-											</a>
+											</Link>
 											<p className="text-uppercase font-w700 font-size-sm text-muted">
 												Create New Account
 											</p>
@@ -92,7 +94,7 @@ class SignUp extends React.PureComponent {
 														</div>
 													</div>
 													<div className="form-group">
-														<a href="/dashboard">
+														<Link to="/dashboard">
 															<button
 																type="button"
 																className="btn btn-block btn-hero-lg btn-hero-success"
@@ -100,25 +102,25 @@ class SignUp extends React.PureComponent {
 																<i className="fa fa-fw fa-plus mr-1" />{' '}
 																Sign Up
 															</button>
-														</a>
+														</Link>
 														<p className="mt-3 mb-0 d-lg-flex justify-content-lg-between">
-															<a
+															<Link
 																className="btn btn-sm btn-light d-block d-lg-inline-block mb-1"
-																href="/"
+																to="/"
 															>
 																<i className="fa fa-sign-in-alt text-muted mr-1" />{' '}
 																Sign In
-															</a>
+															</Link>
 															{/* eslint-disable-next-line */}
-															<a
+															<Link
 																className="btn btn-sm btn-light d-block d-lg-inline-block mb-1"
-																href="#"
+																to="#"
 																data-toggle="modal"
 																data-target="#modal-terms"
 															>
 																<i className="fa fa-book text-muted mr-1" />{' '}
 																Read Terms
-															</a>
+															</Link>
 														</p>
 													</div>
 												</form>

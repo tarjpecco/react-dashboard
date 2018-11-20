@@ -6,6 +6,8 @@ import { connectRouter, routerMiddleware } from 'connected-react-router';
 import auth from './ducks/auth';
 import global from './ducks/global';
 import userlicenses from './ducks/userlicenses';
+import projects from './ducks/projects';
+
 import rootSaga from './sagas';
 
 const sagaMiddleware = createSagaMiddleware();
@@ -27,7 +29,8 @@ export default function configureStore(initialState = {}) {
 	const reducer = combineReducers({
 		auth,
 		global,
-		userlicenses
+		userlicenses,
+		projects,
 	});
 	
 	const store = createStore(connectRouter(history)(reducer), initialState, compose(...enhancers));

@@ -1,7 +1,14 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Modal from 'react-modal';
+import { connect } from 'react-redux';
+
 import Table from '../../../components/Table';
+import {
+	getProjectsAction,
+	getProjectsSelector
+} from '../../../redux/ducks/projects';
 
 import './index.scss';
 
@@ -17,32 +24,6 @@ class Projects extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			projectList: [
-				{
-					id: '0',
-					name: 'Main Street',
-					address: '123 admin Main Street',
-					countOfSubs: '1',
-					risks: '3',
-					status: 'in progress',
-				},
-				{
-					id: '1',
-					name: 'Main Street 1',
-					address: '123 Main Street',
-					countOfSubs: '1',
-					risks: '3',
-					status: 'in progress',
-				},
-				{
-					id: '2',
-					name: 'Main Street 2',
-					address: 'NY Main Street',
-					countOfSubs: '1',
-					risks: '3',
-					status: 'in progress',
-				},
-			],
 			modalIsOpen: false,
 		};
 		this.openModal = this.openModal.bind(this);
@@ -51,6 +32,8 @@ class Projects extends React.Component {
 
 	componentDidMount() {
 		Modal.setAppElement('body');
+		const { listProjects } = this.props;
+		listProjects();
 	}
 
 	openModal() {
@@ -62,7 +45,8 @@ class Projects extends React.Component {
 	}
 
 	render() {
-		const { projectList, modalIsOpen } = this.state;
+		const { modalIsOpen } = this.state;
+		const { projectList } = this.props;
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -100,7 +84,7 @@ class Projects extends React.Component {
 									<td>
 										<p className="text-info">{item.name}</p>
 									</td>
-									<td>{item.address}</td>
+									<td>{item.address.join(' ')}</td>
 									<td>{item.countOfSubs}</td>
 									<td>
 										<p className="badge badge-pill badge-danger">
@@ -190,4 +174,22 @@ class Projects extends React.Component {
 		);
 	}
 }
-export default Projects;
+
+const mapStateToProps = state => ({
+	projectList: getProjectsSelector(state)
+});
+
+const mapDispatchToProps = dispatch => ({
+	listProjects: () => dispatch(getProjectsAction()),
+})
+
+Projects.propTypes = {
+	projectList: PropTypes.array,
+	listProjects: PropTypes.func.isRequired,
+};
+
+Projects.defaultProps = {
+	projectList: [],
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Projects);

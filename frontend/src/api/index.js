@@ -103,3 +103,15 @@ export const getAuthToken = ({ username, password }) => {
     throw err;
   })
 };
+
+export const getProjects = () => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.get(`${API_URL}/projects/`,
+    {
+      headers
+    }))
+    .then(res => res.data)
+    .catch(error => {
+      return error;
+    })
+};

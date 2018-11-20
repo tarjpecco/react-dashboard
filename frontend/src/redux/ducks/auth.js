@@ -25,7 +25,7 @@ const initialState = {
   entity: null,
   error: null,
   showSideBar: true,
-	userRole: '',
+	user: null,
 };
 
 // Reducer
@@ -40,33 +40,38 @@ export default function reducer(state = initialState, { type, payload }) {
         }
       );
     case SIGNIN_SUCCEED:
+      localStorage.setItem('user', JSON.stringify(payload));
       return {
         ...state,
-        userRole: payload.userRole,
+        user: payload,
+        error: null,
+      };
+    case SIGNIN_FAILD:
+      return {
+        ...state,
+        error: payload.error,
       };
     case SIGNOUT:
       localStorage.removeItem('id_token');
+      localStorage.removeItem('user');
       return {
         ...state,
-        userRole: null,
+        user: null,
       };
     default:
       return state;
   }
 }
 
-
 function* signInSaga({ payload }) {
   try {
     yield call(getAuthToken, payload);
     const userInfo = yield call(getCurrentUser);
-    console.log('userInfo', userInfo);
     yield put({
       type: SIGNIN_SUCCEED,
-      payload: { userInfo },
+      payload: { ...userInfo },
     });
   } catch (err) {
-    console.error(err);
     const errorMessage = 'User SignIn Failed';
     yield put({
       type: SIGNIN_FAILD,

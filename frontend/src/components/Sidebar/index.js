@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import logoImg from '../../assets/media/logo.png';
@@ -14,7 +13,7 @@ class Sidebar extends React.Component {
 	}
 
 	render() {
-		const { location, username } = this.props;
+		const { location, userRole } = this.props;
 		const path = location.pathname;
 		return (
 			<nav id="sidebar">
@@ -22,13 +21,13 @@ class Sidebar extends React.Component {
 					<div className="simplebar-content">
 						<div className="bg-header-dark">
 							<div className="content-header bg-white-10">
-								<a className="link-fx font-w600 font-size-lg text-white" href="/">
+								<Link className="link-fx font-w600 font-size-lg text-white" to="/dashboard">
 									<span className="smini-hidden">
 										<span className="text-white-75">
 											<img src={logoImg} style={{ width: 170 }} alt="logo" />
 										</span>
 									</span>
-								</a>
+								</Link>
 							</div>
 						</div>
 						<div className="content-side content-side-full">
@@ -44,7 +43,7 @@ class Sidebar extends React.Component {
 										<span className="nav-main-link-name">Dashboard</span>
 									</Link>
 								</li>
-								{username === 'gc' && (
+								{userRole === 'gc' && (
 									<li className="nav-main-item">
 										<Link
 											to="/projects"
@@ -57,7 +56,7 @@ class Sidebar extends React.Component {
 										</Link>
 									</li>
 								)}
-								{username !== 'agent' && (
+								{userRole !== 'agent' && (
 									<li className="nav-main-item">
 										<Link
 											to="/insurance"
@@ -70,7 +69,7 @@ class Sidebar extends React.Component {
 										</Link>
 									</li>
 								)}
-								{username === 'gc' && (
+								{userRole === 'gc' && (
 									<li className="nav-main-item">
 										<Link
 											to="/team"
@@ -83,7 +82,7 @@ class Sidebar extends React.Component {
 										</Link>
 									</li>
 								)}
-								{username === 'gc' && (
+								{userRole === 'gc' && (
 									<li className="nav-main-item">
 										<Link
 											to="/billing"
@@ -96,7 +95,7 @@ class Sidebar extends React.Component {
 										</Link>
 									</li>
 								)}
-								{username === 'agent' && (
+								{userRole === 'agent' && (
 									<li className="nav-main-item">
 										<Link
 											to="/clients"
@@ -130,15 +129,11 @@ class Sidebar extends React.Component {
 		);
 	}
 }
-const mapStateToProps = state => ({
-	username: state.auth.username,
-	password: state.auth.password,
-});
 
 const { object, string } = PropTypes;
 Sidebar.propTypes = {
 	location: object.isRequired,
-	username: string.isRequired,
+	userRole: string.isRequired,
 };
 
-export default connect(mapStateToProps)(Sidebar);
+export default Sidebar;

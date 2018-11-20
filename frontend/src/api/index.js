@@ -30,10 +30,16 @@ export const getAuthToken = ({ username, password }) => {
       password
     })
   }).then((response) => {
-    return response.json();
+    if (response.status === 200) {
+      return response.json();
+    }
+    throw response.statusText;
   }).then(res => {
-    this.setToken(res.access)
+    localStorage.setItem('id_token', res.access)
     return res;
+  })
+  .catch(err => {
+    throw err;
   })
 };
 

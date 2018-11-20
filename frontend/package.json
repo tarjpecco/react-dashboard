@@ -5,6 +5,7 @@
 	"dependencies": {
 		"axios": "^0.18.0",
 		"classnames": "^2.2.6",
+		"connected-react-router": "^5.0.1",
 		"history": "^4.7.2",
 		"jwt-decode": "^2.2.0",
 		"node-sass": "^4.10.0",

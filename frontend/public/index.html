@@ -21,22 +21,6 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
   <title>FlexComply - Dashboard</title>
-  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoq4_-BeKtYRIs-3FjJL721G1eP5DaU0g&libraries=places"></script>
-  <script src="assets/js/dashmix.core.min.js"></script>
-  <script src="assets/js/dashmix.app.min.js"></script>
-  <script src="assets/js/bootstrap-datepicker.min.js"></script>
-  <script>
-    jQuery(function() { setTimeout(() => {
-      Dashmix.helpers(['datepicker']);
-        console.log(' Dashmix.helpers([]) called');
-    }, 3000)
-      });
-    // window.initalizeDatePicker = () => {
-    //   jQuery(function() { Dashmix.helpers(['datepicker']);
-    //     console.log(' Dashmix.helpers([]) called');
-    //   });
-    // }
-  </script>
 </head>
 
 <body>
@@ -44,9 +28,16 @@
     You need to enable JavaScript to run this app.
   </noscript>
   <div id="root"></div>
-  <div>
-      <input type="text" class="js-datepicker form-control js-datepicker-enabled" id="example-datepicker1" name="example-datepicker1" data-week-start="1" data-autoclose="true" data-today-highlight="true" data-date-format="mm/dd/yy" placeholder="mm/dd/yy">
-  </div>
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoq4_-BeKtYRIs-3FjJL721G1eP5DaU0g&libraries=places"></script>
+  <script src="assets/js/dashmix.core.min.js"></script>
+  <script src="assets/js/dashmix.app.min.js"></script>
+  <script src="assets/js/bootstrap-datepicker.min.js"></script>
+  <script>
+    jQuery(function() { 
+      window.addEventListener("DOMSubtreeModified", () => {
+        Dashmix.helpers(['datepicker']);
+      });
+    });
+  </script>
 </body>
-
 </html>

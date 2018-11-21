@@ -11,6 +11,7 @@ class SearchBar extends React.Component {
 
   static propTypes = {
     onAddressChanged: PropTypes.func.isRequired,
+    isInValid: PropTypes.bool.isRequired,
   }
 
   handleChange = address => {
@@ -21,14 +22,15 @@ class SearchBar extends React.Component {
     const final = {};
     data.address_components.forEach(item => {
       // eslint-disable-next-line no-return-assign
-      item.types.map(category => (data[category] = item.long_name));
+      item.types.map(category => (data[category] = item.short_name));
     });
-    final.street = data.route;
+    final.line_1 = data.route;
+    final.line_2 = '';
     final.state = data.administrative_area_level_1;
-    final.city = data.locality;
+    final.town = data.locality;
     final.county = data.administrative_area_level_2;
     final.country = data.country;
-    final.postal_code = data.postal_code;
+    final.zip_code = data.postal_code;
     return final;
   }
 
@@ -43,6 +45,8 @@ class SearchBar extends React.Component {
 
   render() {
     const { address } = this.state;
+    const { isInValid } = this.props;
+
     return (
 	<PlacesAutocomplete
 		value={address}
@@ -54,9 +58,10 @@ class SearchBar extends React.Component {
 				<input
 					{...getInputProps({
           placeholder: 'Search Places ...',
-          className: 'location-search-input form-control',
-        })}
-      />
+          className: `location-search-input form-control ${isInValid ? 'is-invalid' : ''}`,
+          })}
+        />
+				{isInValid && <div className="invalid-feedback animated fadeIn">Address is Required</div>}
 				<div className={`autocomplete-dropdown-container ${suggestions.length > 0 ? 'show' : 'hide'}`}>
 					{loading && <div>Loading...</div>}
 					{suggestions.map(suggestion => {

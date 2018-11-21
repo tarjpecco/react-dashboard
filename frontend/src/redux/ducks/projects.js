@@ -7,17 +7,22 @@ import {
   getProjects,
   createProject,
 } from '../../api';
+import { actionNames } from '../helper';
 
 const projectsDuck = createDuck('projects-duck');
 
 // actions
-const GET_PROJECTS = projectsDuck.defineType('GET_PROJECTS');
-const CREATE_PROJECT = projectsDuck.defineType('CREATE_PROJECT');
-const GET_PROJECT_LIST_SUCCESS = projectsDuck.defineType('GET_PROJECT_LIST_SUCCESS');
-const GET_PROJECT_LIST_FAILED = projectsDuck.defineType('GET_PROJECT_LIST_FAILED');
-const GET_PROJECT_LIST_REQUEST = projectsDuck.defineType('GET_PROJECT_LIST_REQUEST');
-const UPDATE_PROJECT_SUCCESS = projectsDuck.defineType('UPDATE_PROJECT_SUCCESS');
-const UPDATE_PROJECT_FAILED = projectsDuck.defineType('UPDATE_PROJECT_FAILED');
+const CONSTANT_ACTIONS = [
+  'GET_PROJECTS',
+  'CREATE_PROJECT',
+  ...actionNames('GET_PROJECT_LIST'),
+  ...actionNames('UPDATE_PROJECT')
+];
+const PROJECT_ACTIONS = {};
+CONSTANT_ACTIONS.forEach(action => {
+  projectsDuck.defineType(action);
+  PROJECT_ACTIONS[action] = projectsDuck.defineType(action);
+});
 
 // Selectors
 export const stateSelector = state => state.projects;
@@ -26,8 +31,8 @@ export const getProjectsSelector = createSelector([stateSelector], state => {
 });
 
 // Action Creators
-export const getProjectsAction = projectsDuck.createAction(GET_PROJECTS);
-export const createProjectAction = projectsDuck.createAction(CREATE_PROJECT);
+export const getProjectsAction = projectsDuck.createAction(PROJECT_ACTIONS.GET_PROJECTS);
+export const createProjectAction = projectsDuck.createAction(PROJECT_ACTIONS.CREATE_PROJECT);
 
 // Reducer Intial State
 const initialState = fromJS({
@@ -39,24 +44,24 @@ const initialState = fromJS({
 
 // Reducer
 const projectListReducer = projectsDuck.createReducer({
-  [GET_PROJECT_LIST_SUCCESS]: (state, { payload }) =>
+  [PROJECT_ACTIONS.GET_PROJECT_LIST_SUCCESS]: (state, { payload }) =>
     state
       .update('projects', () => List(payload.projectList))
       .set('loading', false),
-  [GET_PROJECT_LIST_FAILED]: (state, { error }) => ({
+  [PROJECT_ACTIONS.GET_PROJECT_LIST_FAILED]: (state, { error }) => ({
     ...state,
     loading: false,
     error
   }),
-  [GET_PROJECT_LIST_REQUEST]: (state) => ({
+  [PROJECT_ACTIONS.GET_PROJECT_LIST_REQUEST]: (state) => ({
     ...state,
     loading: true,
   }),
-  [UPDATE_PROJECT_SUCCESS]: (state, { payload }) =>
+  [PROJECT_ACTIONS.UPDATE_PROJECT_SUCCESS]: (state, { payload }) =>
   state
     .update('projects', () => List(payload.projects))
     .set('saveloading', false),
-  [UPDATE_PROJECT_FAILED]: (state, { error }) => ({
+  [PROJECT_ACTIONS.UPDATE_PROJECT_FAILED]: (state, { error }) => ({
     ...state,
     saveloading: false,
     error
@@ -70,13 +75,13 @@ function* listProjectsSaga() {
   try {
     const { results: projectList } = yield call(getProjects);
     yield put({
-      type: GET_PROJECT_LIST_SUCCESS,
+      type: PROJECT_ACTIONS.GET_PROJECT_LIST_SUCCESS,
       payload: { projectList },
     });
   } catch (err) {
     const errorMessage = 'Listing Projects Failed';
     yield put({
-      type: GET_PROJECT_LIST_FAILED,
+      type: PROJECT_ACTIONS.GET_PROJECT_LIST_FAILED,
       payload: { error: errorMessage },
     });
   }
@@ -88,14 +93,14 @@ function* createProjectSaga({ payload }) {
     const projectList = yield select(getProjectsSelector);
     projectList.push(newItem);
     yield put({
-      type: GET_PROJECT_LIST_SUCCESS,
+      type: PROJECT_ACTIONS.GET_PROJECT_LIST_SUCCESS,
       payload: { projectList },
     });
   } catch (err) {
     console.error(err);
     const errorMessage = 'Creating Project Failed';
     yield put({
-      type: UPDATE_PROJECT_FAILED,
+      type: PROJECT_ACTIONS.UPDATE_PROJECT_FAILED,
       payload: { error: errorMessage },
     });
   }
@@ -103,7 +108,7 @@ function* createProjectSaga({ payload }) {
 
 export function* projectsSaga() {
   yield all([
-    yield takeEvery(GET_PROJECTS, listProjectsSaga),
-    yield takeLatest(CREATE_PROJECT, createProjectSaga),
+    yield takeEvery(PROJECT_ACTIONS.GET_PROJECTS, listProjectsSaga),
+    yield takeLatest(PROJECT_ACTIONS.CREATE_PROJECT, createProjectSaga),
   ]);
 }

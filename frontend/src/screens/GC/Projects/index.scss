@@ -1,0 +1,23 @@
+.autocomplete-dropdown-container {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  z-index: 1000;
+  border: solid 1px #e6e6e6;
+  border-radius: 5px;
+  padding: 10px;
+  width: 100%;
+  background: white;
+
+  & .suggestion-item:hover {
+    background: #e6ebf4;
+  }
+
+  &.hide {
+    display: none;
+  }
+
+  &.show {
+    display: block;
+  }
+}

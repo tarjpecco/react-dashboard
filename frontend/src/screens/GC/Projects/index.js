@@ -3,8 +3,11 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Modal from 'react-modal';
 import { connect } from 'react-redux';
+import { cloneDeep } from 'lodash';
+import DatePicker from 'react-bootstrap-date-picker';
 
 import Table from '../../../components/Table';
+import LocationSearchInput from '../../../components/LocationSearchInput';
 import {
 	getProjectsAction,
 	createProjectAction,
@@ -28,15 +31,13 @@ class Projects extends React.Component {
 			name: '',
 			startDate: '',
 			endDate: '',
-			address: '',
+			address: {},
 			status: 'act',
 		},
 		modalIsOpen: false,
 	}
 
 	componentDidMount() {
-		console.log('component loaded');
-		window.initalizeDatePicker();
 		Modal.setAppElement('body');
 		const { listProjects } = this.props;
 		listProjects();
@@ -67,8 +68,11 @@ class Projects extends React.Component {
 		});
 	}
 
-	datepickerChanged = () => {
-		console.log('date picker changed');
+	onAddressChanged = (address) => {
+		const { newproject } = this.state;
+		const project = cloneDeep(newproject);
+		project.address = address;
+		this.setState({ newproject: project });
 	}
 
 	render() {
@@ -160,14 +164,7 @@ class Projects extends React.Component {
 						</div>
 						<div className="form-group">
 							Address
-							<input
-								type="text"
-								placeholder="Address"
-								className="form-control"
-								id="address"
-								value={newproject.address}
-								onChange={e => this.onNewProjectChange('address', e.target.value)}
-							/>
+							<LocationSearchInput onAddressChanged={this.onAddressChanged} />
 						</div>
 						<div className="form-group">
 							Expected Start Date

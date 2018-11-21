@@ -36,7 +36,7 @@ const initialState = fromJS({
 const userProjectsReducer = projectsDuck.createReducer({
   [GET_PROJECT_LIST_SUCCESS]: (state, { payload }) =>
     state
-      .update('projects', () => List(payload.projects))
+      .update('projects', () => List(payload.userProjects))
       .set('loading', false),
   [GET_PROJECT_LIST_FAILED]: (state, { error }) => ({
     ...state,

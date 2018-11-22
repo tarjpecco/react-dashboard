@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { signInAction } from '../../redux/ducks/auth';
+import { actions as authActions } from '../../redux/ducks/auth';
 
 import logoImg from '../../assets/media/logo-frontpage.png';
 
@@ -139,7 +139,7 @@ const mapStateToProps = (state) => ({
 });
 const mapActionToProps = dispatch => ({
 	signIn: params => {
-		dispatch(signInAction(params));
+		dispatch(authActions.signin_request(params));
 	},
 });
 

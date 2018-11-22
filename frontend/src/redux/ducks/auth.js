@@ -1,24 +1,24 @@
 import { takeLatest, call, put, all } from 'redux-saga/effects';
+import { createDuck } from 'redux-duck';
 
 import { getAuthToken, getCurrentUser } from '../../api';
+import { actionNames } from '../helper';
+
+const authDuck = createDuck('auth-duck');
 
 // actions
-const RECEIVE_TOKEN_ERROR = 'RECEIVE_TOKEN_ERROR';
-const SIGNIN = 'SIGNIN';
-const SIGNIN_SUCCEED = 'SIGNIN_SUCCEED';
-const SIGNIN_FAILD = 'SIGNIN_FAILD';
-const SIGNOUT = 'SIGNOUT';
+const CONSTANT_ACTIONS = [...actionNames('SIGNIN'), 'SIGNOUT'];
+const AUTH_ACTIONS = {};
+CONSTANT_ACTIONS.forEach(action => {
+  authDuck.defineType(action);
+  AUTH_ACTIONS[action] = authDuck.defineType(action);
+});
 
 // Action Creators
-export const signInAction = payload => ({
-  type: SIGNIN,
-  payload
-});
-
-export const signOutAcion = payload => ({
-  type: SIGNOUT,
-  payload
-});
+export const signInAction = authDuck.createAction(AUTH_ACTIONS.SIGNIN);
+export const signOutAcion = authDuck.createAction(AUTH_ACTIONS.SIGNOUT);
+export const signInSuccessAction = authDuck.createAction(AUTH_ACTIONS.SIGNIN_SUCCESS);
+export const signInFailedAction = authDuck.createAction(AUTH_ACTIONS.SIGNIN_FAILED);
 
 // Reducer Intial State
 const initialState = {
@@ -28,59 +28,48 @@ const initialState = {
 };
   
 // Reducer
-export default function reducer(state = initialState, { type, payload }) {
-  switch (type){
-    case RECEIVE_TOKEN_ERROR:
-      return Object.assign(
-        {},
-        {
-          ...state,
-          error: payload.error
-        }
-      );
-    case SIGNIN_SUCCEED:
-      localStorage.setItem('user', JSON.stringify(payload));
-      return {
-        ...state,
-        user: payload,
-        error: null,
-      };
-    case SIGNIN_FAILD:
-      return {
-        ...state,
-        error: payload.error,
-      };
-    case SIGNOUT:
-      localStorage.removeItem('id_token');
-      localStorage.removeItem('user');
-      return {
-        ...state,
-        user: null,
-      };
-    default:
-      return state;
+const authReducer = authDuck.createReducer({
+  [AUTH_ACTIONS.SIGNIN_SUCCESS]: (state, { payload }) => {
+    localStorage.setItem('user', JSON.stringify(payload));
+    return {
+      ...state,
+      user: payload,
+      error: null,
+    }},
+  [AUTH_ACTIONS.SIGNIN_FAILED]: (state, { payload }) => ({
+    ...state,
+    error: payload.error,
+  }),
+  [AUTH_ACTIONS.SIGNIN_REQUEST]: (state) => ({
+    ...state,
+    loading: true,
+  }),
+  [AUTH_ACTIONS.SIGNOUT]: (state) => {
+    localStorage.removeItem('id_token');
+    localStorage.removeItem('user');
+    return {
+      ...state,
+      user: null,
+    };
   }
-}
+}, initialState);
 
+export default authReducer;
+
+// sagas
 function* signInSaga({ payload }) {
   try {
     yield call(getAuthToken, payload);
     const userInfo = yield call(getCurrentUser);
-    yield put({
-      type: SIGNIN_SUCCEED,
-      payload: { ...userInfo },
-    });
+    yield put(signInSuccessAction({ ...userInfo }));
   } catch (err) {
     const errorMessage = 'User SignIn Failed';
-    yield put({
-      type: SIGNIN_FAILD,
-      payload: { error: errorMessage },
-    });
+    yield put(signInFailedAction({ error: errorMessage }));
   }
 }
 
 export function* authSaga() {
   yield all([
-    yield takeLatest(SIGNIN, signInSaga),
+    yield takeLatest(AUTH_ACTIONS.SIGNIN, signInSaga),
   ]);
 }

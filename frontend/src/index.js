@@ -7,6 +7,7 @@ import App from './App';
 import configureStore, { history } from './redux/store';
 import * as serviceWorker from './serviceWorker';
 import './assets/styles/dashmix.min.css';
+import './assets/styles/bootstrap-datepicker.min.css';
 
 const store = configureStore();
 ReactDOM.render(

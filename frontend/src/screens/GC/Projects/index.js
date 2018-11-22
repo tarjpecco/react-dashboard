@@ -3,10 +3,13 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Modal from 'react-modal';
 import { connect } from 'react-redux';
+import { cloneDeep, isEmpty } from 'lodash';
 
 import Table from '../../../components/Table';
+import LocationSearchInput from '../../../components/LocationSearchInput';
 import {
 	getProjectsAction,
+	createProjectAction,
 	getProjectsSelector
 } from '../../../redux/ducks/projects';
 
@@ -21,13 +24,21 @@ const customStyles = {
 };
 
 class Projects extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			modalIsOpen: false,
-		};
-		this.openModal = this.openModal.bind(this);
-		this.closeModal = this.closeModal.bind(this);
+	state = {
+		newproject: {
+			budget: 0,
+			name: '',
+			startDate: '',
+			endDate: '',
+			address: {},
+			status: 'act',
+			company: 1,
+		},
+		isInValid: {
+			name: false,
+			address: false,
+		},
+		modalIsOpen: false,
 	}
 
 	componentDidMount() {
@@ -36,16 +47,82 @@ class Projects extends React.Component {
 		listProjects();
 	}
 
-	openModal() {
+	openModal = () => {
 		this.setState({ modalIsOpen: true });
 	}
 
-	closeModal() {
+	closeModal = () => {
 		this.setState({ modalIsOpen: false });
 	}
 
+	addNewProject = () => {
+		const {
+			newproject,
+			isInValid
+		} = this.state;
+		const newIsInValid = cloneDeep(isInValid);
+		let invalid = false;
+
+		if (newproject.name === '') {
+			newIsInValid.name = true;
+			invalid = true;
+		}
+		if (isEmpty(newproject.address)) {
+			newIsInValid.address = true;
+			invalid = true;
+		}
+
+		if (!invalid) {
+			this.closeModal();
+			const { createProject } = this.props;
+			createProject(newproject);
+		} else {
+			this.setState({ isInValid: newIsInValid });
+		}
+	}
+
+	onNewProjectChange = (prop, value) => {
+		const { newproject, isInValid } = this.state;
+		const newIsInValid = cloneDeep(isInValid);
+		newproject[prop] = value;
+		if (prop === 'name' && value !== '') {
+			newIsInValid.name = false;
+		}
+		this.setState({
+			newproject,
+			isInValid: newIsInValid,
+		});
+	}
+
+	onAddressChanged = (address) => {
+		const { newproject, isInValid } = this.state;
+		const project = cloneDeep(newproject);
+		project.address = address;
+		const newIsInValid = cloneDeep(isInValid);
+		if (!isEmpty(address)) {
+			newIsInValid.address = false;
+		}
+		this.setState({
+			newproject: project,
+			isInValid: newIsInValid 
+		});
+	}
+
+	datepickerChanged = (dateType) => {
+		const { newproject } = this.state;
+		setTimeout(() => {
+			const project = cloneDeep(newproject);
+			if (dateType === 'startdate') {
+				project.startDate = this.refs.startDateEleRef.value;
+			} else {
+				project.endDate = this.refs.endDateEleRef.value;
+			}
+			this.setState({ newproject: project });
+		}, 300);
+	}
+
 	render() {
-		const { modalIsOpen } = this.state;
+		const { modalIsOpen, newproject, isInValid } = this.state;
 		const { projectList } = this.props;
 		return (
 			<div id="main">
@@ -84,7 +161,8 @@ class Projects extends React.Component {
 									<td>
 										<p className="text-info">{item.name}</p>
 									</td>
-									<td>{item.address && (`${item.address.line_1} ${item.address.line_2} ${item.address.town} ${item.address.state} ${item.address.zip_code}`)}</td>									<td>{item.countOfSubs}</td>
+									<td>{item.address && (`${item.address.line_1} ${item.address.line_2} ${item.address.town} ${item.address.state} ${item.address.zip_code}`)}</td>
+									<td>{item.countOfSubs}</td>
 									<td>
 										<p className="badge badge-pill badge-danger">
 											{item.risks}
@@ -124,27 +202,48 @@ class Projects extends React.Component {
 							Project Name
 							<input
 								type="text"
+								value={newproject.name}
 								placeholder="Project Name"
-								className="form-control"
+								className={`form-control ${isInValid.name ? 'is-invalid' : ''}`}
+								required
 								id="project"
+								onChange={e => this.onNewProjectChange('name', e.target.value)}
 							/>
+							{isInValid.name && <div className="invalid-feedback animated fadeIn">Name is Required</div>}
 						</div>
 						<div className="form-group">
 							Address
-							<input
-								type="text"
-								placeholder="Address"
-								className="form-control"
-								id="address"
-							/>
+							<LocationSearchInput onAddressChanged={this.onAddressChanged} isInValid={isInValid.address}/>
 						</div>
 						<div className="form-group">
 							Expected Start Date
-							<input type="text" className="form-control" placeholder="dd/mm/yyyy" />
+							<input
+								type="text"
+								ref="startDateEleRef"
+								className="js-datepicker form-control"
+								name="datepicker1"
+								data-week-start="1"
+								data-autoclose="true"
+								data-today-highlight="true"
+								data-date-format="mm/dd/yy"
+								onBlur={() => this.datepickerChanged('startdate')}
+								placeholder="mm/dd/yy"
+							/>
 						</div>
 						<div className="form-group">
 							Expected Completion
-							<input type="text" className="form-control" placeholder="dd/mm/yyyy" />
+							<input
+								type="text"
+								ref="endDateEleRef"
+								className="js-datepicker form-control"
+								name="datepicker2"
+								data-week-start="1"
+								data-autoclose="true"
+								data-today-highlight="true"
+								data-date-format="mm/dd/yy"
+								onBlur={() => this.datepickerChanged('enddate')}
+								placeholder="mm/dd/yy"
+							/>
 						</div>
 						<div className="form-group">
 							Expected Budget
@@ -158,6 +257,8 @@ class Projects extends React.Component {
 									id="example-group1-input3"
 									name="example-group1-input3"
 									placeholder="00"
+									value={newproject.budget}
+									onChange={e => this.onNewProjectChange('budget', e.target.value)}
 								/>
 								<div className="input-group-append">
 									<span className="input-group-text">,00</span>
@@ -165,7 +266,7 @@ class Projects extends React.Component {
 							</div>
 						</div>
 					</form>
-					<button type="button" className="btn btn-success" onClick={this.closeModal}>
+					<button type="button" className="btn btn-success" onClick={this.addNewProject}>
 						Submit
 					</button>
 				</Modal>
@@ -180,11 +281,13 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
 	listProjects: () => dispatch(getProjectsAction()),
+	createProject: params => dispatch(createProjectAction(params)),
 })
 
 Projects.propTypes = {
 	projectList: PropTypes.array,
 	listProjects: PropTypes.func.isRequired,
+	createProject: PropTypes.func.isRequired,
 };
 
 Projects.defaultProps = {

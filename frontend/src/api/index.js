@@ -115,3 +115,19 @@ export const getProjects = () => {
       return error;
     })
 };
+
+export const createProject = (params) => {
+  console.log('here api params:', params);
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.post(`${API_URL}/projects/`,
+    {
+      ...params,
+    },
+    {
+      headers
+    }))
+    .then(res => res.data)
+    .catch(error => {
+      return error;
+    })
+};

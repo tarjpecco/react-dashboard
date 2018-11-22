@@ -43,28 +43,24 @@ const userLicensesReducer = userLicensesDuck.createReducer({
     state
       .update('userLicenses', () => List(payload.userLicenses))
       .set('loading', false),
-  [actions.GET_LICENSES_ERROR]: (state, { error }) => ({
-    ...state,
-    loading: false,
-    error
-  }),
-  [actions.GET_LICENSES_REQUEST]: (state) => ({
-    ...state,
-    loading: true,
-  }),
+  [actions.GET_LICENSES_ERROR]: (state, { payload }) =>
+    state
+      .set('error', payload.error)
+      .set('loading', false),
+  [actions.GET_LICENSES_REQUEST]: (state) =>
+    state
+      .set('loading', true),
   [actions.UPDATE_LICENSE_SUCCESS]: (state, { payload }) =>
     state
       .update('userLicenses', () => List(payload.userLicenses))
       .set('saveloading', false),
-  [actions.UPDATE_LICENSE_ERROR]: (state, { error }) => ({
-    ...state,
-    saveloading: false,
-    error
-  }),
-  [actions.UPDATE_LICENSE_REQUEST]: (state) => ({
-    ...state,
-    saveloading: true,
-  }),
+  [actions.UPDATE_LICENSE_ERROR]: (state, { payload }) =>
+    state
+      .set('error', payload.error)
+      .set('saveloading', false),
+  [actions.UPDATE_LICENSE_REQUEST]: (state) =>
+    state
+      .set('saveloading', true),
   [actions.UPDATE_LICENSE_STATE]: (state, { payload }) => {
     const { id, params } = payload;
     return state
@@ -91,7 +87,6 @@ function* removeUserLicenseSaga({ payload }) {
     yield call(removeUserLicenseForUser, userId, licenseId);
     yield call(listUserLicensesSaga);
   } catch (err) {
-    console.error(err);
     const errorMessage = 'Removing User-license Failed';
     yield put(actions.get_licenses_error({ error: errorMessage }));
   }
@@ -103,7 +98,6 @@ function* updateUserLicenseSaga({ payload }) {
     yield call(updateUserLicenseForUser, userId, licenseId, params);
     yield call(listUserLicensesSaga);
   } catch (err) {
-    console.error(err);
     const errorMessage = 'Updating User-license Failed';
     yield put(actions.get_licenses_error({ error: errorMessage }));
   }
@@ -118,7 +112,6 @@ function* createUserLicenseSaga({ payload }) {
     userLicenses.push(newItem);
     yield put(actions.get_licenses_success({ userLicenses }));
   } catch (err) {
-    console.error(err);
     const errorMessage = 'Creating User-license Failed';
     yield put(actions.get_licenses_error({ error: errorMessage }));
   }

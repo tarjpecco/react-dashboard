@@ -11,7 +11,7 @@ export const getAddress = () => {
       headers
     }))
     .catch(error => {
-      return error;
+      throw error;
     })
 };
 
@@ -22,7 +22,7 @@ export const getUserLicensesForUser = (userPK) => {
     }))
     .then(res => res.data)
     .catch(error => {
-      return error;
+      throw error;
     })
 };
 
@@ -52,7 +52,7 @@ export const updateUserLicenseForUser = (userPK, licenseId, params) => {
     }))
     .then(res => res.data)
     .catch(error => {
-      return error;
+      throw error;
     })
 };
 
@@ -63,7 +63,7 @@ export const removeUserLicenseForUser = (userPK, licenseId) => {
       headers
     }))
     .catch(error => {
-      return error;
+      throw error;
     })
 };
 
@@ -75,7 +75,7 @@ export const getCurrentUser = () => {
     }))
     .then(res => res.data)
     .catch(error => {
-      return error;
+      throw error;
     })
 };
 
@@ -112,12 +112,11 @@ export const getProjects = () => {
     }))
     .then(res => res.data)
     .catch(error => {
-      return error;
+      throw error;
     })
 };
 
 export const createProject = (params) => {
-  console.log('here api params:', params);
   return authHeaderService.getHeaders()
     .then((headers) => axios.post(`${API_URL}/projects/`,
     {
@@ -128,6 +127,36 @@ export const createProject = (params) => {
     }))
     .then(res => res.data)
     .catch(error => {
-      return error;
+      throw error;
+    })
+};
+
+export const getJobsForProject = (id, status) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.get(`${API_URL}/jobs/?project_id=${id}&&status=${status}`,
+    {
+      headers
+    }))
+    .then(res => res.data)
+    .catch(error => {
+      throw error;
+    })
+};
+
+export const createJob = (params) => {
+  return authHeaderService.getHeaders('multipart/form-data')
+    .then((headers) => {
+    return axios.post(`${API_URL}/jobs/`,
+    params,
+    {
+      headers,
+    })})
+    .then(res => {
+      if (res.status < 400)
+        return res.data;
+      throw res.statusText;
+    })
+    .catch(error => {
+      throw error;
     })
 };

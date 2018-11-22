@@ -38,24 +38,21 @@ const projectListReducer = projectsDuck.createReducer({
     state
       .update('projects', () => List(payload.projectList))
       .set('loading', false),
-  [actions.GET_PROJECTS_ERROR]: (state, { error }) => ({
-    ...state,
-    loading: false,
-    error
-  }),
-  [actions.GET_PROJECTS_REQUEST]: (state) => ({
-    ...state,
-    loading: true,
-  }),
+  [actions.GET_PROJECTS_ERROR]: (state, { payload }) =>
+    state
+      .set('error', payload.error)
+      .set('loading', false),
+  [actions.GET_PROJECTS_REQUEST]: (state) =>
+    state
+      .set('loading', true),
   [actions.UPDATE_PROJECT_SUCCESS]: (state, { payload }) =>
   state
     .update('projects', () => List(payload.projects))
     .set('saveloading', false),
-  [actions.UPDATE_PROJECT_ERROR]: (state, { error }) => ({
-    ...state,
-    saveloading: false,
-    error
-  }),
+  [actions.UPDATE_PROJECT_ERROR]: (state, { payload }) =>
+  state
+    .set('error', payload.error)
+    .set('saveloading', false),
 }, initialState);
 
 export default projectListReducer;
@@ -78,7 +75,6 @@ function* createProjectSaga({ payload }) {
     projectList.push(newItem);
     yield put(actions.get_projects_success({ projectList }));
   } catch (err) {
-    console.error(err);
     const errorMessage = 'Creating Project Failed';
     yield put(actions.get_projects_error({ error: errorMessage }));
   }

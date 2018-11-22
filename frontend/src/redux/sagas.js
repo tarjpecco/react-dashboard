@@ -3,6 +3,7 @@ import { all } from 'redux-saga/effects';
 import { authSaga } from './ducks/auth';
 import { userLicensesSaga } from './ducks/userlicenses';
 import { projectsSaga } from './ducks/projects';
+import { jobsSaga } from './ducks/jobs';
 
 
 export default function* () {
@@ -10,5 +11,6 @@ export default function* () {
     authSaga(),
     userLicensesSaga(),
     projectsSaga(),
+    jobsSaga(),
   ]);
 }

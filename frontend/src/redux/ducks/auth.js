@@ -17,6 +17,8 @@ CONSTANT_ACTIONS.forEach(action => {
 // Action Creators
 export const signInAction = authDuck.createAction(AUTH_ACTIONS.SIGNIN);
 export const signOutAcion = authDuck.createAction(AUTH_ACTIONS.SIGNOUT);
+export const signInSuccessAction = authDuck.createAction(AUTH_ACTIONS.SIGNIN_SUCCESS);
+export const signInFailedAction = authDuck.createAction(AUTH_ACTIONS.SIGNIN_FAILED);
 
 // Reducer Intial State
 const initialState = {
@@ -59,16 +61,10 @@ function* signInSaga({ payload }) {
   try {
     yield call(getAuthToken, payload);
     const userInfo = yield call(getCurrentUser);
-    yield put({
-      type: AUTH_ACTIONS.SIGNIN_SUCCESS,
-      payload: { ...userInfo },
-    });
+    yield put(signInSuccessAction({ ...userInfo }));
   } catch (err) {
     const errorMessage = 'User SignIn Failed';
-    yield put({
-      type: AUTH_ACTIONS.SIGNIN_FAILED,
-      payload: { error: errorMessage },
-    });
+    yield put(signInFailedAction({ error: errorMessage }));
   }
 }
 

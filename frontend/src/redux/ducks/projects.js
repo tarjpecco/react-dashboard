@@ -33,6 +33,8 @@ export const getProjectsSelector = createSelector([stateSelector], state => {
 // Action Creators
 export const getProjectsAction = projectsDuck.createAction(PROJECT_ACTIONS.GET_PROJECTS);
 export const createProjectAction = projectsDuck.createAction(PROJECT_ACTIONS.CREATE_PROJECT);
+export const getProjectListSuccessAction = projectsDuck.createAction(PROJECT_ACTIONS.GET_PROJECT_LIST_SUCCESS);
+export const getProjectListFailedAction = projectsDuck.createAction(PROJECT_ACTIONS.GET_PROJECT_LIST_FAILED);
 
 // Reducer Intial State
 const initialState = fromJS({
@@ -74,16 +76,10 @@ export default projectListReducer;
 function* listProjectsSaga() {
   try {
     const { results: projectList } = yield call(getProjects);
-    yield put({
-      type: PROJECT_ACTIONS.GET_PROJECT_LIST_SUCCESS,
-      payload: { projectList },
-    });
+    yield put(getProjectListSuccessAction({ projectList }));
   } catch (err) {
     const errorMessage = 'Listing Projects Failed';
-    yield put({
-      type: PROJECT_ACTIONS.GET_PROJECT_LIST_FAILED,
-      payload: { error: errorMessage },
-    });
+    yield put(getProjectListFailedAction({ error: errorMessage }));
   }
 }
 
@@ -92,17 +88,11 @@ function* createProjectSaga({ payload }) {
     const newItem = yield call(createProject, payload);
     const projectList = yield select(getProjectsSelector);
     projectList.push(newItem);
-    yield put({
-      type: PROJECT_ACTIONS.GET_PROJECT_LIST_SUCCESS,
-      payload: { projectList },
-    });
+    yield put(getProjectListSuccessAction({ projectList }));
   } catch (err) {
     console.error(err);
     const errorMessage = 'Creating Project Failed';
-    yield put({
-      type: PROJECT_ACTIONS.UPDATE_PROJECT_FAILED,
-      payload: { error: errorMessage },
-    });
+    yield put(getProjectListFailedAction({ error: errorMessage }));
   }
 }
 

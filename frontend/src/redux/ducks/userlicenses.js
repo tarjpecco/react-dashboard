@@ -1,6 +1,5 @@
 import { createDuck } from 'redux-duck';
 import { List, fromJS } from 'immutable';
-import { message } from 'antd';
 import { takeLatest, takeEvery, call, put, all, select } from 'redux-saga/effects';
 import { createSelector } from 'reselect';
 
@@ -42,7 +41,8 @@ export const createUserLicense = userLicensesDuck.createAction(USERLICENSE_ACTIO
 export const removeUserLicense = userLicensesDuck.createAction(USERLICENSE_ACTIONS.REMOVE_USER_LICENSE);
 export const updateUserLicense = userLicensesDuck.createAction(USERLICENSE_ACTIONS.UPDATE_USER_LICENSE);
 export const updateUserLicenseState = userLicensesDuck.createAction(USERLICENSE_ACTIONS.UPDATE_USER_LICENSE_STATE);
-
+export const getUserLicensesSuccess = userLicensesDuck.createAction(USERLICENSE_ACTIONS.GET_USER_LICENSES_SUCCESS);
+export const getUserLicensesFailed = userLicensesDuck.createAction(USERLICENSE_ACTIONS.GET_USER_LICENSES_FAILED);
 
 // Reducer Intial State
 const initialState = fromJS({
@@ -93,16 +93,10 @@ export default userLicensesReducer;
 function* listUserLicensesSaga() {
   try {
     const { results: userLicenses } = yield call(getUserLicensesForUser, 'me');
-    yield put({
-      type: USERLICENSE_ACTIONS.GET_USER_LICENSES_SUCCESS,
-      payload: { userLicenses },
-    });
+    yield put(getUserLicensesSuccess({ userLicenses }));
   } catch (err) {
     const errorMessage = 'Listing User-licenses Failed';
-    yield put({
-      type: USERLICENSE_ACTIONS.UPDATE_USER_LICENSE_FAILED,
-      payload: { error: errorMessage },
-    });
+    yield put(getUserLicensesFailed({ error: errorMessage }));
   }
 }
 
@@ -114,11 +108,7 @@ function* removeUserLicenseSaga({ payload }) {
   } catch (err) {
     console.error(err);
     const errorMessage = 'Removing User-license Failed';
-    yield call(message.error, errorMessage);
-    yield put({
-      type: USERLICENSE_ACTIONS.UPDATE_USER_LICENSE_FAILED,
-      payload: { error: errorMessage },
-    });
+    yield put(getUserLicensesFailed({ error: errorMessage }));
   }
 }
 
@@ -130,11 +120,7 @@ function* updateUserLicenseSaga({ payload }) {
   } catch (err) {
     console.error(err);
     const errorMessage = 'Updating User-license Failed';
-    yield call(message.error, errorMessage);
-    yield put({
-      type: USERLICENSE_ACTIONS.UPDATE_USER_LICENSE_FAILED,
-      payload: { error: errorMessage },
-    });
+    yield put(getUserLicensesFailed({ error: errorMessage }));
   }
 }
 
@@ -145,18 +131,11 @@ function* createUserLicenseSaga({ payload }) {
     const newItem = yield call(createUserLicenseForUser, 'me', { ...payload, user: userInfo.url });
     const userLicenses = yield select(getLicensesSelector);
     userLicenses.push(newItem);
-    yield put({
-      type: USERLICENSE_ACTIONS.GET_USER_LICENSES_SUCCESS,
-      payload: { userLicenses },
-    });
+    yield put(getUserLicensesSuccess({ userLicenses }));
   } catch (err) {
     console.error(err);
     const errorMessage = 'Creating User-license Failed';
-    yield call(message.error, errorMessage);
-    yield put({
-      type: USERLICENSE_ACTIONS.UPDATE_USER_LICENSE_FAILED,
-      payload: { error: errorMessage },
-    });
+    yield put(getUserLicensesFailed({ error: errorMessage }));
   }
 }
 

@@ -147,3 +147,29 @@ export const updateCurrentUser = (params) => {
     }))
     .then(res => res.data)
 };
+
+export const getPoliciesForUser = (userPK) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.get(`${API_URL}/user-policies/${userPK}/`, {
+      headers
+    }))
+    .then(res => res.data)
+    .catch(error => {
+      throw error;
+    })
+};
+
+export const createPoliciesForUser = (userPK, params) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.post(`${API_URL}/user-policies/${userPK}/`,
+    {
+      ...params,
+    },
+    {
+      headers
+    }))
+    .then(res => res.data)
+    .catch(error => {
+      return error;
+    })
+};

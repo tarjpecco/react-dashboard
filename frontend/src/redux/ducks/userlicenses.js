@@ -61,11 +61,9 @@ const userLicensesReducer = userLicensesDuck.createReducer({
   [actions.UPDATE_LICENSE_REQUEST]: (state) =>
     state
       .set('saveloading', true),
-  [actions.UPDATE_LICENSE_STATE]: (state, { payload }) => {
-    const { id, params } = payload;
-    return state
-      .updateIn(['userLicenses', id], () => params)
-  }
+  [actions.UPDATE_LICENSE_STATE]: (state, { payload }) =>
+    state
+      .updateIn(['userLicenses', payload.id], () => payload.params),
 }, initialState);
 
 export default userLicensesReducer;

@@ -10,8 +10,7 @@ import Modal from 'react-modal';
 import Table from '../../../components/Table';
 import Proposal from '../../../components/Proposal';
 import {
-	listJobsAction,
-	createJobAction,
+	actions as jobActions,
 	getJobsSelector
 } from '../../../redux/ducks/jobs';
 import { API_URL } from '../../../api';
@@ -617,8 +616,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-	listJobs: params => dispatch(listJobsAction(params)),
-	createJob: params => dispatch(createJobAction(params)),
+	listJobs: params => dispatch(jobActions.get_jobs(params)),
+	createJob: params => dispatch(jobActions.create_job(params)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Detail);

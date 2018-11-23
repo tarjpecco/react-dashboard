@@ -7,34 +7,22 @@ import {
   getJobsForProject,
   createJob,
 } from '../../api';
-import { actionNames } from '../helper';
+import { actionNames, createActions } from '../helper';
 
 const jobsDuck = createDuck('jobs-duck');
 
 // actions
-const CONSTANT_ACTIONS = [
-  'GET_JOBS',
+export const actions = createActions(jobsDuck,
   'CREATE_JOB',
-  ...actionNames('GET_JOB_LIST'),
+  ...actionNames('GET_JOBS'),
   ...actionNames('UPDATE_JOB')
-];
-const JOB_ACTIONS = {};
-CONSTANT_ACTIONS.forEach(action => {
-  jobsDuck.defineType(action);
-  JOB_ACTIONS[action] = jobsDuck.defineType(action);
-});
+)
 
 // Selectors
 export const stateSelector = state => state.jobs;
 export const getJobsSelector = createSelector([stateSelector], state => {
   return state.get('jobs').toJS();
 });
-
-// Action Creators
-export const listJobsAction = jobsDuck.createAction(JOB_ACTIONS.GET_JOBS);
-export const createJobAction = jobsDuck.createAction(JOB_ACTIONS.CREATE_JOB);
-export const getJobListSuccessAction = jobsDuck.createAction(JOB_ACTIONS.GET_JOB_LIST_SUCCESS);
-export const getJobListFailedAction = jobsDuck.createAction(JOB_ACTIONS.GET_JOB_LIST_FAILED);
 
 // Reducer Intial State
 const initialState = fromJS({
@@ -46,22 +34,22 @@ const initialState = fromJS({
 
 // Reducer
 const jobListReducer = jobsDuck.createReducer({
-  [JOB_ACTIONS.GET_JOB_LIST_SUCCESS]: (state, { payload }) =>
+  [actions.GET_JOBS_SUCCESS]: (state, { payload }) =>
     state
       .update('jobs', () => List(payload.jobList))
       .set('loading', false),
-  [JOB_ACTIONS.GET_JOB_LIST_FAILED]: (state, { payload }) =>
+  [actions.GET_JOBS_ERROR]: (state, { payload }) =>
     state
       .set('error', payload.error)
       .set('loading', false),
-  [JOB_ACTIONS.GET_JOB_LIST_REQUEST]: (state) =>
+  [actions.GET_JOBS_REQUEST]: (state) =>
     state
       .set('loading', true),
-  [JOB_ACTIONS.UPDATE_JOB_SUCCESS]: (state, { payload }) =>
+  [actions.UPDATE_JOB_SUCCESS]: (state, { payload }) =>
   state
     .update('jobs', () => List(payload.jobs))
     .set('saveloading', false),
-  [JOB_ACTIONS.UPDATE_JOB_FAILED]: (state, { payload }) =>
+  [actions.UPDATE_JOB_ERROR]: (state, { payload }) =>
     state
       .set('error', payload.error)
       .set('saveloading', false),
@@ -73,10 +61,10 @@ export default jobListReducer;
 function* listJobsSaga({ payload }) {
   try {
     const { results: jobList } = yield call(getJobsForProject, payload.id, payload.status);
-    yield put(getJobListSuccessAction({ jobList }));
+    yield put(actions.get_jobs_success({ jobList }));
   } catch (err) {
     const errorMessage = 'Listing jobs Failed';
-    yield put(getJobListFailedAction({ error: errorMessage }));
+    yield put(actions.get_jobs_error({ error: errorMessage }));
   }
 }
 
@@ -85,16 +73,16 @@ function* createJobSaga({ payload }) {
     const newItem = yield call(createJob, payload);
     const jobList = yield select(getJobsSelector);
     jobList.push(newItem);
-    yield put(getJobListSuccessAction({ jobList }));
+    yield put(actions.get_jobs_success({ jobList }));
   } catch (err) {
     const errorMessage = 'Creating Job Failed';
-    yield put(getJobListFailedAction({ error: errorMessage }));
+    yield put(actions.get_jobs_error({ error: errorMessage }));
   }
 }
 
 export function* jobsSaga() {
   yield all([
-    yield takeEvery(JOB_ACTIONS.GET_JOBS, listJobsSaga),
-    yield takeLatest(JOB_ACTIONS.CREATE_JOB, createJobSaga),
+    yield takeEvery(actions.GET_JOBS, listJobsSaga),
+    yield takeLatest(actions.CREATE_JOB, createJobSaga),
   ]);
 }

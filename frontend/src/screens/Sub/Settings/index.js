@@ -196,7 +196,8 @@ class Settings extends React.PureComponent {
 											name="type"
 											value={item.type}
 											disabled={editable}
-											onChange={this.onChangeLicenseHandler(id)}
+											onChange={this.onChangeStateLicenseHandler(id)}
+											onBlur={this.onChangeLicenseHandler(id)}
 										/>
 									</td>
 									<td className="table-width-30">
@@ -205,16 +206,18 @@ class Settings extends React.PureComponent {
 											name="number"
 											value={item.number}
 											disabled={editable}
-											onChange={this.onChangeLicenseHandler(id)}
+											onChange={this.onChangeStateLicenseHandler(id)}
+											onBlur={this.onChangeLicenseHandler(id)}
 										/>
 									</td>
 									<td className="table-width-40">
 										<input
 											type="text"
-											name="expireday"
-											value={item.expireday}
+											name="expire_date"
+											value={item.expire_date}
 											disabled={editable}
-											onChange={this.onChangeLicenseHandler(id)}
+											onChange={this.onChangeStateLicenseHandler(id)}
+											onBlur={this.onChangeLicenseHandler(id)}
 										/>
 									</td>
 									<td className="text-center">

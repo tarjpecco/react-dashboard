@@ -4,11 +4,7 @@ import { connect } from 'react-redux';
 import * as moment from 'moment';
 
 import {
-	createUserLicense,
-	updateUserLicense,
-	getUserLicenses,
-	removeUserLicense,
-	updateUserLicenseState,
+	actions as licenseActions,
 	getLicensesSelector
 } from '../../../redux/ducks/userlicenses';
 
@@ -305,11 +301,11 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-	createLicense: params => dispatch(createUserLicense(params)),
-	listUserLicenses: () => dispatch(getUserLicenses()),
-	updateLicense: params => dispatch(updateUserLicense(params)),
-	removeLicense: params => dispatch(removeUserLicense(params)),
-	updateLicenseState: params => dispatch(updateUserLicenseState(params)),
+	createLicense: params => dispatch(licenseActions.create_license(params)),
+	listUserLicenses: () => dispatch(licenseActions.get_licenses()),
+	updateLicense: params => dispatch(licenseActions.update_license(params)),
+	removeLicense: params => dispatch(licenseActions.remove_license(params)),
+	updateLicenseState: params => dispatch(licenseActions.update_license_state(params)),
 })
 
 Settings.propTypes = {

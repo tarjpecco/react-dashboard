@@ -8,8 +8,7 @@ import { cloneDeep, isEmpty } from 'lodash';
 import Table from '../../../components/Table';
 import LocationSearchInput from '../../../components/LocationSearchInput';
 import {
-	getProjectsAction,
-	createProjectAction,
+	actions as projectActions,
 	getProjectsSelector
 } from '../../../redux/ducks/projects';
 
@@ -280,8 +279,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-	listProjects: () => dispatch(getProjectsAction()),
-	createProject: params => dispatch(createProjectAction(params)),
+	listProjects: () => dispatch(projectActions.get_projects()),
+	createProject: params => dispatch(projectActions.create_project(params)),
 })
 
 Projects.propTypes = {

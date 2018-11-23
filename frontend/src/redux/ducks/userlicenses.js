@@ -10,39 +10,24 @@ import {
   removeUserLicenseForUser,
   getCurrentUser
 } from '../../api';
-import { actionNames } from '../helper';
+import { actionNames, createActions } from '../helper';
 
 const userLicensesDuck = createDuck('userLicenses-duck');
 
 // actions
-const CONSTANT_ACTIONS = [
-  'CREATE_USER_LICENSE',
-  'REMOVE_USER_LICENSE',
-  'UPDATE_USER_LICENSE',
-  'UPDATE_USER_LICENSE_STATE',
-  ...actionNames('GET_USER_LICENSES'),
-  ...actionNames('UPDATE_USER_LICENSE')
-];
-const USERLICENSE_ACTIONS = {};
-CONSTANT_ACTIONS.forEach(action => {
-  userLicensesDuck.defineType(action);
-  USERLICENSE_ACTIONS[action] = userLicensesDuck.defineType(action);
-});
+export const actions = createActions(userLicensesDuck,
+  'CREATE_LICENSE',
+  'REMOVE_LICENSE',
+  'UPDATE_LICENSE_STATE',
+  ...actionNames('GET_LICENSES'),
+  ...actionNames('UPDATE_LICENSE')
+)
 
 // Selectors
 export const stateSelector = state => state.userlicenses;
 export const getLicensesSelector = createSelector([stateSelector], state => {
   return state.get('userLicenses').toJS();
 });
-
-// Action Creators
-export const getUserLicenses = userLicensesDuck.createAction(USERLICENSE_ACTIONS.GET_USER_LICENSES);
-export const createUserLicense = userLicensesDuck.createAction(USERLICENSE_ACTIONS.CREATE_USER_LICENSE);
-export const removeUserLicense = userLicensesDuck.createAction(USERLICENSE_ACTIONS.REMOVE_USER_LICENSE);
-export const updateUserLicense = userLicensesDuck.createAction(USERLICENSE_ACTIONS.UPDATE_USER_LICENSE);
-export const updateUserLicenseState = userLicensesDuck.createAction(USERLICENSE_ACTIONS.UPDATE_USER_LICENSE_STATE);
-export const getUserLicensesSuccess = userLicensesDuck.createAction(USERLICENSE_ACTIONS.GET_USER_LICENSES_SUCCESS);
-export const getUserLicensesFailed = userLicensesDuck.createAction(USERLICENSE_ACTIONS.GET_USER_LICENSES_FAILED);
 
 // Reducer Intial State
 const initialState = fromJS({
@@ -54,33 +39,33 @@ const initialState = fromJS({
 
 // Reducer
 const userLicensesReducer = userLicensesDuck.createReducer({
-  [USERLICENSE_ACTIONS.GET_USER_LICENSES_SUCCESS]: (state, { payload }) =>
+  [actions.GET_LICENSES_SUCCESS]: (state, { payload }) =>
     state
       .update('userLicenses', () => List(payload.userLicenses))
       .set('loading', false),
-  [USERLICENSE_ACTIONS.GET_USER_LICENSES_FAILED]: (state, { error }) => ({
+  [actions.GET_LICENSES_ERROR]: (state, { error }) => ({
     ...state,
     loading: false,
     error
   }),
-  [USERLICENSE_ACTIONS.GET_USER_LICENSES_REQUEST]: (state) => ({
+  [actions.GET_LICENSES_REQUEST]: (state) => ({
     ...state,
     loading: true,
   }),
-  [USERLICENSE_ACTIONS.UPDATE_USER_LICENSE_SUCCESS]: (state, { payload }) =>
+  [actions.UPDATE_LICENSE_SUCCESS]: (state, { payload }) =>
     state
       .update('userLicenses', () => List(payload.userLicenses))
       .set('saveloading', false),
-  [USERLICENSE_ACTIONS.UPDATE_USER_LICENSE_FAILED]: (state, { error }) => ({
+  [actions.UPDATE_LICENSE_ERROR]: (state, { error }) => ({
     ...state,
     saveloading: false,
     error
   }),
-  [USERLICENSE_ACTIONS.UPDATE_USER_LICENSE_REQUEST]: (state) => ({
+  [actions.UPDATE_LICENSE_REQUEST]: (state) => ({
     ...state,
     saveloading: true,
   }),
-  [USERLICENSE_ACTIONS.UPDATE_USER_LICENSE_STATE]: (state, { payload }) => {
+  [actions.UPDATE_LICENSE_STATE]: (state, { payload }) => {
     const { id, params } = payload;
     return state
       .updateIn(['userLicenses', id], () => params)
@@ -93,10 +78,10 @@ export default userLicensesReducer;
 function* listUserLicensesSaga() {
   try {
     const { results: userLicenses } = yield call(getUserLicensesForUser, 'me');
-    yield put(getUserLicensesSuccess({ userLicenses }));
+    yield put(actions.get_licenses_success({ userLicenses }));
   } catch (err) {
     const errorMessage = 'Listing User-licenses Failed';
-    yield put(getUserLicensesFailed({ error: errorMessage }));
+    yield put(actions.get_licenses_error({ error: errorMessage }));
   }
 }
 
@@ -108,7 +93,7 @@ function* removeUserLicenseSaga({ payload }) {
   } catch (err) {
     console.error(err);
     const errorMessage = 'Removing User-license Failed';
-    yield put(getUserLicensesFailed({ error: errorMessage }));
+    yield put(actions.get_licenses_error({ error: errorMessage }));
   }
 }
 
@@ -120,7 +105,7 @@ function* updateUserLicenseSaga({ payload }) {
   } catch (err) {
     console.error(err);
     const errorMessage = 'Updating User-license Failed';
-    yield put(getUserLicensesFailed({ error: errorMessage }));
+    yield put(actions.get_licenses_error({ error: errorMessage }));
   }
 }
 
@@ -131,20 +116,20 @@ function* createUserLicenseSaga({ payload }) {
     const newItem = yield call(createUserLicenseForUser, 'me', { ...payload, user: userInfo.url });
     const userLicenses = yield select(getLicensesSelector);
     userLicenses.push(newItem);
-    yield put(getUserLicensesSuccess({ userLicenses }));
+    yield put(actions.get_licenses_success({ userLicenses }));
   } catch (err) {
     console.error(err);
     const errorMessage = 'Creating User-license Failed';
-    yield put(getUserLicensesFailed({ error: errorMessage }));
+    yield put(actions.get_licenses_error({ error: errorMessage }));
   }
 }
 
 
 export function* userLicensesSaga() {
   yield all([
-    yield takeLatest(USERLICENSE_ACTIONS.REMOVE_USER_LICENSE, removeUserLicenseSaga),
-    yield takeLatest(USERLICENSE_ACTIONS.CREATE_USER_LICENSE, createUserLicenseSaga),
-    yield takeEvery(USERLICENSE_ACTIONS.UPDATE_USER_LICENSE, updateUserLicenseSaga),
-    yield takeLatest(USERLICENSE_ACTIONS.GET_USER_LICENSES, listUserLicensesSaga),
+    yield takeLatest(actions.REMOVE_LICENSE, removeUserLicenseSaga),
+    yield takeLatest(actions.CREATE_LICENSE, createUserLicenseSaga),
+    yield takeEvery(actions.UPDATE_LICENSE, updateUserLicenseSaga),
+    yield takeLatest(actions.GET_LICENSES, listUserLicensesSaga),
   ]);
 }

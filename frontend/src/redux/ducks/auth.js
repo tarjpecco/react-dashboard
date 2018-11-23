@@ -8,22 +8,8 @@ const authDuck = createDuck('auth-duck');
 
 export const actions = createActions(authDuck,
   ...actionNames('SIGNIN'),
-  ...'SIGNOUT'
+  'SIGNOUT'
 )
-
-// actions
-const CONSTANT_ACTIONS = [...actionNames('SIGNIN'), 'SIGNOUT'];
-const AUTH_ACTIONS = {};
-CONSTANT_ACTIONS.forEach(action => {
-  authDuck.defineType(action);
-  AUTH_ACTIONS[action] = authDuck.defineType(action);
-});
-
-// Action Creators
-export const signInAction = authDuck.createAction(AUTH_ACTIONS.SIGNIN);
-export const signOutAcion = authDuck.createAction(AUTH_ACTIONS.SIGNOUT);
-export const signInSuccessAction = authDuck.createAction(AUTH_ACTIONS.SIGNIN_SUCCESS);
-export const signInFailedAction = authDuck.createAction(AUTH_ACTIONS.SIGNIN_FAILED);
 
 // Reducer Intial State
 const initialState = {
@@ -41,7 +27,7 @@ const authReducer = authDuck.createReducer({
       user: payload,
       error: null,
     }},
-  [actions.SIGNIN_FAILED]: (state, { payload }) => ({
+  [actions.SIGNIN_ERROR]: (state, { payload }) => ({
     ...state,
     error: payload.error,
   }),

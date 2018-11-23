@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { toggleSideBar } from '../../redux/ducks/global';
-import { signOutAcion } from '../../redux/ducks/auth';
+import { actions as authActions } from '../../redux/ducks/auth';
 
 class Header extends React.Component {
 	state = {
@@ -191,7 +191,7 @@ const mapActionToProps = dispatch => ({
 	toggleAction: () => {
 		dispatch(toggleSideBar());
 	},
-	logout: () => dispatch(signOutAcion())
+	logout: () => dispatch(authActions.signout())
 });
 
 const { func, object, string } = PropTypes;

@@ -2,11 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import * as moment from 'moment';
+import { isEmpty } from 'lodash';
 
 import {
 	actions as licenseActions,
 	getLicensesSelector
 } from '../../../redux/ducks/userlicenses';
+import {
+	getUserSelector,
+	actions as userActions,
+} from '../../../redux/ducks/user';
 import Table from '../../../components/Table';
 import './index.scss';
 
@@ -15,15 +20,15 @@ class Settings extends React.PureComponent {
 		super(props);
 		this.state = {
 			editable: 'disable',
-			name: 'Name Surname',
-			address: '123 Main Street NY, NY 10001',
-			phone: '555-555-5555',
 			ein: '61-512584',
 			btnname: 'Edit',
 			btnicon: 'si si-pencil',
 			password: '',
 		};
-		const { listUserLicenses } = props;
+		const { user, getUserInfo, listUserLicenses } = props;
+		if (isEmpty(user)) {
+			getUserInfo();
+		}
 		listUserLicenses();
 	}
 
@@ -90,11 +95,14 @@ class Settings extends React.PureComponent {
 
 	onResetPassword = () => {};
 
+	getAddressStr = (address) => {
+		const { line_1: line1, line_2: line2, town, state, zip_code:zipCode } = address;
+		return `${line1} ${line2} ${town}, ${state} ${zipCode}`;
+	}
+
 	render() {
+		const { user } = this.props;
 		const {
-			name,
-			phone,
-			address,
 			ein,
 			editable,
 			btnname,
@@ -102,7 +110,13 @@ class Settings extends React.PureComponent {
 			password,
 		} = this.state;
 		const { userLicenses: license } = this.props;
-
+		const {
+			first_name: firstName,
+			last_name: lastName,
+			phone,
+			address,
+		} = user;
+	
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -146,7 +160,7 @@ class Settings extends React.PureComponent {
 									<input
 										type="text"
 										name="name"
-										value={name}
+										value={`${firstName} ${lastName}`}
 										onChange={this.onChangeHandler}
 										disabled={editable}
 									/>
@@ -160,7 +174,7 @@ class Settings extends React.PureComponent {
 									<input
 										type="text"
 										name="address"
-										value={address}
+										value={this.getAddressStr(address)}
 										onChange={this.onChangeHandler}
 										disabled={editable}
 									/>
@@ -284,7 +298,8 @@ class Settings extends React.PureComponent {
 }
 
 const mapStateToProps = state => ({
-	userLicenses: getLicensesSelector(state)
+	userLicenses: getLicensesSelector(state),
+	user: getUserSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -293,18 +308,19 @@ const mapDispatchToProps = dispatch => ({
 	updateLicense: params => dispatch(licenseActions.update_license(params)),
 	removeLicense: params => dispatch(licenseActions.remove_license(params)),
 	updateLicenseState: params => dispatch(licenseActions.update_license_state(params)),
+	getUserInfo: () => dispatch(userActions.get_user()),
+	updateUserInfo: params => dispatch(userActions.update_user(params)),
 })
 
 Settings.propTypes = {
-	userLicenses: PropTypes.array,
+	userLicenses: PropTypes.array.isRequired,
 	createLicense: PropTypes.func.isRequired,
 	listUserLicenses: PropTypes.func.isRequired,
 	updateLicense: PropTypes.func.isRequired,
 	removeLicense: PropTypes.func.isRequired,
 	updateLicenseState: PropTypes.func.isRequired,
+	user: PropTypes.object.isRequired,
+	getUserInfo: PropTypes.func.isRequired,
 };
 
-Settings.defaultProps = {
-	userLicenses: [],
-}
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);

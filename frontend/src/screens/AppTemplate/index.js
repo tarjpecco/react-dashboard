@@ -4,6 +4,7 @@ import { compose } from 'redux';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withRouter, Route, Switch } from 'react-router-dom';
+import { isEmpty } from 'lodash';
 
 import GCDashboard from '../GC/Dashboard';
 import MyInsurance from '../GC/MyInsurance';
@@ -22,14 +23,17 @@ import AgentDetail from '../Agent/Detail';
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 
+import {
+	getUserSelector,
+	actions as userActions,
+} from '../../redux/ducks/user';
 import './index.scss';
 
-const AppTemplate = ({ showSideBar, location, history }) => {
-	const user = JSON.parse(localStorage.getItem('user'));
-	if (user === null) {
-		history.push('/login');
+const AppTemplate = ({ showSideBar, location, history, user, getUserInfo }) => {
+	if (isEmpty(user)) {
+		getUserInfo();
 	}
-	const userRole = user.role.toLowerCase();
+	const userRole = user && user.role && user.role.toLowerCase();
 	return (
 		<div
 			id="page-container"
@@ -40,7 +44,7 @@ const AppTemplate = ({ showSideBar, location, history }) => {
 		>
 			<Sidebar location={location} userRole={userRole} />
 
-			<Header history={history} username={user.username} />
+			<Header history={history} username={user && user.username} />
 			{userRole === 'gc' && (
 				<Switch>
 					<Route exact path="/dashboard" component={GCDashboard} />
@@ -73,23 +77,26 @@ const AppTemplate = ({ showSideBar, location, history }) => {
 
 const mapStateToProps = state => ({
 	showSideBar: state.global.showSideBar,
+	user: getUserSelector(state),
 });
 
-const { bool } = PropTypes;
-
+const { object, bool, func } = PropTypes;
 AppTemplate.propTypes = {
 	showSideBar: bool.isRequired,
-};
-
-const { object } = PropTypes;
-AppTemplate.propTypes = {
 	location: object.isRequired,
 	history: object.isRequired,
+	user: object.isRequired,
+	getUserInfo: func.isRequired,
 };
+
+
+const mapDispatchToProps = dispatch => ({
+	getUserInfo: () => dispatch(userActions.get_user()),
+})
 
 const enhance = compose(
 	withRouter,
-	connect(mapStateToProps)
+	connect(mapStateToProps, mapDispatchToProps)
 );
 
 export default enhance(AppTemplate);

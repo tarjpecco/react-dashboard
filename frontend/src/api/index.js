@@ -5,11 +5,12 @@ export const API_URL = process.env.REACT_APP_API_URL || 'https://flexcomply-dev.
 
 const authHeaderService = new AuthHeaderService(API_URL);
 
-export const getAddress = () => {
+export const getAddressById = (id) => {
   return authHeaderService.getHeaders()
-    .then((headers) => axios.get(`${API_URL}/address/`, {
+    .then((headers) => axios.get(`${API_URL}/address/${id}`, {
       headers
     }))
+    .then(res => res.data)
 };
 
 export const getUserLicensesForUser = (userPK) => {
@@ -126,4 +127,16 @@ export const createJob = (params) => {
         return res.data;
       throw res.statusText;
     })
+};
+
+export const updateCurrentUser = (params) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.patch(`${API_URL}/users/me/`,
+    {
+      ...params,  
+    },
+    {
+      headers
+    }))
+    .then(res => res.data)
 };

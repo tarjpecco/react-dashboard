@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Modal from 'react-modal';
 import { connect } from 'react-redux';
+import { cloneDeep, mapValues } from 'lodash';
 
 import {
 	actions as policiesAction,
@@ -21,7 +22,15 @@ const customStyles = {
 class MyInsurance extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { modalIsOpen: false };
+		this.state = {
+			modalIsOpen: false,
+			isInValid: {
+
+			},
+			newPolicy: {
+
+			}
+		};
 		const { listPolicies } = props;
 		listPolicies();
 	}
@@ -40,14 +49,40 @@ class MyInsurance extends React.Component {
 
 	addNewPolicy = () => {
 		const { createPolicy } = this.props;
-		createPolicy();
+		const {
+			newJob,
+			isInValid,
+			clicked
+		} = this.state;
+		const newIsInValid = cloneDeep(isInValid);
+		let invalid = false;
+		mapValues(newJob, (value, key) => {
+			if (value === '') {
+				newIsInValid[key] = true;
+				invalid = true;
+			}
+		});
+		if (this.file.files[0] === undefined) {
+			invalid = true;
+			window.alert('Please upload Resume!');
+		}
+		if (!invalid) {
+			this.closeModal();
+			const formData = new FormData();
+			mapValues(newJob, (value, key) => {
+				formData.append(key, value);
+			});
+			formData.append('file', this.file.files[0]);
+			formData.append('status', clicked);
+			createPolicy(formData);
+		} else {
+			this.setState({ isInValid: newIsInValid });
+		}
 	}
 
 	render() {
 		const { modalIsOpen } = this.state;
 		const { policies } = this.props;
-		console.log('policies');
-		
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -146,7 +181,7 @@ class MyInsurance extends React.Component {
 						<h2>Select Policy type(s) you would like to add:</h2>
 					</center>
 
-					<form>
+					<form method="post" encType="multipart/form-data" id="create_policy_form" >
 						<div className="form-group wrap">
 							<div className="form-check form-check-inline">
 								<input
@@ -178,6 +213,11 @@ class MyInsurance extends React.Component {
 								/>
 								DBL
 							</div>
+							<input
+								type="file"
+								ref={(ref) => { this.file = ref; }}
+								style={{ visibility: 'hidden' }}
+							/>
 						</div>
 					</form>
 					<br />
@@ -186,10 +226,10 @@ class MyInsurance extends React.Component {
 						<h2>Who will upload the document(s)?</h2>
 					</center>
 					<div className="wrap">
-						<button type="button" className="btn btn-success" onClick={this.closeModal}>
+						<button type="button" className="btn btn-success" onClick={() => this.file && this.file.click()}>
 							Upload Myself
 						</button>
-						<button type="button" className="btn btn-success" onClick={this.closeModal}>
+						<button type="button" className="btn btn-success" onClick={this.addNewPolicy}>
 							Link My agent
 						</button>
 					</div>

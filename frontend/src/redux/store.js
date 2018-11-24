@@ -9,6 +9,8 @@ import userlicenses from './ducks/userlicenses';
 import projects from './ducks/projects';
 import jobs from './ducks/jobs';
 import user from './ducks/user';
+import policies from './ducks/policies';
+
 
 import rootSaga from './sagas';
 
@@ -33,6 +35,7 @@ export default function configureStore(initialState = {}) {
 		global,
 		userlicenses,
 		projects,
+		policies,
 		jobs,
 		user,
 	});

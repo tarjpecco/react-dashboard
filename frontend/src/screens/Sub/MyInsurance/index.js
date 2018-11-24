@@ -1,7 +1,13 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Modal from 'react-modal';
-import Table from '../../../components/Table';
+import { connect } from 'react-redux';
 
+import {
+	actions as policiesAction,
+	getPoliciesSelector
+} from '../../../redux/ducks/policies';
+import Table from '../../../components/Table';
 import './index.scss';
 
 const customStyles = {
@@ -16,25 +22,32 @@ class MyInsurance extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { modalIsOpen: false };
-
-		this.openModal = this.openModal.bind(this);
-		this.closeModal = this.closeModal.bind(this);
+		const { listPolicies } = props;
+		listPolicies();
 	}
 
 	componentDidMount() {
 		Modal.setAppElement('body');
 	}
 
-	openModal() {
+	openModal = () => {
 		this.setState({ modalIsOpen: true });
 	}
 
-	closeModal() {
+	closeModal = () => {
 		this.setState({ modalIsOpen: false });
+	}
+
+	addNewPolicy = () => {
+		const { createPolicy } = this.props;
+		createPolicy();
 	}
 
 	render() {
 		const { modalIsOpen } = this.state;
+		const { policies } = this.props;
+		console.log('policies');
+		
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -57,7 +70,7 @@ class MyInsurance extends React.Component {
 					</div>
 				</div>
 				<div className="content">
-					<Table>
+					<Table tableName="policies_list" tableStyle="">
 						<thead className="thead-light">
 							<tr>
 								<th className="text-center table-width-20">Agent/Broker name</th>
@@ -101,6 +114,24 @@ class MyInsurance extends React.Component {
 									</button>
 								</td>
 							</tr>
+							{policies.map((policy, index) => (
+								<tr className="text-center" key={index}>
+									<td>
+										<p className="text-info">{policy.name}</p>
+									</td>
+									<td>GL</td>
+									<td>12345678</td>
+									<td>12/12/2019</td>
+									<td>
+										<span className="badge badge-success">Active</span>
+									</td>
+									<td>
+										<button type="button" className="btn btn-primary">
+											View or Edit{' '}
+										</button>
+									</td>
+								</tr>
+							))}
 						</tbody>
 					</Table>
 				</div>
@@ -167,4 +198,23 @@ class MyInsurance extends React.Component {
 		);
 	}
 }
-export default MyInsurance;
+
+const mapStateToProps = state => ({
+	policies: getPoliciesSelector(state)
+});
+
+const mapDispatchToProps = dispatch => ({
+	createPolicy: params => dispatch(policiesAction.create_policy(params)),
+	listPolicies: () => dispatch(policiesAction.get_policies()),
+})
+
+MyInsurance.propTypes = {
+	policies: PropTypes.array,
+	createPolicy: PropTypes.func.isRequired,
+	listPolicies: PropTypes.func.isRequired,
+};
+
+MyInsurance.defaultProps = {
+	policies: [],
+}
+export default connect(mapStateToProps, mapDispatchToProps)(MyInsurance);

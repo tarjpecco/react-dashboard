@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Modal from 'react-modal';
 import { connect } from 'react-redux';
 import { cloneDeep, mapValues } from 'lodash';
+import * as moment from 'moment';
 
 import {
 	actions as policiesAction,
@@ -25,10 +26,13 @@ class MyInsurance extends React.Component {
 		this.state = {
 			modalIsOpen: false,
 			isInValid: {
-
+				type: false,
 			},
 			newPolicy: {
-
+				name: '',
+				type: 'GL',
+				number: 12345678,
+				renewal_date: new Date(),
 			}
 		};
 		const { listPolicies } = props;
@@ -50,13 +54,13 @@ class MyInsurance extends React.Component {
 	addNewPolicy = () => {
 		const { createPolicy } = this.props;
 		const {
-			newJob,
+			newPolicy,
 			isInValid,
 			clicked
 		} = this.state;
 		const newIsInValid = cloneDeep(isInValid);
 		let invalid = false;
-		mapValues(newJob, (value, key) => {
+		mapValues(newPolicy, (value, key) => {
 			if (value === '') {
 				newIsInValid[key] = true;
 				invalid = true;
@@ -69,7 +73,7 @@ class MyInsurance extends React.Component {
 		if (!invalid) {
 			this.closeModal();
 			const formData = new FormData();
-			mapValues(newJob, (value, key) => {
+			mapValues(newPolicy, (value, key) => {
 				formData.append(key, value);
 			});
 			formData.append('file', this.file.files[0]);
@@ -78,6 +82,13 @@ class MyInsurance extends React.Component {
 		} else {
 			this.setState({ isInValid: newIsInValid });
 		}
+	}
+
+	changePolicyType = (e) => {
+		const { newPolicy } = this.state;
+		const policy = cloneDeep(newPolicy);
+		policy.type = e.target.value;
+		this.setState({ newPolicy: policy });
 	}
 
 	render() {
@@ -154,9 +165,9 @@ class MyInsurance extends React.Component {
 									<td>
 										<p className="text-info">{policy.name}</p>
 									</td>
-									<td>GL</td>
-									<td>12345678</td>
-									<td>12/12/2019</td>
+									<td>{policy.type}</td>
+									<td>{policy.number}</td>
+									<td>{moment(policy.renewal_date).format('MM/DD/YYYY')}</td>
 									<td>
 										<span className="badge badge-success">Active</span>
 									</td>
@@ -189,7 +200,8 @@ class MyInsurance extends React.Component {
 									type="radio"
 									id="example-radios-inline1"
 									name="example-radios-inline"
-									value="option1"
+									value="GL"
+									onClick={this.changePolicyType}
 								/>
 								GL
 							</div>
@@ -199,7 +211,8 @@ class MyInsurance extends React.Component {
 									type="radio"
 									id="example-radios-inline2"
 									name="example-radios-inline"
-									value="option2"
+									value="WC"
+									onClick={this.changePolicyType}
 								/>
 								WC
 							</div>
@@ -209,16 +222,17 @@ class MyInsurance extends React.Component {
 									type="radio"
 									id="example-radios-inline3"
 									name="example-radios-inline"
-									value="option2"
+									value="DBL"
+									onClick={this.changePolicyType}
 								/>
 								DBL
 							</div>
-							<input
-								type="file"
-								ref={(ref) => { this.file = ref; }}
-								style={{ visibility: 'hidden' }}
-							/>
 						</div>
+						<input
+							type="file"
+							ref={(ref) => { this.file = ref; }}
+							style={{ visibility: 'hidden' }}
+						/>
 					</form>
 					<br />
 					<br />

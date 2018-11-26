@@ -47,7 +47,7 @@ const AppTemplate = ({ showSideBar, location, history }) => {
 					<Route exact path="/billing" component={GCBilling} />
 					<Route exact path="/insurance" component={MyInsurance} />
 					<Route exact path="/projects" component={Projects} />
-					<Route exact path="/projectdetail" component={Detail} />
+					<Route exact path="/projects/:id" component={Detail} />
 					<Route exact path="/settings" component={Settings} />
 					<Route exact path="/team" component={Team} />
 				</Switch>

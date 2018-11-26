@@ -32,10 +32,10 @@ export default class AuthHeaderService {
     return localStorage.getItem('id_token');
   }
 
-  getHeaders = () => {
+  getHeaders = (contentType) => {
     const headers = {
       'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': contentType || 'application/json'
     }
 
     // Setting Authorization header

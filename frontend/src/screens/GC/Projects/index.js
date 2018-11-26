@@ -54,6 +54,8 @@ class Projects extends React.Component {
 		this.setState({ modalIsOpen: false });
 	}
 
+	getProjectIdFromUrl = (url) => url.slice(0, -1).split('/').pop();
+
 	addNewProject = () => {
 		const {
 			newproject,
@@ -173,7 +175,7 @@ class Projects extends React.Component {
 									<td className="text-right">
 										<Link
 											to={{
-												pathname: '/projectdetail',
+												pathname: `/projects/${this.getProjectIdFromUrl(item.url)}`,
 												state: { projectId: item.id },
 											}}
 										>

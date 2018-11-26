@@ -47,7 +47,12 @@ const { string, node } = PropTypes;
 Table.propTypes = {
 	tableName: string.isRequired,
 	tableStyle: string.isRequired,
-	editable: string.isRequired,
+	editable: string,
 	children: node.isRequired,
 };
+
+Table.defaultProps = {
+	editable: 'disable',
+}
+
 export default Table;

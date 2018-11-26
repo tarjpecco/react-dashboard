@@ -1,9 +1,19 @@
 import React from 'react';
+import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom';
 import classnames from 'classnames';
+import { connect } from 'react-redux';
+import * as moment from 'moment';
+import { orderBy, cloneDeep, mapValues } from 'lodash';
+
 import Modal from 'react-modal';
 import Table from '../../../components/Table';
 import Proposal from '../../../components/Proposal';
+import {
+	actions as jobActions,
+	getJobsSelector
+} from '../../../redux/ducks/jobs';
+import { API_URL } from '../../../api';
 
 import './index.scss';
 
@@ -16,40 +26,36 @@ const customStyles = {
 };
 
 class Detail extends React.Component {
+	static propTypes = {
+		match: PropTypes.object.isRequired,
+		listJobs: PropTypes.func.isRequired,
+		createJob: PropTypes.func.isRequired,
+	}
+
 	constructor(props) {
 		super(props);
+		this.projectId = props.match.params.id;
+
 		this.state = {
 			clicked: 'rfq',
-
-			bids: [
-				{
-					id: '1',
-					subId: 'ABC Plumbing',
-					project_Id: '0',
-					tradeType: 'Plumbing',
-					due_date: '12/01/2018',
-					status: 'bid in progress',
-					bid: '',
-					COI_file: '',
-					proposal_file: '',
-					compliance: { '0': 'WC', '1': 'GL', '2': 'Disability' },
-					showdetail: false,
-				},
-				{
-					id: '2',
-					subId: 'ABC Construction',
-					project_Id: '0',
-					due_date: '12/01/2018',
-					tradeType: 'Electrical',
-					status: 'bid in progress',
-					bid: '',
-					COI_file: '',
-					proposal_file: '',
-					compliance: { '0': 'WC', '1': 'GL', '2': 'Disability' },
-					showdetail: false,
-				},
-			],
 			modalIsOpen: false,
+			bids: [],
+			isInValid: {
+				trade_type: false,
+				expected_start_date: false,
+				expected_end_date: false,
+				estimated_end_date: false,
+			},
+			newJob: {
+				trade_type: "",
+				expected_start_date: "",
+				expected_end_date: "",
+				estimated_end_date: "",
+				project_id: `${API_URL}/projects/${this.projectId}/`,
+				user: this.getUserInfo().url,
+				start_date: moment(new Date()).format('YYYY-MM-DD'),
+				end_date: moment(new Date()).format('YYYY-MM-DD')
+			}
 		};
 
 		this.onClickTabHandler.bind(this);
@@ -59,6 +65,24 @@ class Detail extends React.Component {
 
 	componentDidMount() {
 		Modal.setAppElement('body');
+		const { listJobs } = this.props;
+		const { clicked } = this.state;
+		listJobs({ id: this.projectId, status: clicked });
+	}
+
+	componentWillReceiveProps(newProps) {
+		const { jobList } = newProps;
+		jobList.forEach(job => {
+			job.id = this.getJobIdFromUrl(job.url);
+			job.expected_end_date = moment(job.expected_end_date).format('MM/DD/YYYY');
+			job.estimated_end_date = moment(job.estimated_end_date).format('MM/DD/YYYY');
+			job.expected_start_date = moment(job.expected_start_date).format('MM/DD/YYYY');
+			job.start_date = moment(job.start_date).format('MM/DD/YYYY');
+			job.end_date = moment(job.end_date).format('MM/DD/YYYY');
+			job.showdetail = false;
+		})
+		const bids = orderBy(jobList, ['id'],['asc']);
+		this.setState({ bids });
 	}
 
 	onClickTabHandler = tabname => {
@@ -72,17 +96,96 @@ class Detail extends React.Component {
 		this.setState({ bids: temp });
 	};
 
-	openModal() {
+	openModal = () => {
 		this.setState({ modalIsOpen: true });
 	}
 
-	closeModal() {
+	closeModal = () => {
 		this.setState({ modalIsOpen: false });
 	}
 
-	render() {
-		const { bids, clicked, modalIsOpen } = this.state;
+	tabChanged = (status) => {
+		const { listJobs } = this.props;
+		listJobs({ id: this.projectId, status });
+		this.setState({ clicked: status });
+	}
 
+	getJobIdFromUrl = (url) => url.slice(0, -1).split('/').pop();
+
+	getUserInfo = () => JSON.parse(localStorage.getItem('user'));
+
+	datepickerChanged = (dateType) => {
+		const { newJob, isInValid } = this.state;
+		setTimeout(() => {
+			const job = cloneDeep(newJob);
+			const inValid = cloneDeep(isInValid);
+			if (dateType === 'expected_start_date') {
+				job.expected_start_date = this.expectedStartDateEle &&
+					moment(this.expectedStartDateEle.value).format('YYYY-MM-DD');
+				inValid.expected_start_date = false;
+			}
+			if (dateType === 'expected_end_date') {
+				job.expected_end_date = this.expectedEndDateEle &&
+					moment(this.expectedEndDateEle.value).format('YYYY-MM-DD');
+				inValid.expected_end_date = false;
+			}
+			if (dateType === 'estimated_end_date') {
+				job.estimated_end_date = this.estimatedEndDateEle &&
+					moment(this.estimatedEndDateEle.value).format('YYYY-MM-DD');
+				inValid.estimated_end_date = false;
+			}
+			this.setState({ newJob: job, isInValid: inValid });
+		}, 300);
+	}
+
+	onNewJobPropChange = (prop, value) => {
+		const { newJob, isInValid } = this.state;
+		const newIsInValid = cloneDeep(isInValid);
+		newJob[prop] = value;
+		if (value !== '') {
+			newIsInValid[prop] = false;
+		}
+		this.setState({
+			newJob,
+			isInValid: newIsInValid,
+		});
+	}
+
+	addNewJob = () => {
+		const {
+			newJob,
+			isInValid,
+			clicked
+		} = this.state;
+		const newIsInValid = cloneDeep(isInValid);
+		let invalid = false;
+		mapValues(newJob, (value, key) => {
+			if (value === '') {
+				newIsInValid[key] = true;
+				invalid = true;
+			}
+		});
+		if (this.file.files[0] === undefined) {
+			invalid = true;
+			window.alert('Please upload PFQ/P!');
+		}
+		if (!invalid) {
+			this.closeModal();
+			const { createJob } = this.props;
+			const formData = new FormData();
+			mapValues(newJob, (value, key) => {
+				formData.append(key, value);
+			});
+			formData.append('file', this.file.files[0]);
+			formData.append('status', clicked);
+			createJob(formData);
+		} else {
+			this.setState({ isInValid: newIsInValid });
+		}
+	}
+
+	render() {
+		const { bids, clicked, modalIsOpen, isInValid, newJob } = this.state;
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -110,33 +213,33 @@ class Detail extends React.Component {
 						>
 							<li className="nav-item">
 								<Link
-									to="/projectdetail"
+									to="#"
 									className={classnames('nav-link', {
 										active: clicked === 'rfq',
 									})}
-									onClick={() => this.setState({ clicked: 'rfq' })}
+									onClick={() => this.tabChanged('rfq')}
 								>
 									RFQ in progress
 								</Link>
 							</li>
 							<li className="nav-item">
 								<Link
-									to="/projectdetail"
+									to="#"
 									className={classnames('nav-link', {
-										active: clicked === 'job',
+										active: clicked === 'in_progress',
 									})}
-									onClick={() => this.setState({ clicked: 'job' })}
+									onClick={() => this.tabChanged('in_progress')}
 								>
 									Job in progress
 								</Link>
 							</li>
 							<li className="nav-item">
 								<Link
-									to="/projectdetail"
+									to="#"
 									className={classnames('nav-link', {
 										active: clicked === 'archived',
 									})}
-									onClick={() => this.setState({ clicked: 'archived' })}
+									onClick={() => this.tabChanged('archived')}
 								>
 									Archived jobs
 								</Link>
@@ -163,129 +266,131 @@ class Detail extends React.Component {
 									</thead>
 									<tbody>
 										{bids.map((item, id) =>
-											// eslint-disable-next-line
 											[
-												<tr className="text-left">
-													<td>
-														<p>{item.id}</p>
-													</td>
-													<td>
-														<p className="text-info">
-															{item.tradeType}
-														</p>
-													</td>
-													<td>
-														<Link to="/projectdetail">
+											// eslint-disable-next-line
+												<React.Fragment key={id}>
+													<tr className="text-left">
+														<td>
+															<p>{item.id}</p>
+														</td>
+														<td>
+															<p className="text-info">
+																{item.trade_type}
+															</p>
+														</td>
+														<td>
+															<Link to="/projectdetail">
+																<button
+																	type="button"
+																	className="btn btn-primary"
+																>
+																	Download
+																</button>
+															</Link>
+														</td>
+														<td>
+															<p>{item.end_date}</p>
+														</td>
+														<td>
+															<span className="badge badge-warning">
+																{'Bid in progress'}
+															</span>
+														</td>
+														<td className="text-right">
 															<button
 																type="button"
-																className="btn btn-primary"
+																onClick={() => this.onClickDetail(id)}
 															>
-																Download
+																{!bids[id].showdetail && (
+																	<i className="far fa-arrow-alt-circle-down" />
+																)}
+																{bids[id].showdetail && (
+																	<i className="far fa-arrow-alt-circle-up" />
+																)}
 															</button>
-														</Link>
-													</td>
-													<td>
-														<p>{item.due_date}</p>
-													</td>
-													<td>
-														<span className="badge badge-warning">
-															{item.status}
-														</span>
-													</td>
-													<td className="text-right">
-														<button
-															type="button"
-															onClick={() => this.onClickDetail(id)}
-														>
-															{!bids[id].showdetail && (
-																<i className="far fa-arrow-alt-circle-down" />
-															)}
-															{bids[id].showdetail && (
-																<i className="far fa-arrow-alt-circle-up" />
-															)}
-														</button>
-													</td>
-												</tr>,
-												<tr
-													className={classnames({
-														hidden: !bids[id].showdetail,
-													})}
-												>
-													<td colSpan="6">
-														<Proposal tableName="ABC Construction Company, Inc.">
-															<tbody>
-																<tr className="text-left">
-																	<td className="table-width-20">
-																		<p className="text-info">
-																			Contact name
-																		</p>
-																	</td>
-																	<td
-																		className="table-width-80"
-																		colSpan="3"
-																	>
-																		<p>Name Surname</p>
-																	</td>
-																</tr>
-																<tr className="text-left">
-																	<td className="table-width-20">
-																		<p className="text-info">
-																			Address
-																		</p>
-																	</td>
-																	<td
-																		className="table-width-80"
-																		colSpan="3"
-																	>
-																		<p>
-																			123 Main street NY,NY
-																			1001
-																		</p>
-																	</td>
-																</tr>
-																<tr className="text-left">
-																	<td className="table-width-20">
-																		<p className="text-info">
-																			Phone
-																		</p>
-																	</td>
-																	<td>
-																		<p>555-444-555</p>
-																	</td>
-																</tr>
-																<tr className="text-left">
-																	<td className="table-width-20">
-																		<p className="text-info">
-																			EIN #
-																		</p>
-																	</td>
-																	<td>
-																		<p>61-512584</p>
-																	</td>
-																</tr>
-																<tr className="text-left">
-																	<td>
-																		<p className="text-info">
-																			License number
-																		</p>
-																	</td>
-																	<td className="table-width-30">
-																		Type
-																	</td>
-																	<td className="table-width-30">
-																		Number
-																	</td>
-																	<td
-																		className="table-width-40"
-																		colSpan="2"
-																	>
-																		Expiredate
-																	</td>
-																</tr>
-															</tbody>
-														</Proposal>
-													</td>
-												</tr>,
+														</td>
+													</tr>
+													<tr
+														className={classnames({
+															hidden: !bids[id].showdetail,
+														})}
+													>
+														<td colSpan="6">
+															<Proposal tableName="ABC Construction Company, Inc.">
+																<tbody>
+																	<tr className="text-left">
+																		<td className="table-width-20">
+																			<p className="text-info">
+																				Contact name
+																			</p>
+																		</td>
+																		<td
+																			className="table-width-80"
+																			colSpan="3"
+																		>
+																			<p>Name Surname</p>
+																		</td>
+																	</tr>
+																	<tr className="text-left">
+																		<td className="table-width-20">
+																			<p className="text-info">
+																				Address
+																			</p>
+																		</td>
+																		<td
+																			className="table-width-80"
+																			colSpan="3"
+																		>
+																			<p>
+																				123 Main street NY,NY
+																				1001
+																			</p>
+																		</td>
+																	</tr>
+																	<tr className="text-left">
+																		<td className="table-width-20">
+																			<p className="text-info">
+																				Phone
+																			</p>
+																		</td>
+																		<td>
+																			<p>555-444-555</p>
+																		</td>
+																	</tr>
+																	<tr className="text-left">
+																		<td className="table-width-20">
+																			<p className="text-info">
+																				EIN #
+																			</p>
+																		</td>
+																		<td>
+																			<p>61-512584</p>
+																		</td>
+																	</tr>
+																	<tr className="text-left">
+																		<td>
+																			<p className="text-info">
+																				License number
+																			</p>
+																		</td>
+																		<td className="table-width-30">
+																			Type
+																		</td>
+																		<td className="table-width-30">
+																			Number
+																		</td>
+																		<td
+																			className="table-width-40"
+																			colSpan="2"
+																		>
+																			Expiredate
+																		</td>
+																	</tr>
+																</tbody>
+															</Proposal>
+														</td>
+													</tr>
+												</React.Fragment>
 											]
 										)}
 									</tbody>
@@ -293,7 +398,7 @@ class Detail extends React.Component {
 							</div>
 							<div
 								className={classnames('tab-pane', {
-									active: clicked === 'job',
+									active: clicked === 'in_progress',
 								})}
 								role="tabpanel"
 							>
@@ -321,14 +426,14 @@ class Detail extends React.Component {
 													<p>{item.id}</p>
 												</td>
 												<td>
-													<p className="text-info">{item.subId}</p>
+													<p className="text-info">{item.subId || ''}</p>
 												</td>
 												<td>
-													<p>{item.tradeType}</p>
+													<p>{item.trade_type}</p>
 												</td>
 
 												<td>
-													<p>{item.due_date}</p>
+													<p>{item.estimated_end_date}</p>
 												</td>
 												<td className="text-center wrap">
 													<span className="badge badge-success">GL</span>
@@ -372,14 +477,14 @@ class Detail extends React.Component {
 													<p>{item.id}</p>
 												</td>
 												<td>
-													<p className="text-info">{item.subId}</p>
+													<p className="text-info">{item.subId || ''}</p>
 												</td>
 												<td>
-													<p>{item.tradeType}</p>
+													<p>{item.trade_type}</p>
 												</td>
 
 												<td>
-													<p>{item.due_date}</p>
+													<p>{item.expected_end_date}</p>
 												</td>
 												<td className="text-right">
 													<button type="button">
@@ -403,23 +508,67 @@ class Detail extends React.Component {
 				>
 					<h2>Add An RFQ/P</h2>
 
-					<form className="mb-5">
+					<form className="mb-5" method="post" encType="multipart/form-data" id="create_job_form" >
 						<div className="form-group">
 							Trade Type
 							<input
 								type="text"
-								placeholder="Project Name"
-								className="form-control"
+								value={newJob.trade_type}
+								placeholder="Trade Type"
+								className={`form-control ${isInValid.trade_type ? 'is-invalid' : ''}`}
+								name="trade_type"
 								id="project"
+								onChange={e => this.onNewJobPropChange('trade_type', e.target.value)}
 							/>
+							{isInValid.trade_type && <div className="invalid-feedback">Required</div>}
 						</div>
 						<div className="form-group">
 							Expected Start Date
-							<input type="text" className="form-control" placeholder="dd/mm/yyyy" />
+							<input
+								type="text"
+								ref={(ref) => { this.expectedStartDateEle = ref; }}
+								className={`js-datepicker form-control ${isInValid.expected_start_date ? 'is-invalid' : ''}`}
+								name="expected_start_date"
+								data-week-start="1"
+								data-autoclose="true"
+								data-today-highlight="true"
+								data-date-format="mm/dd/yyyy"
+								onBlur={() => this.datepickerChanged('expected_start_date')}
+								placeholder="mm/dd/yyyy"
+							/>
+							{isInValid.expected_start_date && <div className="invalid-feedback">Required</div>}
 						</div>
 						<div className="form-group">
 							Expected Completion
-							<input type="text" className="form-control" placeholder="dd/mm/yyyy" />
+							<input
+								type="text"
+								ref={(ref) => { this.expectedEndDateEle = ref; }}
+								className={`js-datepicker form-control ${isInValid.expected_end_date ? 'is-invalid' : ''}`}
+								name="expected_end_date"
+								data-week-start="1"
+								data-autoclose="true"
+								data-today-highlight="true"
+								data-date-format="mm/dd/yyyy"
+								onBlur={() => this.datepickerChanged('expected_end_date')}
+								placeholder="mm/dd/yyyy"
+							/>
+							{isInValid.expected_end_date && <div className="invalid-feedback">Required</div>}
+						</div>
+						<div className="form-group">
+							Estimated End Date
+							<input
+								type="text"
+								ref={(ref) => { this.estimatedEndDateEle = ref; }}
+								className={`js-datepicker form-control ${isInValid.estimated_end_date ? 'is-invalid' : ''}`}
+								name="estimated_end_date"
+								data-week-start="1"
+								data-today-highlight="true"
+								data-autoclose="true"
+								data-date-format="mm/dd/yyyy"
+								onBlur={() => this.datepickerChanged('estimated_end_date')}
+								placeholder="mm/dd/yyyy"
+							/>
+							{isInValid.estimated_end_date && <div className="invalid-feedback">Required</div>}
 						</div>
 						<div className="form-group">
 							Expected Budget
@@ -431,7 +580,7 @@ class Detail extends React.Component {
 									type="text"
 									className="form-control text-center"
 									id="example-group1-input3"
-									name="example-group1-input3"
+									name="budget"
 									placeholder="00"
 								/>
 								<div className="input-group-append">
@@ -439,11 +588,21 @@ class Detail extends React.Component {
 								</div>
 							</div>
 						</div>
+						<input
+							type="hidden"
+							name="status"
+							value={clicked}
+						/>
+						<input
+							type="file"
+							ref={(ref) => { this.file = ref; }}
+							style={{ visibility: 'hidden' }}
+						/>
 					</form>
-					<button type="button" className="btn btn-success">
+					<button type="button" className="btn btn-success" onClick={() => this.file && this.file.click()}>
 						Upload RFQ/P
 					</button>
-					<button type="button" className="btn btn-success" onClick={this.closeModal}>
+					<button type="button" className="btn btn-success" onClick={this.addNewJob}>
 						Submit
 					</button>
 				</Modal>
@@ -452,4 +611,13 @@ class Detail extends React.Component {
 	}
 }
 
-export default Detail;
+const mapStateToProps = state => ({
+	jobList: getJobsSelector(state)
+});
+
+const mapDispatchToProps = dispatch => ({
+	listJobs: params => dispatch(jobActions.get_jobs(params)),
+	createJob: params => dispatch(jobActions.create_job(params)),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Detail);

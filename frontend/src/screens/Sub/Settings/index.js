@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import * as moment from 'moment';
-import { isEmpty } from 'lodash';
+import { isEmpty, cloneDeep } from 'lodash';
+import 'react-phone-number-input/style.css'
+import PhoneInput from 'react-phone-number-input'
 
 import {
 	actions as licenseActions,
@@ -100,6 +102,12 @@ class Settings extends React.PureComponent {
 		return `${line1} ${line2} ${town}, ${state} ${zipCode}`;
 	}
 
+	onUserEditHandler = (prop, value) => {
+		const { user } = this.props;
+		const userInfo = cloneDeep(user);
+		userInfo[prop] = value;
+	}
+
 	render() {
 		const { user } = this.props;
 		const {
@@ -161,7 +169,7 @@ class Settings extends React.PureComponent {
 										type="text"
 										name="name"
 										value={`${firstName} ${lastName}`}
-										onChange={e => this.onChangeHandler('name', e.target.value)}
+										onChange={e => this.onUserEditHandler('name', e.target.value)}
 										disabled={editable}
 									/>
 								</td>
@@ -185,13 +193,18 @@ class Settings extends React.PureComponent {
 									<p className="text-info">Phone</p>
 								</td>
 								<td className="table-width-80" colSpan="4">
-									<input
+									{/* <input
 										type="text"
 										name="phone"
 										value={phone}
-										onChange={e => this.onChangeHandler('phone', e.target.value)}
+										onChange={e => this.onUserEditHandler('phone', e.target.value)}
 										disabled={editable}
-									/>
+									/> */}
+									<PhoneInput
+										placeholder="Enter phone number"
+										value={ phone }
+										disabled={editable}
+										onChange={value => this.onUserEditHandler('phone', value)} />
 								</td>
 							</tr>
 							<tr className="text-left">

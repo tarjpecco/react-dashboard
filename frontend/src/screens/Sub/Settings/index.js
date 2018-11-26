@@ -16,6 +16,7 @@ import {
 } from '../../../redux/ducks/user';
 import Table from '../../../components/Table';
 import './index.scss';
+import LocationSearchInput from '../../../components/LocationSearchInput';
 
 class Settings extends React.PureComponent {
 	constructor(props) {
@@ -26,6 +27,17 @@ class Settings extends React.PureComponent {
 			btnname: 'Edit',
 			btnicon: 'si si-pencil',
 			password: '',
+			user: {
+				first_name: '',
+				last_name: '',
+				addressObj: {
+					line_1: '',
+					line_2: '',
+					town: '',
+					state: '',
+					country: '',
+				}
+			}
 		};
 		const { user, getUserInfo, listUserLicenses } = props;
 		if (isEmpty(user)) {
@@ -33,6 +45,13 @@ class Settings extends React.PureComponent {
 		}
 		listUserLicenses();
 	}
+
+	
+	componentWillReceiveProps(nextProps) {
+		const { user } = nextProps;
+		this.setState({ user });
+	}
+	
 
 	handleClickEdit = () => {
 		const { editable } = this.state;
@@ -44,6 +63,10 @@ class Settings extends React.PureComponent {
 			this.setState({ editable: 'disable' });
 			this.setState({ btnname: 'Edit' });
 			this.setState({ btnicon: 'si si-pencil' });
+		
+			const { user } = this.state;
+			const { updateUserInfo } = this.props;
+			updateUserInfo({ user });
 		}
 	};
 
@@ -103,26 +126,42 @@ class Settings extends React.PureComponent {
 	}
 
 	onUserEditHandler = (prop, value) => {
-		const { user } = this.props;
+		const { user } = this.state;
 		const userInfo = cloneDeep(user);
 		userInfo[prop] = value;
+		this.setState({ user: userInfo });
+	}
+
+	onNameEditHandler = value => {
+		const { user } = this.state;
+		if (value) {
+			const n = value.lastIndexOf(' ');
+			const firstName = value.slice(0, n);
+			const lastName = value.slice(n + 1);
+			this.setState({ user: { ...user, first_name: firstName, last_name: lastName } });
+		}
+	}
+
+	onAddressChanged = (address) => {
+		const { user } = this.state;
+		this.setState({ user: { ...user, addressObj: address } });
 	}
 
 	render() {
-		const { user } = this.props;
 		const {
 			ein,
 			editable,
 			btnname,
 			btnicon,
 			password,
+			user,
 		} = this.state;
 		const { userLicenses: license } = this.props;
 		const {
 			first_name: firstName,
 			last_name: lastName,
 			phone,
-			address,
+			addressObj: address,
 		} = user;
 	
 		return (
@@ -169,7 +208,7 @@ class Settings extends React.PureComponent {
 										type="text"
 										name="name"
 										value={`${firstName} ${lastName}`}
-										onChange={e => this.onUserEditHandler('name', e.target.value)}
+										onChange={e => this.onNameEditHandler(e.target.value)}
 										disabled={editable}
 									/>
 								</td>
@@ -179,13 +218,21 @@ class Settings extends React.PureComponent {
 									<p className="text-info">Address</p>
 								</td>
 								<td className="table-width-80" colSpan="4">
-									<input
-										type="text"
-										name="address"
-										value={this.getAddressStr(address)}
-										onChange={this.onChangeHandler}
-										disabled={editable}
-									/>
+									{editable &&
+										<input
+											type="text"
+											value={this.getAddressStr(address)}
+											disabled={editable}
+										/>
+									}
+									{!editable && 
+										<LocationSearchInput
+											onAddressChanged={this.onAddressChanged}
+											className="locationSearchForm"
+											placeholder={this.getAddressStr(address)}
+										/>
+										
+									}
 								</td>
 							</tr>
 							<tr className="text-left">
@@ -193,16 +240,10 @@ class Settings extends React.PureComponent {
 									<p className="text-info">Phone</p>
 								</td>
 								<td className="table-width-80" colSpan="4">
-									{/* <input
-										type="text"
-										name="phone"
-										value={phone}
-										onChange={e => this.onUserEditHandler('phone', e.target.value)}
-										disabled={editable}
-									/> */}
 									<PhoneInput
 										placeholder="Enter phone number"
 										value={ phone }
+										country="US"
 										disabled={editable}
 										onChange={value => this.onUserEditHandler('phone', value)} />
 								</td>
@@ -334,6 +375,7 @@ Settings.propTypes = {
 	updateLicenseState: PropTypes.func.isRequired,
 	user: PropTypes.object.isRequired,
 	getUserInfo: PropTypes.func.isRequired,
+	updateUserInfo: PropTypes.func.isRequired, 
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);

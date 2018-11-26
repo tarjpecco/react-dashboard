@@ -7,6 +7,7 @@ import {
   getCurrentUser,
   updateCurrentUser,
   getAddressById,
+  updateAddressById,
 } from '../../api';
 import { actionNames, createActions } from '../helper';
 
@@ -71,7 +72,7 @@ function* getUserInfoSaga() {
   try {
     const user = yield call(getCurrentUser);
     const address = yield call(getAddressById, getIdFromUrl(user.address));
-    yield put(actions.get_user_success({ user: { ...user, address }}));
+    yield put(actions.get_user_success({ user: { ...user, addressObj: address }}));
   } catch (err) {
     const errorMessage = 'GET USER Failed';
     yield put(actions.get_user_error({ error: errorMessage }));
@@ -79,10 +80,11 @@ function* getUserInfoSaga() {
 }
 
 function* updateUserSaga({ payload }) {
-  const { params } = payload;
   try {
-    const user = yield call(updateCurrentUser, params);
-    console.log('update user info saga:', user);
+    const user = yield call(updateCurrentUser, payload.user);
+    yield call(updateAddressById, getIdFromUrl(user.address), { ...payload.user.addressObj });
+    const address = yield call(getAddressById, getIdFromUrl(user.address));
+    yield put(actions.get_user_success({ user: { ...user, addressObj: address, }}));
   } catch (err) {
     console.error(err);
     const errorMessage = 'Updating User Failed';
@@ -92,7 +94,7 @@ function* updateUserSaga({ payload }) {
 
 export function* userSaga() {
   yield all([
-    yield takeEvery(actions.UPDATE_USER, updateUserSaga),
+    yield takeLatest(actions.UPDATE_USER, updateUserSaga),
     yield takeLatest(actions.GET_USER, getUserInfoSaga),
   ]);
 }

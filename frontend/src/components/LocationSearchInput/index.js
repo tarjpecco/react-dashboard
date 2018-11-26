@@ -12,6 +12,11 @@ class SearchBar extends React.Component {
   static propTypes = {
     onAddressChanged: PropTypes.func.isRequired,
     isInValid: PropTypes.bool.isRequired,
+    placeholder: PropTypes.string,
+  }
+
+  static defaultProps = {
+    placeholder: 'Search Places...',
   }
 
   handleChange = address => {
@@ -45,7 +50,7 @@ class SearchBar extends React.Component {
 
   render() {
     const { address } = this.state;
-    const { isInValid } = this.props;
+    const { isInValid, placeholder } = this.props;
 
     return (
 	<PlacesAutocomplete
@@ -57,7 +62,7 @@ class SearchBar extends React.Component {
 			<div style={{ position: 'relative' }}>
 				<input
 					{...getInputProps({
-          placeholder: 'Search Places ...',
+          placeholder: `${placeholder}`,
           className: `location-search-input form-control ${isInValid ? 'is-invalid' : ''}`,
           })}
         />

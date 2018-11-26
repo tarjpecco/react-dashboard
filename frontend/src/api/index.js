@@ -10,9 +10,6 @@ export const getAddress = () => {
     .then((headers) => axios.get(`${API_URL}/address/`, {
       headers
     }))
-    .catch(error => {
-      throw error;
-    })
 };
 
 export const getUserLicensesForUser = (userPK) => {
@@ -21,9 +18,6 @@ export const getUserLicensesForUser = (userPK) => {
       headers
     }))
     .then(res => res.data)
-    .catch(error => {
-      throw error;
-    })
 };
 
 export const createUserLicenseForUser = (userPK, params) => {
@@ -36,9 +30,6 @@ export const createUserLicenseForUser = (userPK, params) => {
       headers
     }))
     .then(res => res.data)
-    .catch(error => {
-      return error;
-    })
 };
 
 export const updateUserLicenseForUser = (userPK, licenseId, params) => {
@@ -51,9 +42,6 @@ export const updateUserLicenseForUser = (userPK, licenseId, params) => {
       headers
     }))
     .then(res => res.data)
-    .catch(error => {
-      throw error;
-    })
 };
 
 export const removeUserLicenseForUser = (userPK, licenseId) => {
@@ -62,9 +50,6 @@ export const removeUserLicenseForUser = (userPK, licenseId) => {
     {
       headers
     }))
-    .catch(error => {
-      throw error;
-    })
 };
 
 export const getCurrentUser = () => {
@@ -74,9 +59,6 @@ export const getCurrentUser = () => {
       headers
     }))
     .then(res => res.data)
-    .catch(error => {
-      throw error;
-    })
 };
 
 export const getAuthToken = ({ username, password }) => {
@@ -99,9 +81,6 @@ export const getAuthToken = ({ username, password }) => {
     localStorage.setItem('id_token', res.access)
     return res;
   })
-  .catch(err => {
-    throw err;
-  })
 };
 
 export const getProjects = () => {
@@ -111,9 +90,6 @@ export const getProjects = () => {
       headers
     }))
     .then(res => res.data)
-    .catch(error => {
-      throw error;
-    })
 };
 
 export const createProject = (params) => {
@@ -126,9 +102,6 @@ export const createProject = (params) => {
       headers
     }))
     .then(res => res.data)
-    .catch(error => {
-      throw error;
-    })
 };
 
 export const getJobsForProject = (id, status) => {
@@ -138,9 +111,6 @@ export const getJobsForProject = (id, status) => {
       headers
     }))
     .then(res => res.data)
-    .catch(error => {
-      throw error;
-    })
 };
 
 export const createJob = (params) => {
@@ -155,8 +125,5 @@ export const createJob = (params) => {
       if (res.status < 400)
         return res.data;
       throw res.statusText;
-    })
-    .catch(error => {
-      throw error;
     })
 };

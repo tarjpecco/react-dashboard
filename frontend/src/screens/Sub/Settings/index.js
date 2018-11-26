@@ -161,7 +161,7 @@ class Settings extends React.PureComponent {
 										type="text"
 										name="name"
 										value={`${firstName} ${lastName}`}
-										onChange={this.onChangeHandler}
+										onChange={e => this.onChangeHandler('name', e.target.value)}
 										disabled={editable}
 									/>
 								</td>
@@ -189,7 +189,7 @@ class Settings extends React.PureComponent {
 										type="text"
 										name="phone"
 										value={phone}
-										onChange={this.onChangeHandler}
+										onChange={e => this.onChangeHandler('phone', e.target.value)}
 										disabled={editable}
 									/>
 								</td>

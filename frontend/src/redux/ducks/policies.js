@@ -40,15 +40,13 @@ const policiesReducer = policiesDuck.createReducer({
     state
       .update('policies', () => List(payload.policies))
       .set('loading', false),
-  [actions.GET_POLICIES_ERROR]: (state, { error }) => ({
-    ...state,
-    loading: false,
-    error
-  }),
-  [actions.GET_POLICIES_REQUEST]: (state) => ({
-    ...state,
-    loading: true,
-  }),
+  [actions.GET_POLICIES_ERROR]: (state, { payload }) =>
+    state
+      .set('error', payload.error)
+      .set('loading', false),
+  [actions.GET_POLICIES_REQUEST]: (state) =>
+    state
+      .set('loading', true),
 }, initialState);
 
 export default policiesReducer;

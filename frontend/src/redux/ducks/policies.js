@@ -64,8 +64,7 @@ function* listPoliciesSaga() {
 
 function* createPoliciesSaga({ payload }) {
   try {
-    const userInfo = yield call(getCurrentUser);
-    const newItem = yield call(createPoliciesForUser, 'me', { ...payload, user: userInfo.url });
+    const newItem = yield call(createPoliciesForUser, 'me', payload);
     const policies = yield select(getPoliciesSelector);
     policies.push(newItem);
     yield put(actions.get_policies_success({ policies }));

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Modal from 'react-modal';
 import { connect } from 'react-redux';
-import { cloneDeep, mapValues } from 'lodash';
+import { cloneDeep, mapValues, isUndefined } from 'lodash';
 import * as moment from 'moment';
 
 import {
@@ -25,14 +25,11 @@ class MyInsurance extends React.Component {
 		super(props);
 		this.state = {
 			modalIsOpen: false,
-			isInValid: {
-				type: false,
-			},
 			newPolicy: {
 				name: '',
 				type: 'GL',
 				number: 12345678,
-				renewal_date: new Date(),
+				renewal_date: moment(new Date()).format('YYYY-MM-DD'),
 			}
 		};
 		const { listPolicies } = props;
@@ -55,33 +52,14 @@ class MyInsurance extends React.Component {
 		const { createPolicy } = this.props;
 		const {
 			newPolicy,
-			isInValid,
-			clicked
 		} = this.state;
-		const newIsInValid = cloneDeep(isInValid);
-		let invalid = false;
+		this.closeModal();
+		const formData = new FormData();
 		mapValues(newPolicy, (value, key) => {
-			if (value === '') {
-				newIsInValid[key] = true;
-				invalid = true;
-			}
+			formData.append(key, value);
 		});
-		if (this.file.files[0] === undefined) {
-			invalid = true;
-			window.alert('Please upload Resume!');
-		}
-		if (!invalid) {
-			this.closeModal();
-			const formData = new FormData();
-			mapValues(newPolicy, (value, key) => {
-				formData.append(key, value);
-			});
-			formData.append('file', this.file.files[0]);
-			formData.append('status', clicked);
-			createPolicy(formData);
-		} else {
-			this.setState({ isInValid: newIsInValid });
-		}
+		if (isUndefined(this.file.files[0])) formData.append('file', this.file.files[0]);
+		createPolicy(formData);
 	}
 
 	changePolicyType = (e) => {
@@ -89,6 +67,10 @@ class MyInsurance extends React.Component {
 		const policy = cloneDeep(newPolicy);
 		policy.type = e.target.value;
 		this.setState({ newPolicy: policy });
+	}
+
+	linkAgent = () => {
+
 	}
 
 	render() {
@@ -243,8 +225,13 @@ class MyInsurance extends React.Component {
 						<button type="button" className="btn btn-success" onClick={() => this.file && this.file.click()}>
 							Upload Myself
 						</button>
-						<button type="button" className="btn btn-success" onClick={this.addNewPolicy}>
+						<button type="button" className="btn btn-success" onClick={this.linkAgent}>
 							Link My agent
+						</button>
+					</div>
+					<div>
+						<button type="button" className="btn btn-success" onClick={this.addNewPolicy}>
+							OK
 						</button>
 					</div>
 				</Modal>

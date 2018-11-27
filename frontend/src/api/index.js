@@ -160,11 +160,9 @@ export const getPoliciesForUser = (userPK) => {
 };
 
 export const createPoliciesForUser = (userPK, params) => {
-  return authHeaderService.getHeaders()
+  return authHeaderService.getHeaders('multipart/form-data')
     .then((headers) => axios.post(`${API_URL}/user-policies/${userPK}/`,
-    {
-      ...params,
-    },
+    params,
     {
       headers
     }))

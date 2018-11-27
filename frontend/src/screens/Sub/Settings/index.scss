@@ -31,3 +31,17 @@ table {
 	border: none;
 	color: black;
 }
+
+table .password input {
+	display: inline-block;
+	width: 200px;
+	margin: 8px 5px 5px;
+	padding: 5px;
+	border: none;
+}
+
+#login-password-error {
+	margin-left: 11px;
+	margin-top: 3px;
+	display: block;
+}

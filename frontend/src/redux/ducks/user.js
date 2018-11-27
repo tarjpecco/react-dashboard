@@ -2,6 +2,7 @@ import { createDuck } from 'redux-duck';
 import { Map, fromJS } from 'immutable';
 import { takeLatest, takeEvery, call, put, all } from 'redux-saga/effects';
 import { createSelector } from 'reselect';
+import { isUndefined } from 'lodash';
 
 import {
   getCurrentUser,
@@ -39,28 +40,21 @@ const userReducer = userDuck.createReducer({
     state
       .update('user', () => Map(payload.user))
       .set('loading', false),
-  [actions.GET_USER_ERROR]: (state, { error }) => ({
-    ...state,
-    loading: false,
-    error
-  }),
-  [actions.GET_USER_REQUEST]: (state) => ({
-    ...state,
-    loading: true,
-  }),
+  [actions.GET_USER_ERROR]: (state, { payload }) =>
+    state
+      .set('error', payload.error)
+      .set('loading', false),
+  [actions.GET_USER_REQUEST]: (state) =>
+    state
+      .set('loading', true),
   [actions.UPDATE_USER_SUCCESS]: (state, { payload }) =>
     state
       .update('user', () => Map(payload.user))
       .set('saveloading', false),
-  [actions.UPDATE_USER_ERROR]: (state, { error }) => ({
-    ...state,
-    saveloading: false,
-    error
-  }),
-  [actions.UPDATE_USER_REQUEST]: (state) => ({
-    ...state,
-    saveloading: true,
-  }),
+  [actions.UPDATE_USER_ERROR]: (state, { payload }) =>
+    state
+      .set('error', payload.error)
+      .set('saveloading', false),
 }, initialState);
 
 export default userReducer;
@@ -82,11 +76,10 @@ function* getUserInfoSaga() {
 function* updateUserSaga({ payload }) {
   try {
     const user = yield call(updateCurrentUser, payload.user);
-    yield call(updateAddressById, getIdFromUrl(user.address), { ...payload.user.addressObj });
+    if (!isUndefined(payload.user.addressObj)) yield call(updateAddressById, getIdFromUrl(user.address), { ...payload.user.addressObj });
     const address = yield call(getAddressById, getIdFromUrl(user.address));
     yield put(actions.get_user_success({ user: { ...user, addressObj: address, }}));
   } catch (err) {
-    console.error(err);
     const errorMessage = 'Updating User Failed';
     yield put(actions.get_user_error({ error: errorMessage }));
   }

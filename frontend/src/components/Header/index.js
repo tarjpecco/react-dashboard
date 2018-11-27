@@ -191,7 +191,7 @@ const mapActionToProps = dispatch => ({
 	toggleAction: () => {
 		dispatch(toggleSideBar());
 	},
-	logout: () => dispatch(authActions.signout())
+	logout: () => dispatch(authActions.signout_request())
 });
 
 const { func, object, string } = PropTypes;

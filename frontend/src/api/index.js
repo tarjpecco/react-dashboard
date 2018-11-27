@@ -88,9 +88,6 @@ export const getAuthToken = ({ username, password }) => {
       return response.json();
     }
     throw response.statusText;
-  }).then(res => {
-    localStorage.setItem('id_token', res.access)
-    return res;
   })
 };
 

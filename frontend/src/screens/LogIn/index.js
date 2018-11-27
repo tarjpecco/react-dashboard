@@ -135,7 +135,7 @@ class LogIn extends React.PureComponent {
 }
 const mapStateToProps = (state) => ({
 	error: state.auth.error,
-	user: state.auth.user,
+	user: state.user,
 });
 const mapActionToProps = dispatch => ({
 	signIn: params => {

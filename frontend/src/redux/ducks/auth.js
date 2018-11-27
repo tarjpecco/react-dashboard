@@ -1,14 +1,16 @@
 import { takeLatest, call, put, all } from 'redux-saga/effects';
 import { createDuck } from 'redux-duck';
 
-import { getAuthToken, getCurrentUser } from '../../api';
+import { getAuthToken } from '../../api';
 import { actionNames, createActions } from '../helper';
+
+import { actions as userActions } from './user';
 
 const authDuck = createDuck('auth-duck');
 
 export const actions = createActions(authDuck,
   ...actionNames('SIGNIN'),
-  'SIGNOUT'
+  ...actionNames('SIGNOUT'),
 )
 
 // Reducer Intial State
@@ -20,11 +22,9 @@ const initialState = {
 
 // Reducer
 const authReducer = authDuck.createReducer({
-  [actions.SIGNIN_SUCCESS]: (state, { payload }) => {
-    localStorage.setItem('user', JSON.stringify(payload));
+  [actions.SIGNIN_SUCCESS]: (state) => {
     return {
       ...state,
-      user: payload,
       error: null,
     }},
   [actions.SIGNIN_ERROR]: (state, { payload }) => ({
@@ -35,14 +35,14 @@ const authReducer = authDuck.createReducer({
     ...state,
     loading: true,
   }),
-  [actions.SIGNOUT]: (state) => {
-    localStorage.removeItem('id_token');
-    localStorage.removeItem('user');
-    return {
-      ...state,
-      user: null,
-    };
-  }
+  [actions.SIGNOUT_SUCCESS]: (state) => ({
+    ...state,
+    error: null,
+  }),
+  [actions.SIGNOUT_ERROR]: (state) => ({
+    ...state,
+    error: null,
+  }),
 }, initialState);
 
 export default authReducer;
@@ -50,17 +50,29 @@ export default authReducer;
 // sagas
 function* signInSaga({ payload }) {
   try {
-    yield call(getAuthToken, payload);
-    const userInfo = yield call(getCurrentUser);
-    yield put(actions.signin_success(userInfo));
+    const token = yield call(getAuthToken, payload);
+    localStorage.setItem('id_token', token.access)
+    yield put(userActions.get_user());
+    yield put(actions.signin_success());
   } catch (err) {
     const errorMessage = 'User SignIn Failed';
     yield put(actions.signin_error({ error: errorMessage }));
+  }
+}
+function* signOutSaga() {
+  try {
+    localStorage.removeItem('id_token');
+    yield put(userActions.reset_user());
+    yield put(actions.signout_success());
+  } catch (err) {
+    const errorMessage = 'User SingOut Failed';
+    yield put(actions.signout_error({ error: errorMessage }));
   }
 }
 
 export function* authSaga() {
   yield all([
     yield takeLatest(actions.SIGNIN_REQUEST, signInSaga),
+    yield takeLatest(actions.SIGNOUT_REQUEST, signOutSaga),
   ]);
 }

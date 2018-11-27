@@ -1,6 +1,6 @@
 import { createDuck } from 'redux-duck';
 import { Map, fromJS } from 'immutable';
-import { takeLatest, takeEvery, call, put, all } from 'redux-saga/effects';
+import { takeLatest, call, put, all } from 'redux-saga/effects';
 import { createSelector } from 'reselect';
 import { isUndefined } from 'lodash';
 
@@ -17,7 +17,8 @@ const userDuck = createDuck('user-duck');
 // actions
 export const actions = createActions(userDuck,
   ...actionNames('GET_USER'),
-  ...actionNames('UPDATE_USER')
+  ...actionNames('UPDATE_USER'),
+  'RESET_USER',
 )
 
 // Selectors
@@ -55,6 +56,9 @@ const userReducer = userDuck.createReducer({
     state
       .set('error', payload.error)
       .set('saveloading', false),
+  [actions.RESET_USER]: (state) =>
+    state
+      .set('user', () => Map({}))
 }, initialState);
 
 export default userReducer;

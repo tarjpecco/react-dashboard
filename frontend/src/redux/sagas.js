@@ -7,6 +7,8 @@ import { jobsSaga } from './ducks/jobs';
 import { userSaga } from './ducks/user';
 import { policiesSaga } from './ducks/policies';
 import { invitesSaga } from './ducks/invites';
+import { companiesSaga } from './ducks/companies';
+
 
 export default function* () {
   yield all([
@@ -17,5 +19,6 @@ export default function* () {
     userSaga(),
     policiesSaga(),
     invitesSaga(),
+    companiesSaga(),
   ]);
 }

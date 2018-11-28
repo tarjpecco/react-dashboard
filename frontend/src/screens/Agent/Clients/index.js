@@ -32,6 +32,8 @@ class Clients extends React.Component {
 		listCompanies({ search });
 	};
 
+	getIdFromUrl = (url) => url.slice(0, -1).split('/').pop();
+
 	render() {
 		const { companyList } = this.props;
 		const { search } = this.state;
@@ -69,7 +71,7 @@ class Clients extends React.Component {
 								// eslint-disable-next-line
 								<tr key={id}>
 									<td className="text-left">
-										<p className="text-info">{item}</p>
+										<p className="text-info">{item.name}</p>
 									</td>
 
 									<td className="text-center wrap">
@@ -79,10 +81,7 @@ class Clients extends React.Component {
 									</td>
 									<td className="text-right">
 										<Link
-											to={{
-												pathname: '/agentdetail',
-												state: { agentId: item },
-											}}
+											to={`/clients/${this.getIdFromUrl(item.url)}`}
 										>
 											<button type="button" className="btn btn-primary">
 												Go

@@ -15,6 +15,7 @@ const projectsDuck = createDuck('projects-duck');
 export const actions = createActions(projectsDuck,
   'CREATE_PROJECT',
   ...actionNames('GET_PROJECTS'),
+  ...actionNames('GET_USER_PROJECTS'),
   ...actionNames('UPDATE_PROJECT')
 )
 

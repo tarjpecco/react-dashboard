@@ -9,6 +9,10 @@ import {
 	actions as policiesAction,
 	getPoliciesSelector
 } from '../../../redux/ducks/policies';
+import {
+	getUserSelector
+} from '../../../redux/ducks/user';
+import { API_URL } from '../../../api';
 import Table from '../../../components/Table';
 import './index.scss';
 
@@ -17,6 +21,7 @@ const customStyles = {
 		top: '60%',
 		left: '60%',
 		transform: 'translate(-60%, -60%)',
+		height: 450,
 	},
 };
 
@@ -30,6 +35,10 @@ class MyInsurance extends React.Component {
 				type: 'GL',
 				number: 12345678,
 				renewal_date: moment(new Date()).format('YYYY-MM-DD'),
+				timestamps: 'string',
+				effective_date: moment(new Date()).format('YYYY-MM-DD'),
+				company: `${API_URL}/companies/1/`,
+				address: 1,
 			}
 		};
 		const { listPolicies } = props;
@@ -49,7 +58,7 @@ class MyInsurance extends React.Component {
 	}
 
 	addNewPolicy = () => {
-		const { createPolicy } = this.props;
+		const { createPolicy, user } = this.props;
 		const {
 			newPolicy,
 		} = this.state;
@@ -59,6 +68,7 @@ class MyInsurance extends React.Component {
 			formData.append(key, value);
 		});
 		if (isUndefined(this.file.files[0])) formData.append('file', this.file.files[0]);
+		formData.append('sub', user.url);
 		createPolicy(formData);
 	}
 
@@ -110,42 +120,10 @@ class MyInsurance extends React.Component {
 							</tr>
 						</thead>
 						<tbody>
-							<tr className="text-center">
-								<td>
-									<p className="text-info">Agent 123</p>
-								</td>
-								<td>GL</td>
-								<td>12345678</td>
-								<td>12/12/2019</td>
-								<td>
-									<span className="badge badge-success">Active</span>
-								</td>
-								<td>
-									<button type="button" className="btn btn-primary">
-										View or Edit{' '}
-									</button>
-								</td>
-							</tr>
-							<tr className="text-center">
-								<td>
-									<p className="text-info">Broker 234</p>
-								</td>
-								<td>WC</td>
-								<td>134567824</td>
-								<td>1/1/2018</td>
-								<td>
-									<span className="badge badge-danger">Expired</span>
-								</td>
-								<td>
-									<button type="button" className="btn btn-primary">
-										View or Edit{' '}
-									</button>
-								</td>
-							</tr>
 							{policies.map((policy, index) => (
 								<tr className="text-center" key={index}>
 									<td>
-										<p className="text-info">{policy.name}</p>
+										<p className="text-info">Broker {index + 1}</p>
 									</td>
 									<td>{policy.type}</td>
 									<td>{policy.number}</td>
@@ -213,7 +191,7 @@ class MyInsurance extends React.Component {
 						<input
 							type="file"
 							ref={(ref) => { this.file = ref; }}
-							style={{ visibility: 'hidden' }}
+							style={{ display: 'none' }}
 						/>
 					</form>
 					<br />
@@ -229,8 +207,13 @@ class MyInsurance extends React.Component {
 							Link My agent
 						</button>
 					</div>
-					<div>
-						<button type="button" className="btn btn-success" onClick={this.addNewPolicy}>
+					<div className="text-center mt-5 mb-3">
+						<button
+							type="button"
+							className="btn btn-primary"
+							style={{ width: 200, fontWeight: 600 }} 
+							onClick={this.addNewPolicy}
+						>
 							OK
 						</button>
 					</div>
@@ -241,7 +224,8 @@ class MyInsurance extends React.Component {
 }
 
 const mapStateToProps = state => ({
-	policies: getPoliciesSelector(state)
+	policies: getPoliciesSelector(state),
+	user: getUserSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -251,6 +235,7 @@ const mapDispatchToProps = dispatch => ({
 
 MyInsurance.propTypes = {
 	policies: PropTypes.array,
+	user: PropTypes.object.isRequired,
 	createPolicy: PropTypes.func.isRequired,
 	listPolicies: PropTypes.func.isRequired,
 };

@@ -44,8 +44,9 @@ class Details extends React.PureComponent {
 
 	render() {
 		const { name, phone, address, ein, license, editable, btnname, btnicon } = this.state;
-		const { location } = this.props;
-		const agentId = location.state.agentId;
+		const { match } = this.props;
+		const agentId = match.params.id;
+		;
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -215,9 +216,8 @@ class Details extends React.PureComponent {
 	}
 }
 
-const { node } = PropTypes;
 Details.propTypes = {
-	location: node.isRequired,
+	match: PropTypes.object.isRequired,
 };
 
 export default Details;

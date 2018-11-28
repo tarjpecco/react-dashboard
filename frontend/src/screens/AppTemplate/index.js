@@ -67,7 +67,7 @@ const AppTemplate = ({ showSideBar, location, history, user, getUserInfo }) => {
 				<Switch>
 					<Route exact path="/dashboard" component={AgentDashboard} />
 					<Route exact path="/clients" component={AgentClients} />
-					<Route exact path="/agentdetail" component={AgentDetail} />
+					<Route exact path="/clients/:id" component={AgentDetail} />
 					<Route exact path="/settings" component={AgentSettings} />
 				</Switch>
 			)}

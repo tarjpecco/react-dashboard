@@ -11,7 +11,7 @@ import {
 	actions as projectActions,
 	getProjectsSelector
 } from '../../../redux/ducks/projects';
-
+import { API_URL } from '../../../api';
 import './index.scss';
 
 const customStyles = {
@@ -31,7 +31,7 @@ class Projects extends React.Component {
 			endDate: '',
 			address: {},
 			status: 'act',
-			company: 1,
+			company: `${API_URL}/companies/1/`,
 		},
 		isInValid: {
 			name: false,

@@ -1,15 +1,26 @@
 import axios from 'axios';
 import AuthHeaderService from './auth-header';
 
-export const API_URL = process.env.REACT_APP_API_URL || 'https://flexcomply-dev.nanoapp.io/api';
+export const API_URL = process.env.REACT_APP_API_URL || 'http://flexcomply-dev.nanoapp.io/api';
 
 const authHeaderService = new AuthHeaderService(API_URL);
 
-export const getAddress = () => {
+export const getAddressById = (id) => {
   return authHeaderService.getHeaders()
-    .then((headers) => axios.get(`${API_URL}/address/`, {
+    .then((headers) => axios.get(`${API_URL}/address/${id}/`, {
       headers
     }))
+    .then(res => res.data)
+};
+
+export const updateAddressById = (id, params) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.put(`${API_URL}/address/${id}/`, {
+      ...params,
+    }, {
+      headers
+    }))
+    .then(res => res.data)
 };
 
 export const getUserLicensesForUser = (userPK) => {
@@ -77,9 +88,6 @@ export const getAuthToken = ({ username, password }) => {
       return response.json();
     }
     throw response.statusText;
-  }).then(res => {
-    localStorage.setItem('id_token', res.access)
-    return res;
   })
 };
 
@@ -126,4 +134,16 @@ export const createJob = (params) => {
         return res.data;
       throw res.statusText;
     })
+};
+
+export const updateCurrentUser = (params) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.patch(`${API_URL}/users/me/`,
+    {
+      ...params,  
+    },
+    {
+      headers
+    }))
+    .then(res => res.data)
 };

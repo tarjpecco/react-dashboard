@@ -4,6 +4,7 @@ import { authSaga } from './ducks/auth';
 import { userLicensesSaga } from './ducks/userlicenses';
 import { projectsSaga } from './ducks/projects';
 import { jobsSaga } from './ducks/jobs';
+import { userSaga } from './ducks/user';
 
 
 export default function* () {
@@ -12,5 +13,6 @@ export default function* () {
     userLicensesSaga(),
     projectsSaga(),
     jobsSaga(),
+    userSaga(),
   ]);
 }

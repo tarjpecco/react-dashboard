@@ -152,10 +152,8 @@ export const getCompanies = (params) => {
   return authHeaderService.getHeaders()
   .then((headers) => axios.get(`${API_URL}/companies/`,
   {
-    ...params,
-  },
-  {
-    headers
+    headers,
+    params,
   }))
   .then(res => res.data)
 }

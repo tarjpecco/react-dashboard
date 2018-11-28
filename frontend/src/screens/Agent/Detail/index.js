@@ -1,7 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Table from '../../../components/Table';
+import { connect } from 'react-redux';
 
+import Table from '../../../components/Table';
+import {
+	actions as companiesActions,
+	getCompanySelector
+} from '../../../redux/ducks/companies';
 import './index.scss';
 
 class Details extends React.PureComponent {
@@ -9,16 +14,17 @@ class Details extends React.PureComponent {
 		super(props);
 		this.state = {
 			editable: 'disable',
-			name: 'Name Surname',
-			address: '123 Main Street NY, NY 10001',
-			phone: '555-555-5555',
-			ein: '61-512584',
-			license: '123 456 789',
+			// name: 'Name Surname',
+			// address: '123 Main Street NY, NY 10001',
+			// phone: '555-555-5555',
+			// ein: '61-512584',
+			// license: '123 456 789',
 			btnname: 'Modify',
 			btnicon: 'si si-pencil',
 		};
-		this.handleClickEdit.bind(this);
-		this.onChangeHandler.bind(this);
+		const { getCompanyInfo, match } = props;
+		const agentId = match.params.id;
+		getCompanyInfo({ id: agentId });
 	}
 
 	handleClickEdit = () => {
@@ -43,10 +49,10 @@ class Details extends React.PureComponent {
 	};
 
 	render() {
-		const { name, phone, address, ein, license, editable, btnname, btnicon } = this.state;
-		const { match } = this.props;
+		const { editable, btnname, btnicon } = this.state;
+		const { match, companyInfo } = this.props;
 		const agentId = match.params.id;
-		;
+		const { name, phone, address, ein, license } = companyInfo;
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -140,7 +146,7 @@ class Details extends React.PureComponent {
 									<input
 										type="text"
 										name="license"
-										value={license}
+										value={license || '123 456 789'}
 										onChange={this.onChangeHandler}
 										disabled={editable}
 									/>
@@ -216,8 +222,18 @@ class Details extends React.PureComponent {
 	}
 }
 
+const mapStateToProps = state => ({
+	companyInfo: getCompanySelector(state)
+});
+
+const mapDispatchToProps = dispatch => ({
+	getCompanyInfo: params => dispatch(companiesActions.get_company(params)),
+})
+
 Details.propTypes = {
+	companyInfo: PropTypes.object.isRequired,
+	getCompanyInfo: PropTypes.func.isRequired,
 	match: PropTypes.object.isRequired,
 };
 
-export default Details;
+export default connect(mapStateToProps, mapDispatchToProps)(Details);

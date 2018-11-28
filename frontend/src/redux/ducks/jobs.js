@@ -2,10 +2,13 @@ import { createDuck } from 'redux-duck';
 import { List, fromJS } from 'immutable';
 import { takeEvery, takeLatest, call, put, all, select } from 'redux-saga/effects';
 import { createSelector } from 'reselect';
+import { isUndefined, assign } from 'lodash';
 
 import {
   getJobsForProject,
   createJob,
+  getJobsByStatus,
+  getDataFromUrl,
 } from '../../api';
 import { actionNames, createActions } from '../helper';
 
@@ -60,7 +63,19 @@ export default jobListReducer;
 // Sagas
 function* listJobsSaga({ payload }) {
   try {
-    const { results: jobList } = yield call(getJobsForProject, payload.id, payload.status);
+    let jobList = [];
+    if (!isUndefined(payload.id)) {
+      const { results } = yield call(getJobsForProject, payload.id, payload.status);
+      jobList = results;
+    } else {
+      const { results } = yield call(getJobsByStatus, payload.status);
+      jobList = yield all(results.map(data => {
+        const resp = call(getDataFromUrl, data.project_id);
+        assign(data, resp);
+        return data;
+      }));
+      console.log('joblist in jobs api: ', jobList);
+    }
     yield put(actions.get_jobs_success({ jobList }));
   } catch (err) {
     const errorMessage = 'Listing jobs Failed';

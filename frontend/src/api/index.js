@@ -91,6 +91,7 @@ export const getAuthToken = ({ username, password }) => {
   })
 };
 
+// Projects
 export const getProjects = () => {
   return authHeaderService.getHeaders()
     .then((headers) => axios.get(`${API_URL}/projects/`,
@@ -115,6 +116,15 @@ export const createProject = (params) => {
 export const getJobsForProject = (id, status) => {
   return authHeaderService.getHeaders()
     .then((headers) => axios.get(`${API_URL}/jobs/?project_id=${id}&&status=${status}`,
+    {
+      headers
+    }))
+    .then(res => res.data)
+};
+
+export const getJobsByStatus = (status) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.get(`${API_URL}/jobs/?status=${status}`,
     {
       headers
     }))
@@ -197,3 +207,12 @@ export const getCompany = (params) => {
   }))
   .then(res => res.data)
 }
+
+export const getDataFromUrl = (url) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.get(url,
+    {
+      headers
+    }))
+    .then(res => res.data)
+};

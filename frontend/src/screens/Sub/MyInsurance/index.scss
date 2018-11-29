@@ -11,3 +11,21 @@
 	top: 0;
 	left: 0;
 }
+
+.invite-mail {
+	flex: 1;
+	border: 1px solid lightgray;
+	border-radius: 5px;
+	height: 100%;
+	padding: 0.5em;
+}
+
+.invite-form {
+	display: flex;
+	align-items: center;
+	height: 38px;
+}
+
+#error {
+	display: block;
+}

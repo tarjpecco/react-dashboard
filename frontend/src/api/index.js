@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AuthHeaderService from './auth-header';
 
-export const API_URL = process.env.REACT_APP_API_URL || 'http://flexcomply-dev.nanoapp.io/api';
+export const API_URL = process.env.REACT_APP_API_URL || 'https://flexcomply-dev.nanoapp.io/api';
 
 const authHeaderService = new AuthHeaderService(API_URL);
 
@@ -142,6 +142,34 @@ export const updateCurrentUser = (params) => {
     {
       ...params,  
     },
+    {
+      headers
+    }))
+    .then(res => res.data)
+};
+
+export const getPoliciesForUser = (userPK) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.get(`${API_URL}/user-policies/${userPK}/`, {
+      headers
+    }))
+    .then(res => res.data)
+};
+
+export const createPoliciesForUser = (userPK, params) => {
+  return authHeaderService.getHeaders('multipart/form-data')
+    .then((headers) => axios.post(`${API_URL}/user-policies/${userPK}/`,
+    params,
+    {
+      headers
+    }))
+    .then(res => res.data)
+};
+
+export const createInvite = (params) => {
+  return authHeaderService.getHeaders('multipart/form-data')
+    .then((headers) => axios.post(`${API_URL}/invites/`,
+    params,
     {
       headers
     }))

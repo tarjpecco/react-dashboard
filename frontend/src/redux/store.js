@@ -9,6 +9,8 @@ import userlicenses from './ducks/userlicenses';
 import projects from './ducks/projects';
 import jobs from './ducks/jobs';
 import user from './ducks/user';
+import policies from './ducks/policies';
+import invites from './ducks/invites';
 
 import rootSaga from './sagas';
 
@@ -33,8 +35,10 @@ export default function configureStore(initialState = {}) {
 		global,
 		userlicenses,
 		projects,
+		policies,
 		jobs,
 		user,
+		invites,
 	});
 	
 	const store = createStore(connectRouter(history)(reducer), initialState, compose(...enhancers));

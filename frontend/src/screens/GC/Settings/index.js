@@ -39,6 +39,7 @@ class Settings extends React.PureComponent {
 			user: {
 				first_name: '',
 				last_name: '',
+				email: '',
 				addressObj: {
 					line_1: '',
 					line_2: '',
@@ -224,6 +225,7 @@ class Settings extends React.PureComponent {
 			first_name: firstName,
 			last_name: lastName,
 			phone,
+			email,
 			addressObj: address,
 		} = user;
 
@@ -273,6 +275,20 @@ class Settings extends React.PureComponent {
 										value={`${firstName} ${lastName}`}
 										onChange={e => this.onNameEditHandler(e.target.value)}
 										disabled={editable}
+									/>
+								</td>
+							</tr>
+							<tr className="text-left">
+								<td className="table-width-20">
+									<p className="text-info">Email</p>
+								</td>
+								<td className="table-width-80" colSpan="4">
+									<input
+										type="text"
+										name="email"
+										value={email}
+										onChange={this.onChangeHandler}
+										disabled
 									/>
 								</td>
 							</tr>

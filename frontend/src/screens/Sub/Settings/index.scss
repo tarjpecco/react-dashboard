@@ -45,3 +45,17 @@ table .password input {
 	margin-top: 3px;
 	display: block;
 }
+
+
+.locationdetail-form {
+	display: flex;
+	justify-content: 'space-between';
+	
+	input {
+		border: 1px solid lightgray;
+		border-radius: 5px;
+		padding: 0 0.5em;
+		margin: 0 5px;
+		height: 30px;
+	}
+}

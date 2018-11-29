@@ -2,38 +2,64 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import * as moment from 'moment';
+import { isEmpty, cloneDeep, merge, mapValues } from 'lodash';
+import 'react-phone-number-input/style.css'
+import PhoneInput from 'react-phone-number-input'
 
 import {
 	actions as licenseActions,
 	getLicensesSelector
 } from '../../../redux/ducks/userlicenses';
-
+import {
+	getUserSelector,
+	actions as userActions,
+} from '../../../redux/ducks/user';
 import Table from '../../../components/Table';
 import './index.scss';
+import LocationSearchInput from '../../../components/LocationSearchInput';
 
 class Settings extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
 			editable: 'disable',
-			name: 'Name Surname',
-			address: '123 Main Street NY, NY 10001',
-			phone: '555-555-5555',
 			ein: '61-512584',
 			btnname: 'Edit',
 			btnicon: 'si si-pencil',
+			showResetPassform: false,
+			isInValidPassword: {
+				password: false,
+				oldPassword: false,
+				confirmPassword: false,
+				notequal: false,
+			},
+			addressInvalid: {},
 			password: '',
+			showAddressDetailForm: false,
+			user: {
+				first_name: '',
+				last_name: '',
+				addressObj: {
+					line_1: '',
+					line_2: '',
+					town: '',
+					state: '',
+					zip_code: '',
+				},
+			}
 		};
-		this.handleClickEdit.bind(this);
-		this.onChangeHandler.bind(this);
-		this.onAddLicense.bind(this);
-		this.onDeleteLicense.bind(this);
-		this.onChangeLicenseHandler.bind(this);
-
 		this.textInput = React.createRef();
 		this.focusTextInput = this.focusTextInput.bind(this);
-		const { listUserLicenses } = props;
+		const { user, getUserInfo, listUserLicenses } = props;
+		if (isEmpty(user)) {
+			getUserInfo();
+		}		
 		listUserLicenses();
+	}
+	
+	componentWillReceiveProps(nextProps) {
+		const { user } = nextProps;
+		this.setState({ user });
 	}
 
 	handleClickEdit = () => {
@@ -46,6 +72,9 @@ class Settings extends React.PureComponent {
 			this.setState({ editable: 'disable' });
 			this.setState({ btnname: 'Edit' });
 			this.setState({ btnicon: 'si si-pencil' });
+			const { user } = this.state;
+			const { updateUserInfo } = this.props;
+			updateUserInfo({ user });
 		}
 	};
 
@@ -100,22 +129,104 @@ class Settings extends React.PureComponent {
 
 	onResetPassword = () => {};
 
+
+	getAddressStr = (address) => {
+		const { line_1: line1, line_2: line2, town, state, zip_code:zipCode } = address;
+		return `${line1 || ''} ${line2 || ''} ${town || ''}, ${state || ''} ${zipCode || ''}`;
+	}
+
+	onUserEditHandler = (prop, value) => {
+		const { user } = this.state;
+		const userInfo = cloneDeep(user);
+		userInfo[prop] = value;
+		this.setState({ user: userInfo });
+	}
+
+	onNameEditHandler = value => {
+		const { user } = this.state;
+		if (value) {
+			const n = value.lastIndexOf(' ');
+			const firstName = value.slice(0, n);
+			const lastName = value.slice(n + 1);
+			this.setState({ user: { ...user, first_name: firstName, last_name: lastName } });
+		}
+	}
+
+	onAddressChanged = () => {
+		const { user } = this.state;
+		const emptyAddress = {
+			line_1: '',
+			line_2: '',
+			town: '',
+			state: '',
+			zip_code: '',
+		};
+		const addressInvalid = {};
+		const newAddress = merge(emptyAddress, user.addressObj);
+		let isInValid = false;
+		mapValues(newAddress, (value, key) => {
+			if (!value && key !== 'line_2') {
+				addressInvalid[key] = true;
+				isInValid = true;
+			}
+		});
+		if (isInValid) {
+			this.setState({ addressInvalid });
+		} else {
+			this.setState({ user: { ...user, addressObj: newAddress }, showAddressDetailForm: false, addressInvalid });
+		}
+	}
+
+	changeAddress = (e) => {
+		const prop = e.target.name;
+		const value = e.target.value;
+		const { user, addressInvalid } = this.state;
+		const newAddress = cloneDeep(user.addressObj);
+		const newAddressInvalid = cloneDeep(addressInvalid);
+		if (value) newAddressInvalid[prop] = false;
+		 else newAddressInvalid[prop] = true;
+		newAddress[prop] = value;
+		this.setState({ user: { ...user, addressObj: newAddress }, addressInvalid: newAddressInvalid});
+	}
+
+	showAddressDetailForm = (address) => {
+		const { user } = this.state;
+		this.setState({
+			showAddressDetailForm: true,
+			user: { 
+				...user,
+				addressObj: address,
+			}
+		});
+	}
+
 	focusTextInput() {
 		this.textInput.current.focus();
 	}
 
 	render() {
 		const {
-			name,
-			phone,
-			address,
 			ein,
 			editable,
 			btnname,
 			btnicon,
+			showResetPassform,
+			user,
+			isInValidPassword,
 			password,
+			oldPassword,
+			confirmPassword,
+			showAddressDetailForm,
+			addressInvalid,
 		} = this.state;
 		const { userLicenses: license } = this.props;
+		const {
+			first_name: firstName,
+			last_name: lastName,
+			phone,
+			addressObj: address,
+		} = user;
+
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -159,8 +270,8 @@ class Settings extends React.PureComponent {
 									<input
 										type="text"
 										name="name"
-										value={name}
-										onChange={this.onChangeHandler}
+										value={`${firstName} ${lastName}`}
+										onChange={e => this.onNameEditHandler(e.target.value)}
 										disabled={editable}
 									/>
 								</td>
@@ -170,13 +281,69 @@ class Settings extends React.PureComponent {
 									<p className="text-info">Address</p>
 								</td>
 								<td className="table-width-80" colSpan="4">
-									<input
-										type="text"
-										name="address"
-										value={address}
-										onChange={this.onChangeHandler}
-										disabled={editable}
-									/>
+									{editable &&
+										<input
+											type="text"
+											value={this.getAddressStr(address)}
+											disabled={editable}
+										/>
+									}
+									{!editable &&
+										<React.Fragment>
+											{!showAddressDetailForm && 
+												<LocationSearchInput
+													onAddressChanged={value => this.showAddressDetailForm(value)}
+													className="locationSearchForm"
+													placeholder={this.getAddressStr(address)}
+												/>
+											}
+											{showAddressDetailForm && (
+												<div className="locationdetail-form">
+													<input 
+														value={address.line_1}
+														className={addressInvalid.line_1 && 'is-invalid form-control'}
+														name="line_1"
+														placeholder="line_1"
+														onChange={this.changeAddress}
+													/>
+													<input 
+														value={address.line_2}
+														name="line_2"
+														placeholder="line_2"
+														onChange={this.changeAddress}
+													/>
+													<input 
+														value={address.town}
+														name="town"
+														className={addressInvalid.town && 'is-invalid form-control'}
+														placeholder="town"
+														onChange={this.changeAddress}
+													/>
+													<input 
+														value={address.state}
+														name="state"
+														className={addressInvalid.state && 'is-invalid form-control'}
+														placeholder="state"
+														onChange={this.changeAddress}
+													/>
+													<input 
+														value={address.zip_code}
+														name="zip_code"
+														className={addressInvalid.zip_code && 'is-invalid form-control'}
+														placeholder="zip_code"
+														onChange={this.changeAddress}
+													/>
+													<button
+														type="button"
+														className="btn btn-sm btn-primary"
+														onClick={this.onAddressChanged}
+													>
+														Ok
+													</button>
+												</div>
+												)}
+										</React.Fragment>
+									}
 								</td>
 							</tr>
 							<tr className="text-left">
@@ -184,12 +351,13 @@ class Settings extends React.PureComponent {
 									<p className="text-info">Phone</p>
 								</td>
 								<td className="table-width-80" colSpan="4">
-									<input
-										type="text"
-										name="phone"
-										value={phone}
-										onChange={this.onChangeHandler}
+									<PhoneInput
+										placeholder="Enter phone number"
+										value={ phone }
+										className="phoneinput"
+										country="US"
 										disabled={editable}
+										onChange={value => this.onUserEditHandler('phone', value)}
 									/>
 								</td>
 							</tr>
@@ -297,7 +465,8 @@ class Settings extends React.PureComponent {
 }
 
 const mapStateToProps = state => ({
-	userLicenses: getLicensesSelector(state)
+	userLicenses: getLicensesSelector(state),
+	user: getUserSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -306,18 +475,20 @@ const mapDispatchToProps = dispatch => ({
 	updateLicense: params => dispatch(licenseActions.update_license(params)),
 	removeLicense: params => dispatch(licenseActions.remove_license(params)),
 	updateLicenseState: params => dispatch(licenseActions.update_license_state(params)),
+	getUserInfo: () => dispatch(userActions.get_user()),
+	updateUserInfo: params => dispatch(userActions.update_user(params)),
 })
 
 Settings.propTypes = {
-	userLicenses: PropTypes.array,
+	userLicenses: PropTypes.array.isRequired,
 	createLicense: PropTypes.func.isRequired,
 	listUserLicenses: PropTypes.func.isRequired,
 	updateLicense: PropTypes.func.isRequired,
 	removeLicense: PropTypes.func.isRequired,
 	updateLicenseState: PropTypes.func.isRequired,
+	user: PropTypes.object.isRequired,
+	getUserInfo: PropTypes.func.isRequired,
+	updateUserInfo: PropTypes.func.isRequired, 
 };
 
-Settings.defaultProps = {
-	userLicenses: [],
-}
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);

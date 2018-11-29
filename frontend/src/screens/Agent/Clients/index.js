@@ -1,5 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import {
+	actions as companiesActions,
+	getCompaniesSelector
+} from '../../../redux/ducks/companies';
+
 import Table from '../../../components/Table';
 
 import './index.scss';
@@ -8,29 +15,28 @@ class Clients extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			clientList: ['Roofing', 'Electric', 'Plumbing', 'Exterior'],
-			filteredList: ['Roofing', 'Electric', 'Plumbing', 'Exterior'],
-			filter: '',
+			search: '',
 		};
+	}
+
+	componentDidMount() {
+		const { listCompanies } = this.props;
+		listCompanies({ search: '' });
 	}
 
 	onChangeHandler = e => {
 		const { target } = e;
-		const name = target.name;
-		const value = target.value;
-		this.setState({ [name]: value });
-
-		const { clientList } = this.state;
-		const array = [];
-		clientList.forEach(item => {
-			if (item.includes(value)) array.push(item);
-		});
-		this.setState({ filteredList: array });
+		const search = target.value;
+		this.setState({ search });
+		const { listCompanies } = this.props;
+		listCompanies({ name: search.toLowerCase() });
 	};
 
+	getIdFromUrl = (url) => url.slice(0, -1).split('/').pop();
+
 	render() {
-		const { filteredList } = this.state;
-		const { filter } = this.state;
+		const { companyList } = this.props;
+		const { search } = this.state;
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -45,9 +51,9 @@ class Clients extends React.Component {
 				<div className="content clients">
 					<input
 						type="type"
-						name="filter"
+						name="search"
 						placeholder="Search Client.."
-						value={filter}
+						value={search}
 						onChange={this.onChangeHandler}
 					/>
 				</div>
@@ -61,11 +67,11 @@ class Clients extends React.Component {
 							</tr>
 						</thead>
 						<tbody>
-							{filteredList.map((item, id) => (
+							{companyList.map((item, id) => (
 								// eslint-disable-next-line
 								<tr key={id}>
 									<td className="text-left">
-										<p className="text-info">{item}</p>
+										<p className="text-info">{item.name}</p>
 									</td>
 
 									<td className="text-center wrap">
@@ -75,10 +81,7 @@ class Clients extends React.Component {
 									</td>
 									<td className="text-right">
 										<Link
-											to={{
-												pathname: '/agentdetail',
-												state: { agentId: item },
-											}}
+											to={`/clients/${this.getIdFromUrl(item.url)}`}
 										>
 											<button type="button" className="btn btn-primary">
 												Go
@@ -94,4 +97,22 @@ class Clients extends React.Component {
 		);
 	}
 }
-export default Clients;
+
+const mapStateToProps = state => ({
+	companyList: getCompaniesSelector(state)
+});
+
+const mapDispatchToProps = dispatch => ({
+	listCompanies: params => dispatch(companiesActions.get_companies(params)),
+})
+
+Clients.propTypes = {
+	companyList: PropTypes.array,
+	listCompanies: PropTypes.func.isRequired,
+};
+
+Clients.defaultProps = {
+	companyList: [],
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Clients);

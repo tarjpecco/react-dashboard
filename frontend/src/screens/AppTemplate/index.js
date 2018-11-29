@@ -33,7 +33,7 @@ const AppTemplate = ({ showSideBar, location, history, user, getUserInfo }) => {
 	if (isEmpty(user)) {
 		getUserInfo();
 	}
-	const userRole = user && user.role && user.role.toLowerCase();
+	const userRole = user && user.role ? user.role.toLowerCase() : '';
 	return (
 		<div
 			id="page-container"
@@ -44,7 +44,7 @@ const AppTemplate = ({ showSideBar, location, history, user, getUserInfo }) => {
 		>
 			<Sidebar location={location} userRole={userRole} />
 
-			<Header history={history} username={user && user.username} />
+			<Header history={history} username={user && user.username || ''} />
 			{userRole === 'gc' && (
 				<Switch>
 					<Route exact path="/dashboard" component={GCDashboard} />
@@ -67,7 +67,7 @@ const AppTemplate = ({ showSideBar, location, history, user, getUserInfo }) => {
 				<Switch>
 					<Route exact path="/dashboard" component={AgentDashboard} />
 					<Route exact path="/clients" component={AgentClients} />
-					<Route exact path="/agentdetail" component={AgentDetail} />
+					<Route exact path="/clients/:id" component={AgentDetail} />
 					<Route exact path="/settings" component={AgentSettings} />
 				</Switch>
 			)}
@@ -96,7 +96,7 @@ const mapDispatchToProps = dispatch => ({
 
 const enhance = compose(
 	withRouter,
-	connect(mapStateToProps, mapDispatchToProps)
+	connect(mapStateToProps, mapDispatchToProps),
 );
 
 export default enhance(AppTemplate);

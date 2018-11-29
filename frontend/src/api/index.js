@@ -175,3 +175,25 @@ export const createInvite = (params) => {
     }))
     .then(res => res.data)
 };
+
+export const getCompanies = (params) => {
+  return authHeaderService.getHeaders()
+  .then((headers) => axios.get(`${API_URL}/companies/`,
+  {
+    headers,
+    params,
+  }))
+  .then(res => res.data)
+}
+
+export const getCompany = (params) => {
+  return authHeaderService.getHeaders()
+  .then((headers) => axios.get(`${API_URL}/companies/${params.id}/`,
+  {
+    ...params,
+  },
+  {
+    headers
+  }))
+  .then(res => res.data)
+}

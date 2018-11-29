@@ -21,3 +21,23 @@
     display: block;
   }
 }
+
+.gc-locationdetail-form {
+  display: flex;
+	justify-content: space-between;
+	
+	input {
+		border: 1px solid lightgray;
+		border-radius: 5px;
+		padding: 0 0.5em;
+		margin: 0 5px;
+    height: 30px;
+    min-width: 80px;
+    flex: 1;
+
+    &:focus {
+      width: 150px;
+      flex: auto;
+    }
+	}
+}

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Modal from 'react-modal';
 import { connect } from 'react-redux';
-import { cloneDeep, isEmpty } from 'lodash';
+import { isEmpty, cloneDeep, merge, mapValues } from 'lodash';
 
 import Table from '../../../components/Table';
 import LocationSearchInput from '../../../components/LocationSearchInput';
@@ -22,22 +22,32 @@ const customStyles = {
 	},
 };
 
+const emptyProject = {
+	budget: 0,
+	name: '',
+	startDate: '',
+	endDate: '',
+	address: {
+		line_1: '',
+		line_2: '',
+		town: '',
+		state: '',
+		zip_code: '',
+	},
+	status: 'act',
+	company: `${API_URL}/companies/1/`,
+};
+
 class Projects extends React.Component {
 	state = {
-		newproject: {
-			budget: 0,
-			name: '',
-			startDate: '',
-			endDate: '',
-			address: {},
-			status: 'act',
-			company: `${API_URL}/companies/1/`,
-		},
+		newproject: cloneDeep(emptyProject),
 		isInValid: {
 			name: false,
 			address: false,
 		},
 		modalIsOpen: false,
+		addressInvalid: {},
+		showAddressDetailForm: false,
 	}
 
 	componentDidMount() {
@@ -51,7 +61,7 @@ class Projects extends React.Component {
 	}
 
 	closeModal = () => {
-		this.setState({ modalIsOpen: false });
+		this.setState({ modalIsOpen: false, newproject: cloneDeep(emptyProject) });
 	}
 
 	getProjectIdFromUrl = (url) => url.slice(0, -1).split('/').pop();
@@ -95,17 +105,59 @@ class Projects extends React.Component {
 		});
 	}
 
-	onAddressChanged = (address) => {
-		const { newproject, isInValid } = this.state;
-		const project = cloneDeep(newproject);
-		project.address = address;
-		const newIsInValid = cloneDeep(isInValid);
-		if (!isEmpty(address)) {
-			newIsInValid.address = false;
+	getAddressStr = (address) => {
+		const { line_1: line1, line_2: line2, town, state, zip_code:zipCode } = address;
+		return `${line1 || ''} ${line2 || ''} ${town ? `${town},` : ''} ${state || ''} ${zipCode || ''}`;
+	}
+
+	onAddressChanged = () => {
+		const { newproject } = this.state;
+		const emptyAddress = {
+			line_1: '',
+			line_2: '',
+			town: '',
+			state: '',
+			zip_code: '',
+		};
+		const addressInvalid = {};
+		const newAddress = merge(emptyAddress, newproject.address);
+		let isInValid = false;
+		mapValues(newAddress, (value, key) => {
+			if (!value && key !== 'line_2') {
+				addressInvalid[key] = true;
+				isInValid = true;
+			}
+		});
+		if (isInValid) {
+			this.setState({ addressInvalid });
+		} else {
+			this.setState({ newproject: { ...newproject, address: newAddress }, showAddressDetailForm: false, addressInvalid });
 		}
+	}
+
+	changeAddress = (e) => {
+		const prop = e.target.name;
+		const value = e.target.value;
+		const { newproject, addressInvalid } = this.state;
+		const newAddress = cloneDeep(newproject.address);
+		const newAddressInvalid = cloneDeep(addressInvalid);
+		if (value) newAddressInvalid[prop] = false;
+		 else newAddressInvalid[prop] = true;
+		newAddress[prop] = value;
 		this.setState({
-			newproject: project,
-			isInValid: newIsInValid 
+			newproject: { ...newproject, address: newAddress },
+			addressInvalid: newAddressInvalid
+		});
+	}
+
+	showAddressDetailForm = (address) => {
+		const { newproject } = this.state;
+		this.setState({
+			showAddressDetailForm: true,
+			newproject: { 
+				...newproject,
+				address,
+			}
 		});
 	}
 
@@ -123,7 +175,14 @@ class Projects extends React.Component {
 	}
 
 	render() {
-		const { modalIsOpen, newproject, isInValid } = this.state;
+		const {
+			modalIsOpen,
+			newproject,
+			isInValid,
+			showAddressDetailForm,
+			addressInvalid
+		} = this.state;
+		const { address } = newproject;
 		const { projectList } = this.props;
 		return (
 			<div id="main">
@@ -214,7 +273,61 @@ class Projects extends React.Component {
 						</div>
 						<div className="form-group">
 							Address
-							<LocationSearchInput onAddressChanged={this.onAddressChanged} isInValid={isInValid.address}/>
+							{!showAddressDetailForm && 
+								<LocationSearchInput
+									onAddressChanged={this.showAddressDetailForm}
+									isInValid={isInValid.address}
+									placeholder={this.getAddressStr(address)}
+								/>
+							}
+							{showAddressDetailForm && (
+								<div className="gc-locationdetail-form">
+									<input 
+										value={address.line_1}
+										className={addressInvalid.line_1 && 'is-invalid form-control'}
+										name="line_1"
+										// eslint-disable-next-line jsx-a11y/no-autofocus
+										autoFocus
+										placeholder="line_1"
+										onChange={this.changeAddress}
+									/>
+									<input 
+										value={address.line_2}
+										name="line_2"
+										placeholder="line_2"
+										onChange={this.changeAddress}
+									/>
+									<input 
+										value={address.town}
+										name="town"
+										className={addressInvalid.town && 'is-invalid form-control'}
+										placeholder="town"
+										onChange={this.changeAddress}
+									/>
+									<input 
+										value={address.state}
+										name="state"
+										className={addressInvalid.state && 'is-invalid form-control'}
+										placeholder="state"
+										onChange={this.changeAddress}
+									/>
+									<input 
+										value={address.zip_code}
+										name="zip_code"
+										className={addressInvalid.zip_code && 'is-invalid form-control'}
+										placeholder="zip_code"
+										onChange={this.changeAddress}
+									/>
+									<button
+										type="button"
+										className="btn btn-sm btn-primary"
+										onClick={this.onAddressChanged}
+										style={{ height: 30 }}
+									>
+										Ok
+									</button>
+								</div>
+							)}
 						</div>
 						<div className="form-group">
 							Expected Start Date

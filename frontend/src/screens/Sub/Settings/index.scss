@@ -25,7 +25,7 @@ table {
 	display: flex;
 }
 
-.location-search-input.form-control {
+.sub-locationSearchForm .location-search-input.form-control {
 	padding: 0;
 	height: auto;
 	border: none;
@@ -49,7 +49,7 @@ table .password input {
 
 .locationdetail-form {
 	display: flex;
-	justify-content: 'space-between';
+	justify-content: space-between;
 	
 	input {
 		border: 1px solid lightgray;

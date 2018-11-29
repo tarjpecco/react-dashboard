@@ -322,7 +322,7 @@ class Settings extends React.PureComponent {
 											{!showAddressDetailForm && 
 												<LocationSearchInput
 													onAddressChanged={value => this.showAddressDetailForm(value)}
-													className="locationSearchForm"
+													className="sub-locationSearchForm"
 													placeholder={this.getAddressStr(address)}
 												/>
 											}

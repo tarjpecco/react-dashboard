@@ -2,13 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Modal from 'react-modal';
 import { connect } from 'react-redux';
-import { cloneDeep, mapValues, isUndefined } from 'lodash';
+import { cloneDeep, mapValues } from 'lodash';
 import * as moment from 'moment';
 
 import {
 	actions as policiesAction,
 	getPoliciesSelector
 } from '../../../redux/ducks/policies';
+import {
+	actions as invitesAction,
+} from '../../../redux/ducks/invites';
 import {
 	getUserSelector
 } from '../../../redux/ducks/user';
@@ -30,15 +33,21 @@ class MyInsurance extends React.Component {
 		super(props);
 		this.state = {
 			modalIsOpen: false,
+			showInvitationForm: false,
+			invitation: {
+				email: '',
+				project: [],
+				job: [],
+			},
 			newPolicy: {
-				name: '',
 				type: 'GL',
 				number: 12345678,
-				renewal_date: moment(new Date()).format('YYYY-MM-DD'),
-				timestamps: 'string',
-				effective_date: moment(new Date()).format('YYYY-MM-DD'),
 				company: `${API_URL}/companies/1/`,
-				address: 1,
+				renewal_date: moment(new Date()).format('YYYY-MM-DD'),
+			},
+			inValid: {
+				email: false,
+				file: false,
 			}
 		};
 		const { listPolicies } = props;
@@ -54,7 +63,45 @@ class MyInsurance extends React.Component {
 	}
 
 	closeModal = () => {
-		this.setState({ modalIsOpen: false });
+		this.setState({ modalIsOpen: false, inValid: {}, invitation: {}, showInvitationForm: false });
+	}
+
+	validateEmail = (email) => {
+    // eslint-disable-next-line no-useless-escape
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+	}
+
+	changeInviteEmail = (e) => {
+		const { invitation } = this.state;
+		invitation.email = e.target.value;
+		this.setState({ invitation });
+	}
+
+	sendInvite = () => {
+		const { createInvite, user } = this.props;
+		const {
+			invitation,
+			inValid,
+		} = this.state;
+
+		let isInvalid = false;
+		if (!this.validateEmail(invitation.email)) {
+			inValid.email = true;
+			inValid.errorMessage = 'Invalid Email';
+			isInvalid = true;
+		}
+		if (isInvalid) {
+			this.setState({ inValid });
+		} else {
+			this.closeModal();
+			const formData = new FormData();
+			mapValues(invitation, (value, key) => {
+				formData.append(key, value);
+			});
+			formData.append('type', user.role);
+			createInvite(formData);
+		}
 	}
 
 	addNewPolicy = () => {
@@ -67,8 +114,9 @@ class MyInsurance extends React.Component {
 		mapValues(newPolicy, (value, key) => {
 			formData.append(key, value);
 		});
-		if (isUndefined(this.file.files[0])) formData.append('file', this.file.files[0]);
-		formData.append('sub', user.url);
+		const sub = [];
+		sub.push(user.url);
+		formData.append('sub', sub);
 		createPolicy(formData);
 	}
 
@@ -79,12 +127,8 @@ class MyInsurance extends React.Component {
 		this.setState({ newPolicy: policy });
 	}
 
-	linkAgent = () => {
-
-	}
-
 	render() {
-		const { modalIsOpen } = this.state;
+		const { modalIsOpen, showInvitationForm, inValid, invitation } = this.state;
 		const { policies } = this.props;
 		return (
 			<div id="main">
@@ -191,6 +235,7 @@ class MyInsurance extends React.Component {
 						<input
 							type="file"
 							ref={(ref) => { this.file = ref; }}
+							onChange={this.addNewPolicy}
 							style={{ display: 'none' }}
 						/>
 					</form>
@@ -200,23 +245,44 @@ class MyInsurance extends React.Component {
 						<h2>Who will upload the document(s)?</h2>
 					</center>
 					<div className="wrap">
-						<button type="button" className="btn btn-success" onClick={() => this.file && this.file.click()}>
+						<button
+							type="button"
+							className="btn btn-success"
+							onClick={() => this.file && this.file.click()}
+						>
 							Upload Myself
 						</button>
-						<button type="button" className="btn btn-success" onClick={this.linkAgent}>
+						<button
+							type="button"
+							className="btn btn-success"
+							onClick={() => this.setState({ showInvitationForm: !showInvitationForm })}
+						>
 							Link My agent
 						</button>
 					</div>
-					<div className="text-center mt-5 mb-3">
-						<button
-							type="button"
-							className="btn btn-primary"
-							style={{ width: 200, fontWeight: 600 }} 
-							onClick={this.addNewPolicy}
-						>
-							OK
-						</button>
-					</div>
+					{showInvitationForm && 
+						<div className="text-center mt-3 mb-3 mr-5 ml-5">
+							<div className="invite-form">
+								<input type="email"
+									onChange={this.changeInviteEmail}
+									value={invitation.email}
+									className={`invite-mail form-control ${inValid.errorMessage && 'is-invalid'}`}
+								/>
+								<button
+									type="button"
+									className="btn btn-primary invite-submit"
+									onClick={this.sendInvite}
+								>
+									Send Invitation
+								</button>
+							</div>
+							{inValid.errorMessage &&
+								<div id="error" className="invalid-feedback animated fadeIn">
+									{inValid.errorMessage}
+								</div>
+							}
+						</div>
+					}
 				</Modal>
 			</div>
 		);
@@ -231,12 +297,14 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
 	createPolicy: params => dispatch(policiesAction.create_policy(params)),
 	listPolicies: () => dispatch(policiesAction.get_policies()),
+	createInvite: params => dispatch(invitesAction.create_invite(params)),
 })
 
 MyInsurance.propTypes = {
 	policies: PropTypes.array,
 	user: PropTypes.object.isRequired,
 	createPolicy: PropTypes.func.isRequired,
+	createInvite: PropTypes.func.isRequired,
 	listPolicies: PropTypes.func.isRequired,
 };
 

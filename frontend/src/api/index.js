@@ -154,9 +154,6 @@ export const getPoliciesForUser = (userPK) => {
       headers
     }))
     .then(res => res.data)
-    .catch(error => {
-      throw error;
-    })
 };
 
 export const createPoliciesForUser = (userPK, params) => {
@@ -167,7 +164,14 @@ export const createPoliciesForUser = (userPK, params) => {
       headers
     }))
     .then(res => res.data)
-    .catch(error => {
-      return error;
-    })
+};
+
+export const createInvite = (params) => {
+  return authHeaderService.getHeaders('multipart/form-data')
+    .then((headers) => axios.post(`${API_URL}/invites/`,
+    params,
+    {
+      headers
+    }))
+    .then(res => res.data)
 };

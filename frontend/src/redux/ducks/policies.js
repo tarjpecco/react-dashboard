@@ -6,7 +6,6 @@ import { createSelector } from 'reselect';
 import {
   createPoliciesForUser,
   getPoliciesForUser,
-  getCurrentUser
 } from '../../api';
 import { actionNames, createActions } from '../helper';
 
@@ -63,7 +62,7 @@ function* listPoliciesSaga() {
 }
 
 function* createPoliciesSaga({ payload }) {
-  try {
+  try { 
     const newItem = yield call(createPoliciesForUser, 'me', payload);
     const policies = yield select(getPoliciesSelector);
     policies.push(newItem);

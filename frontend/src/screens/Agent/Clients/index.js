@@ -29,7 +29,7 @@ class Clients extends React.Component {
 		const search = target.value;
 		this.setState({ search });
 		const { listCompanies } = this.props;
-		listCompanies({ search });
+		listCompanies({ name: search.toLowerCase() });
 	};
 
 	getIdFromUrl = (url) => url.slice(0, -1).split('/').pop();

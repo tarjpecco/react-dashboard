@@ -34,7 +34,7 @@ const emptyProject = {
 		state: '',
 		zip_code: '',
 	},
-	status: 'act',
+	status: 'active',
 	company: `${API_URL}/companies/1/`,
 };
 

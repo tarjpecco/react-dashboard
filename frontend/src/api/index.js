@@ -101,6 +101,16 @@ export const getProjects = () => {
     .then(res => res.data)
 };
 
+export const getProjectById = (params) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.get(`${API_URL}/projects/${params.id}/`,
+    {
+      headers
+    }))
+    .then(res => res.data)
+};
+
+
 export const createProject = (params) => {
   return authHeaderService.getHeaders()
     .then((headers) => axios.post(`${API_URL}/projects/`,

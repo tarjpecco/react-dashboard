@@ -46,13 +46,14 @@ class Table extends React.PureComponent {
 const { string, node } = PropTypes;
 Table.propTypes = {
 	tableName: string.isRequired,
-	tableStyle: string.isRequired,
+	tableStyle: string,
 	editable: string,
 	children: node.isRequired,
 };
 
 Table.defaultProps = {
 	editable: 'disable',
+	tableStyle: '',
 }
 
 export default Table;

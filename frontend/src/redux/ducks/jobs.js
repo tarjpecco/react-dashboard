@@ -69,12 +69,7 @@ function* listJobsSaga({ payload }) {
       jobList = results;
     } else {
       const { results } = yield call(getJobsByStatus, payload.status);
-      jobList = yield all(results.map(data => {
-        const resp = call(getDataFromUrl, data.project_id);
-        assign(data, resp);
-        return data;
-      }));
-      console.log('joblist in jobs api: ', jobList);
+      jobList = results;
     }
     yield put(actions.get_jobs_success({ jobList }));
   } catch (err) {

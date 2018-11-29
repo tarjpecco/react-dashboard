@@ -83,13 +83,13 @@ const Dashboard = ({ projectList, listProjects, jobList, listJobs }) => {
 						{jobList.map((job, index) => (
 							<tr key={index}>
 								<td className="font-w600 text-center">
-									<p className="text-info">Main Street</p>
+									<p className="text-info">{job.project.name}</p>
 								</td>
 								<td className="font-w600 text-center">
-									<p className="text-info">123 Main Street NY, NY</p>
+									<p className="text-info">{getAddressStr(job.project.address)}</p>
 								</td>
 								<td className="font-w600 text-center">
-									<p className="text-info">{job.status}</p>
+									<p className="text-info">{job.project.status}</p>
 								</td>
 								<td className="font-w600 text-center">
 									<button type="button" className="btn btn-primary">

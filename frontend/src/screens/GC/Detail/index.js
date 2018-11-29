@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import classnames from 'classnames';
 import { connect } from 'react-redux';
 import * as moment from 'moment';
-import { orderBy, cloneDeep, mapValues } from 'lodash';
+import { orderBy, cloneDeep, mapValues, isEmpty } from 'lodash';
 
 import Modal from 'react-modal';
 import Table from '../../../components/Table';
@@ -13,6 +13,14 @@ import {
 	actions as jobActions,
 	getJobsSelector
 } from '../../../redux/ducks/jobs';
+import {
+	getUserSelector,
+	actions as userActions,
+} from '../../../redux/ducks/user';
+import {
+	actions as projectActions,
+	getProjectSelector,
+} from '../../../redux/ducks/projects';
 import { API_URL } from '../../../api';
 
 import './index.scss';
@@ -30,6 +38,10 @@ class Detail extends React.Component {
 		match: PropTypes.object.isRequired,
 		listJobs: PropTypes.func.isRequired,
 		createJob: PropTypes.func.isRequired,
+		user: PropTypes.object.isRequired,
+		getUserInfo: PropTypes.func.isRequired,
+		getProject: PropTypes.func.isRequired,
+		project: PropTypes.object.isRequired,
 	}
 
 	constructor(props) {
@@ -47,20 +59,20 @@ class Detail extends React.Component {
 				estimated_end_date: false,
 			},
 			newJob: {
-				trade_type: "",
-				expected_start_date: "",
-				expected_end_date: "",
-				estimated_end_date: "",
-				project_id: `${API_URL}/projects/${this.projectId}/`,
-				user: this.getUserInfo().url,
-				start_date: moment(new Date()).format('YYYY-MM-DD'),
-				end_date: moment(new Date()).format('YYYY-MM-DD')
+				trade_type: '',
+				expected_start_date: '',
+				expected_end_date: '',
+				estimated_end_date: '',
+				start_date: '',
+				end_date: '',
 			}
 		};
 
-		this.onClickTabHandler.bind(this);
-		this.openModal = this.openModal.bind(this);
-		this.closeModal = this.closeModal.bind(this);
+		const { user, getUserInfo, getProject } = props;
+		getProject({ id: this.projectId });
+		if (isEmpty(user)) {
+			getUserInfo();
+		}
 	}
 
 	componentDidMount() {
@@ -110,10 +122,6 @@ class Detail extends React.Component {
 		this.setState({ clicked: status });
 	}
 
-	getJobIdFromUrl = (url) => url.slice(0, -1).split('/').pop();
-
-	getUserInfo = () => JSON.parse(localStorage.getItem('user'));
-
 	datepickerChanged = (dateType) => {
 		const { newJob, isInValid } = this.state;
 		setTimeout(() => {
@@ -133,6 +141,16 @@ class Detail extends React.Component {
 				job.estimated_end_date = this.estimatedEndDateEle &&
 					moment(this.estimatedEndDateEle.value).format('YYYY-MM-DD');
 				inValid.estimated_end_date = false;
+			}
+			if (dateType === 'start_date') {
+				job.start_date = this.startDateEle &&
+					moment(this.startDateEle.value).format('YYYY-MM-DD');
+				inValid.start_date = false;
+			}
+			if (dateType === 'end_date') {
+				job.end_date = this.endDateEle &&
+					moment(this.endDateEle.value).format('YYYY-MM-DD');
+				inValid.end_date = false;
 			}
 			this.setState({ newJob: job, isInValid: inValid });
 		}, 300);
@@ -171,13 +189,16 @@ class Detail extends React.Component {
 		}
 		if (!invalid) {
 			this.closeModal();
-			const { createJob } = this.props;
+			const { createJob, user, project } = this.props;
 			const formData = new FormData();
 			mapValues(newJob, (value, key) => {
 				formData.append(key, value);
 			});
 			formData.append('file', this.file.files[0]);
 			formData.append('status', clicked);
+			formData.append('user', user.url);
+			console.log('project:', project);
+			formData.append('project', project);
 			createJob(formData);
 		} else {
 			this.setState({ isInValid: newIsInValid });
@@ -571,6 +592,38 @@ class Detail extends React.Component {
 							{isInValid.estimated_end_date && <div className="invalid-feedback">Required</div>}
 						</div>
 						<div className="form-group">
+							Start Date
+							<input
+								type="text"
+								ref={(ref) => { this.startDateEle = ref; }}
+								className={`js-datepicker form-control ${isInValid.start_date ? 'is-invalid' : ''}`}
+								name="start-date"
+								data-week-start="1"
+								data-today-highlight="true"
+								data-autoclose="true"
+								data-date-format="mm/dd/yyyy"
+								onBlur={() => this.datepickerChanged('start_date')}
+								placeholder="mm/dd/yyyy"
+							/>
+							{isInValid.start_date && <div className="invalid-feedback">Required</div>}
+						</div>
+						<div className="form-group">
+							End Date
+							<input
+								type="text"
+								ref={(ref) => { this.endDateEle = ref; }}
+								className={`js-datepicker form-control ${isInValid.end_date ? 'is-invalid' : ''}`}
+								name="end_date"
+								data-week-start="1"
+								data-today-highlight="true"
+								data-autoclose="true"
+								data-date-format="mm/dd/yyyy"
+								onBlur={() => this.datepickerChanged('end_date')}
+								placeholder="mm/dd/yyyy"
+							/>
+							{isInValid.end_date && <div className="invalid-feedback">Required</div>}
+						</div>
+						<div className="form-group">
 							Expected Budget
 							<div className="input-group">
 								<div className="input-group-prepend">
@@ -612,12 +665,16 @@ class Detail extends React.Component {
 }
 
 const mapStateToProps = state => ({
-	jobList: getJobsSelector(state)
+	jobList: getJobsSelector(state),
+	user: getUserSelector(state),
+	project: getProjectSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({
 	listJobs: params => dispatch(jobActions.get_jobs(params)),
 	createJob: params => dispatch(jobActions.create_job(params)),
+	getUserInfo: () => dispatch(userActions.get_user()),
+	getProject: params => dispatch(projectActions.get_project(params)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Detail);

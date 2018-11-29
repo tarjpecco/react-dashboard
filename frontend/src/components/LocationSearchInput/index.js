@@ -32,9 +32,8 @@ class SearchBar extends React.Component {
     final.line_1 = data.route;
     final.line_2 = '';
     final.state = data.administrative_area_level_1;
-    final.county = data.administrative_area_level_2;
-    final.town = data.locality || final.county;
-    final.country = data.country;
+    const county = data.administrative_area_level_2;
+    final.town = data.locality || county;
     final.zip_code = data.postal_code;
     return final;
   }

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import * as moment from 'moment';
-import { isEmpty, cloneDeep } from 'lodash';
+import { isEmpty, cloneDeep, merge, mapValues } from 'lodash';
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 
@@ -33,9 +33,11 @@ class Settings extends React.PureComponent {
 				confirmPassword: false,
 				notequal: false,
 			},
+			addressInvalid: {},
 			password: '',
 			oldPassword: '',
 			confirmPassword: '',
+			showAddressDetailForm: false,
 			user: {
 				first_name: '',
 				last_name: '',
@@ -44,7 +46,7 @@ class Settings extends React.PureComponent {
 					line_2: '',
 					town: '',
 					state: '',
-					country: '',
+					zip_code: '',
 				},
 			}
 		};
@@ -163,7 +165,7 @@ class Settings extends React.PureComponent {
 
 	getAddressStr = (address) => {
 		const { line_1: line1, line_2: line2, town, state, zip_code:zipCode } = address;
-		return `${line1} ${line2} ${town}, ${state} ${zipCode}`;
+		return `${line1 || ''} ${line2 || ''} ${town || ''}, ${state || ''} ${zipCode || ''}`;
 	}
 
 	onUserEditHandler = (prop, value) => {
@@ -183,9 +185,52 @@ class Settings extends React.PureComponent {
 		}
 	}
 
-	onAddressChanged = (address) => {
+	onAddressChanged = () => {
 		const { user } = this.state;
-		this.setState({ user: { ...user, addressObj: address } });
+		const emptyAddress = {
+			line_1: '',
+			line_2: '',
+			town: '',
+			state: '',
+			zip_code: '',
+		};
+		const addressInvalid = {};
+		const newAddress = merge(emptyAddress, user.addressObj);
+		let isInValid = false;
+		mapValues(newAddress, (value, key) => {
+			if (!value && key !== 'line_2') {
+				addressInvalid[key] = true;
+				isInValid = true;
+			}
+		});
+		if (isInValid) {
+			this.setState({ addressInvalid });
+		} else {
+			this.setState({ user: { ...user, addressObj: newAddress }, showAddressDetailForm: false, addressInvalid });
+		}
+	}
+
+	changeAddress = (e) => {
+		const prop = e.target.name;
+		const value = e.target.value;
+		const { user, addressInvalid } = this.state;
+		const newAddress = cloneDeep(user.addressObj);
+		const newAddressInvalid = cloneDeep(addressInvalid);
+		if (value) newAddressInvalid[prop] = false;
+		 else newAddressInvalid[prop] = true;
+		newAddress[prop] = value;
+		this.setState({ user: { ...user, addressObj: newAddress }, addressInvalid: newAddressInvalid});
+	}
+
+	showAddressDetailForm = (address) => {
+		const { user } = this.state;
+		this.setState({
+			showAddressDetailForm: true,
+			user: { 
+				...user,
+				addressObj: address,
+			}
+		});
 	}
 
 	render() {
@@ -200,6 +245,8 @@ class Settings extends React.PureComponent {
 			password,
 			oldPassword,
 			confirmPassword,
+			showAddressDetailForm,
+			addressInvalid,
 		} = this.state;
 		const { userLicenses: license } = this.props;
 		const {
@@ -270,13 +317,61 @@ class Settings extends React.PureComponent {
 											disabled={editable}
 										/>
 									}
-									{!editable && 
-										<LocationSearchInput
-											onAddressChanged={this.onAddressChanged}
-											className="locationSearchForm"
-											placeholder={this.getAddressStr(address)}
-										/>
-										
+									{!editable &&
+										<React.Fragment>
+											{!showAddressDetailForm && 
+												<LocationSearchInput
+													onAddressChanged={value => this.showAddressDetailForm(value)}
+													className="locationSearchForm"
+													placeholder={this.getAddressStr(address)}
+												/>
+											}
+											{showAddressDetailForm && (
+												<div className="locationdetail-form">
+													<input 
+														value={address.line_1}
+														className={addressInvalid.line_1 && 'is-invalid form-control'}
+														name="line_1"
+														placeholder="line_1"
+														onChange={this.changeAddress}
+													/>
+													<input 
+														value={address.line_2}
+														name="line_2"
+														placeholder="line_2"
+														onChange={this.changeAddress}
+													/>
+													<input 
+														value={address.town}
+														name="town"
+														className={addressInvalid.town && 'is-invalid form-control'}
+														placeholder="town"
+														onChange={this.changeAddress}
+													/>
+													<input 
+														value={address.state}
+														name="state"
+														className={addressInvalid.state && 'is-invalid form-control'}
+														placeholder="state"
+														onChange={this.changeAddress}
+													/>
+													<input 
+														value={address.zip_code}
+														name="zip_code"
+														className={addressInvalid.zip_code && 'is-invalid form-control'}
+														placeholder="zip_code"
+														onChange={this.changeAddress}
+													/>
+													<button
+														type="button"
+														className="btn btn-sm btn-primary"
+														onClick={this.onAddressChanged}
+													>
+														Ok
+													</button>
+												</div>
+												)}
+										</React.Fragment>
 									}
 								</td>
 							</tr>

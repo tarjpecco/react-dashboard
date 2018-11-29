@@ -1,7 +1,23 @@
 import React from 'react';
-import Table from '../../../components/Table';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { isEmpty } from 'lodash';
 
-const Dashboard = () => {
+import Table from '../../../components/Table';
+import {
+	actions as projectActions,
+	getProjectsSelector
+} from '../../../redux/ducks/projects';
+
+const Dashboard = ({ projectList, listProjects }) => {
+	const getAddressStr = (address) => {
+		const { line_1: line1, line_2: line2, town, state, zip_code:zipCode } = address;
+		return `${line1} ${line2} ${town}, ${state} ${zipCode}`;
+	};
+	if (isEmpty(projectList)) {
+		listProjects();
+	}
+
 	return (
 		<div id="main">
 			<div className="bg-body-light">
@@ -27,22 +43,24 @@ const Dashboard = () => {
 						</tr>
 					</thead>
 					<tbody>
-						<tr>
-							<td className="font-w600 text-center">
-								<p className="text-info">Main Street</p>
-							</td>
-							<td className="font-w600 text-center">
-								<p className="text-info">123 Main Street NY, NY</p>
-							</td>
-							<td className="font-w600 text-center">
-								<p className="text-info">Quote Submitted</p>
-							</td>
-							<td className="font-w600 text-center">
-								<button type="button" className="btn btn-primary">
-									View
-								</button>
-							</td>
-						</tr>
+						{projectList.map((project, index) => (
+							<tr key={index}>
+								<td className="font-w600 text-center">
+									<p className="text-info">{project.name}</p>
+								</td>
+								<td className="font-w600 text-center">
+									<p className="text-info">{getAddressStr(project.address)}</p>
+								</td>
+								<td className="font-w600 text-center">
+									<p className="text-info">{project.status}</p>
+								</td>
+								<td className="font-w600 text-center">
+									<button type="button" className="btn btn-primary">
+										View
+									</button>
+								</td>
+							</tr>
+						))}
 					</tbody>
 				</Table>
 				<Table tableName="New RFQ/P Received" editable="disable">
@@ -77,4 +95,19 @@ const Dashboard = () => {
 		</div>
 	);
 };
-export default Dashboard;
+
+
+const mapStateToProps = state => ({
+	projectList: getProjectsSelector(state)
+});
+
+const mapDispatchToProps = dispatch => ({
+	listProjects: () => dispatch(projectActions.get_projects()),
+})
+
+Dashboard.propTypes = {
+	projectList: PropTypes.array.isRequired,
+	listProjects: PropTypes.func.isRequired,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);

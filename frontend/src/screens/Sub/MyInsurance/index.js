@@ -15,7 +15,6 @@ import {
 import {
 	getUserSelector
 } from '../../../redux/ducks/user';
-import { API_URL } from '../../../api';
 import Table from '../../../components/Table';
 import './index.scss';
 
@@ -41,13 +40,14 @@ class MyInsurance extends React.Component {
 			},
 			newPolicy: {
 				type: 'GL',
-				number: 12345678,
-				company: `${API_URL}/companies/1/`,
-				renewal_date: moment(new Date()).format('YYYY-MM-DD'),
+				number: '',
+				renewal_date: '',
 			},
 			inValid: {
 				email: false,
 				file: false,
+				number: false,
+				renewal_date: false,
 			}
 		};
 		const { listPolicies } = props;
@@ -59,11 +59,20 @@ class MyInsurance extends React.Component {
 	}
 
 	openModal = () => {
-		this.setState({ modalIsOpen: true });
+		this.setState({ modalIsOpen: true, });
 	}
 
 	closeModal = () => {
-		this.setState({ modalIsOpen: false, inValid: {}, invitation: {}, showInvitationForm: false });
+		this.setState({ 
+			modalIsOpen: false,
+			inValid: {},
+			newPolicy: {
+				type: 'GL',
+				number: '',
+				renewal_date: '',
+			},
+			invitation: {},
+			showInvitationForm: false });
 	}
 
 	validateEmail = (email) => {
@@ -108,16 +117,28 @@ class MyInsurance extends React.Component {
 		const { createPolicy, user } = this.props;
 		const {
 			newPolicy,
+			inValid,
 		} = this.state;
-		this.closeModal();
 		const formData = new FormData();
+		let isInValid = false;
+		const newInValid = cloneDeep(inValid);
 		mapValues(newPolicy, (value, key) => {
 			formData.append(key, value);
+			if (value === '' || value === 'Invalid Date') {
+				newInValid[key] = true;
+				isInValid = true;
+			}
 		});
-		const sub = [];
-		sub.push(user.url);
-		formData.append('sub', sub);
-		createPolicy(formData);
+		if (isInValid) {
+			this.setState({ inValid: newInValid });
+		} else {
+			this.closeModal();
+			const sub = [];
+			sub.push(user.url);
+			formData.append('sub', sub);
+			formData.append('company', user.company);
+			createPolicy(formData);
+		}
 	}
 
 	changePolicyType = (e) => {
@@ -127,8 +148,29 @@ class MyInsurance extends React.Component {
 		this.setState({ newPolicy: policy });
 	}
 
+	datepickerChanged = () => {
+		const { newPolicy } = this.state;
+		setTimeout(() => {
+			const policy = cloneDeep(newPolicy);
+			/* eslint-disable-next-line */
+			const value = this.refs.renewalDatePicker && this.refs.renewalDatePicker.value;
+			policy.renewal_date = moment(value).format('YYYY-MM-DD');
+			this.setState({ newPolicy: policy });
+		}, 300);
+	}
+
+	onChangeHandler = (prop, value) => {
+		const { newPolicy } = this.state;
+		const reg = /^\d+$/;
+		if (value === '' || reg.test(value)) {
+			const policy = cloneDeep(newPolicy);
+			policy[prop] = value;
+			this.setState({ newPolicy: policy });
+		}
+	}
+
 	render() {
-		const { modalIsOpen, showInvitationForm, inValid, invitation } = this.state;
+		const { modalIsOpen, showInvitationForm, inValid, invitation, newPolicy } = this.state;
 		const { policies } = this.props;
 		return (
 			<div id="main">
@@ -152,7 +194,7 @@ class MyInsurance extends React.Component {
 					</div>
 				</div>
 				<div className="content">
-					<Table tableName="policies_list" tableStyle="">
+					<Table tableName="" tableStyle="">
 						<thead className="thead-light">
 							<tr>
 								<th className="text-center table-width-20">Agent/Broker name</th>
@@ -167,7 +209,7 @@ class MyInsurance extends React.Component {
 							{policies.map((policy, index) => (
 								<tr className="text-center" key={index}>
 									<td>
-										<p className="text-info">Broker {index + 1}</p>
+										<p className="text-info">{(policy.agent[0] && policy.agent[0].first_name + policy.agent[0].last_name) || ''}</p>
 									</td>
 									<td>{policy.type}</td>
 									<td>{policy.number}</td>
@@ -205,6 +247,7 @@ class MyInsurance extends React.Component {
 									id="example-radios-inline1"
 									name="example-radios-inline"
 									value="GL"
+									defaultChecked
 									onClick={this.changePolicyType}
 								/>
 								GL
@@ -240,7 +283,32 @@ class MyInsurance extends React.Component {
 						/>
 					</form>
 					<br />
-					<br />
+					<div className="form-group">
+						<input
+							type="text"
+							value={newPolicy.number}
+							className={`form-control ${inValid.number ? 'is-invalid' : ''}`}
+							onChange={e => this.onChangeHandler('number', e.target.value)}
+							placeholder="Number"
+						/>
+						{inValid.number && <div className="invalid-feedback animated fadeIn">Required</div>}
+					</div>
+					<div className="form-group">
+						<input
+							type="text"
+							/* eslint-disable-next-line */
+							ref="renewalDatePicker"
+							className={`js-datepicker form-control ${inValid.renewal_date && 'is-invalid'}`}
+							name="datepicker1"
+							data-week-start="1"
+							data-autoclose="true"
+							data-today-highlight="true"
+							data-date-format="mm/dd/yyyy"
+							onBlur={this.datepickerChanged}
+							placeholder="Expiration Date"
+						/>
+						{inValid.renewal_date && <div className="invalid-feedback animated fadeIn">Required</div>}
+					</div>
 					<center>
 						<h2>Who will upload the document(s)?</h2>
 					</center>

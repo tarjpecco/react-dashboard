@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
+
 import { toggleSideBar } from '../../redux/ducks/global';
 import { actions as authActions } from '../../redux/ducks/auth';
 
@@ -169,9 +171,9 @@ class Header extends React.Component {
 										User Options
 								</div>
 								<div className="p-2">
-									<div className="dropdown-item">
+									<Link className="dropdown-item" to="/settings">
 										<i className="far fa-fw fa-user mr-1" /> Profile
-									</div>
+									</Link>
 									<div role="separator" className="dropdown-divider" />
 									<div className="dropdown-item" onClick={this.signOut}>
 										<i className="far fa-fw fa-arrow-alt-circle-left mr-1" /> Sign Out

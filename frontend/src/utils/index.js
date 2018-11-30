@@ -1,0 +1,1 @@
+export const getIdFromUrl = (url) => url.slice(0, -1).split('/').pop();

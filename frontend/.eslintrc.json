@@ -66,7 +66,7 @@
 		"react/jsx-indent": [2, "tab"],
 		"react/jsx-indent-props": [2, "tab"],
 		"react/no-string-refs": 1,
-		"react/require-default-props": 1,
+		"import/prefer-default-export": 0,
 		"react/no-array-index-key": 0,
 		"jsx-a11y/label-has-for": 1,
 		"jsx-a11y/click-events-have-key-events": 1,

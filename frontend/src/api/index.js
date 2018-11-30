@@ -206,9 +206,9 @@ export const getCompanies = (params) => {
   .then(res => res.data)
 }
 
-export const updateCompany = (params) => {
+export const updateCompany = (id, params) => {
   return authHeaderService.getHeaders()
-  .then((headers) => axios.patch(`${API_URL}/companies/${params.id}/`,
+  .then((headers) => axios.patch(`${API_URL}/companies/${id}/`,
   {
     ...params,
   },
@@ -218,12 +218,9 @@ export const updateCompany = (params) => {
   .then(res => res.data)
 }
 
-export const getCompany = (params) => {
+export const getCompany = (id) => {
   return authHeaderService.getHeaders()
-  .then((headers) => axios.get(`${API_URL}/companies/${params.id}/`,
-  {
-    ...params,
-  },
+  .then((headers) => axios.get(`${API_URL}/companies/${id}/`,
   {
     headers
   }))

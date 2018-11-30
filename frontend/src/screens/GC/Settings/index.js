@@ -14,6 +14,10 @@ import {
 	getUserSelector,
 	actions as userActions,
 } from '../../../redux/ducks/user';
+import {
+	getCompanySelector,
+	actions as companyActions,
+} from '../../../redux/ducks/companies';
 import Table from '../../../components/Table';
 import './index.scss';
 import LocationSearchInput from '../../../components/LocationSearchInput';
@@ -23,7 +27,6 @@ class Settings extends React.PureComponent {
 		super(props);
 		this.state = {
 			editable: 'disable',
-			ein: '61-512584',
 			btnname: 'Edit',
 			btnicon: 'si si-pencil',
 			showResetPassform: false,
@@ -54,9 +57,10 @@ class Settings extends React.PureComponent {
 			this.setState({ editable: 'disable' });
 			this.setState({ btnname: 'Edit' });
 			this.setState({ btnicon: 'si si-pencil' });
-			const { updateUserInfo, updateLicenses, user } = this.props;
+			const { updateUserInfo, updateLicenses, user, companyInfo, updateCompanyInfo } = this.props;
 			updateLicenses();
 			updateUserInfo({ user });
+			updateCompanyInfo({ id: this.getIdFromUrl(companyInfo.url), params: companyInfo });
 		}
 	};
 
@@ -101,7 +105,6 @@ class Settings extends React.PureComponent {
 	}
 
 	onUserEditHandler = (prop, value) => {
-		console.log('user edi prop:', prop, value);
 		const { user, shallowUpdateUser } = this.props;
 		const userInfo = cloneDeep(user);
 		userInfo[prop] = value;
@@ -186,14 +189,18 @@ class Settings extends React.PureComponent {
 		}
 	}
 
-	onComapnyNameChanged = ({ tableName }) => {
-		console.log('company name: ', tableName);
-		
-	}
+	onUpdateCompanyDetails = (prop, value) => {
+		this.setState({ [`company_${prop}`]: value });
+		const { companyInfo, updateCompanyPartialInfo } = this.props;
+		const newCompanyInfo = cloneDeep(companyInfo);
+		newCompanyInfo[prop] = value;
+		updateCompanyPartialInfo({ companyInfo: newCompanyInfo })
+	};
+
+	getIdFromUrl = url => url.slice(0, -1).split('/').pop();
 
 	render() {
 		const {
-			ein,
 			editable,
 			btnname,
 			btnicon,
@@ -205,15 +212,17 @@ class Settings extends React.PureComponent {
 			showAddressDetailForm,
 			addressInvalid,
 		} = this.state;
-		const { userLicenses: license, user } = this.props;
+		const { userLicenses: license, user, companyInfo, getCompanyInfo } = this.props;
 		const {
 			first_name: firstName,
 			last_name: lastName,
 			phone,
 			email,
-			company_name: companyName,
 			addressObj: address,
 		} = user;
+		if (isEmpty(companyInfo)) {
+			getCompanyInfo({ id: this.getIdFromUrl(user.company)});
+		}
 
 		return (
 			<div id="main">
@@ -245,8 +254,8 @@ class Settings extends React.PureComponent {
 						</button>
 					</div>
 					<Table
-						tableName={companyName}
-						onComapnyNameChanged={this.onComapnyNameChanged}
+						tableName={companyInfo.name || ''}
+						onComapnyNameChanged={value => this.onUpdateCompanyDetails('name', value)}
 						tableStyle="table-striped table-bordered"
 						editable={editable}
 					>
@@ -373,8 +382,8 @@ class Settings extends React.PureComponent {
 									<input
 										type="text"
 										name="ein"
-										value={ein}
-										onChange={this.onChangeHandler}
+										value={companyInfo.ein}
+										onChange={e => this.onUpdateCompanyDetails('ein', e.target.value)}
 										disabled={editable}
 									/>
 								</td>
@@ -484,6 +493,7 @@ class Settings extends React.PureComponent {
 const mapStateToProps = state => ({
 	userLicenses: getLicensesSelector(state),
 	user: getUserSelector(state),
+	companyInfo: getCompanySelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -495,6 +505,9 @@ const mapDispatchToProps = dispatch => ({
 	getUserInfo: () => dispatch(userActions.get_user()),
 	updateUserInfo: params => dispatch(userActions.update_user(params)),
 	shallowUpdateUser: params => dispatch(userActions.update_user_state(params)),
+	getCompanyInfo: params => dispatch(companyActions.get_company(params)),
+	updateCompanyInfo: params => dispatch(companyActions.update_company(params)),
+	updateCompanyPartialInfo: params => dispatch(companyActions.update_company_partial(params)),
 })
 
 Settings.propTypes = {
@@ -507,7 +520,11 @@ Settings.propTypes = {
 	user: PropTypes.object.isRequired,
 	getUserInfo: PropTypes.func.isRequired,
 	shallowUpdateUser: PropTypes.func.isRequired,
-	updateUserInfo: PropTypes.func.isRequired, 
+	updateUserInfo: PropTypes.func.isRequired,
+	getCompanyInfo: PropTypes.func.isRequired,
+	updateCompanyPartialInfo: PropTypes.func.isRequired,
+	updateCompanyInfo: PropTypes.func.isRequired,
+	companyInfo: PropTypes.object.isRequired,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);

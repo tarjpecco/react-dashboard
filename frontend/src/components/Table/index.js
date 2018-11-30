@@ -3,20 +3,15 @@ import PropTypes from 'prop-types';
 import './index.scss';
 
 class Table extends React.PureComponent {
-	constructor(props) {
-		super(props);
-		this.state = { tableName: props.tableName };
-		this.onChangeHandler.bind(this);
-	}
 
 	onChangeHandler = e => {
+		const { onComapnyNameChanged } = this.props;
 		const value = e.target.value;
-		this.setState({ tableName: value });
+		onComapnyNameChanged(value);
 	};
 
 	render() {
-		const { children, tableStyle, editable } = this.props;
-		const { tableName } = this.state;
+		const { children, tableStyle, editable, tableName } = this.props;
 		const classname = `table table-vcenter ${tableStyle}`;
 		return (
 			<div className="block block-rounded block-bordered">
@@ -43,12 +38,13 @@ class Table extends React.PureComponent {
 	}
 }
 
-const { string, node } = PropTypes;
+const { string, node, func } = PropTypes;
 Table.propTypes = {
 	tableName: string.isRequired,
 	tableStyle: string,
 	editable: string,
 	children: node.isRequired,
+	onComapnyNameChanged: func.isRequired,
 };
 
 Table.defaultProps = {

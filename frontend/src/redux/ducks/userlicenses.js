@@ -1,6 +1,6 @@
 import { createDuck } from 'redux-duck';
 import { List, fromJS } from 'immutable';
-import { takeLatest, takeEvery, call, put, all, select } from 'redux-saga/effects';
+import { takeLatest, call, put, all, select } from 'redux-saga/effects';
 import { createSelector } from 'reselect';
 
 import {
@@ -17,10 +17,13 @@ const userLicensesDuck = createDuck('userLicenses-duck');
 // actions
 export const actions = createActions(userLicensesDuck,
   'CREATE_LICENSE',
+  'ADD_LICENSE',
+  'EDIT_LICENSE',
+  'DELETE_LICENSE',
   'REMOVE_LICENSE',
   'UPDATE_LICENSE_STATE',
   ...actionNames('GET_LICENSES'),
-  ...actionNames('UPDATE_LICENSE')
+  ...actionNames('UPDATE_LICENSES'),
 )
 
 // Selectors
@@ -50,20 +53,31 @@ const userLicensesReducer = userLicensesDuck.createReducer({
   [actions.GET_LICENSES_REQUEST]: (state) =>
     state
       .set('loading', true),
-  [actions.UPDATE_LICENSE_SUCCESS]: (state, { payload }) =>
+  [actions.UPDATE_LICENSES_SUCCESS]: (state, { payload }) =>
     state
-      .update('userLicenses', () => List(payload.userLicenses))
       .set('saveloading', false),
-  [actions.UPDATE_LICENSE_ERROR]: (state, { payload }) =>
+  [actions.UPDATE_LICENSES_ERROR]: (state, { payload }) =>
     state
       .set('error', payload.error)
       .set('saveloading', false),
-  [actions.UPDATE_LICENSE_REQUEST]: (state) =>
+  [actions.UPDATE_LICENSES_REQUEST]: (state) =>
     state
       .set('saveloading', true),
   [actions.UPDATE_LICENSE_STATE]: (state, { payload }) =>
     state
       .updateIn(['userLicenses', payload.id], () => payload.params),
+  [actions.ADD_LICENSE]: (state, { payload }) =>
+    state
+      .update('userLicenses', (userLicenses) => userLicenses.push(payload))
+      .set('loading', false),
+  [actions.EDIT_LICENSE]: (state, { payload }) =>
+    state
+    .updateIn(['userLicenses', payload.id], () => payload.params)
+    .set('loading', false),
+  [actions.DELETE_LICENSE]: (state, { payload }) =>
+    state
+    .update('userLicenses', (userLicenses) => List(userLicenses.splice(payload.id, 1)))
+    .set('loading', false),
 }, initialState);
 
 export default userLicensesReducer;
@@ -90,10 +104,26 @@ function* removeUserLicenseSaga({ payload }) {
   }
 }
 
-function* updateUserLicenseSaga({ payload }) {
-  const { userId, licenseId, params } = payload;
+function* updateLicensesSaga() {
   try {
-    yield call(updateUserLicenseForUser, userId, licenseId, params);
+    const { results: exLicenses } = yield call(getUserLicensesForUser, 'me');
+    const userLicenses = yield select(getLicensesSelector);
+    const userLicensesUrls = userLicenses.map(license => license.url);
+    yield all(exLicenses.map(license => {
+      const index = userLicensesUrls.findIndex(url => url === license.url);
+      const licenseId = license.url.slice(0, -1).split('/').pop();
+      if (index >= 0) {
+        return call(updateUserLicenseForUser, 'me', licenseId, userLicenses[index]);
+      }
+      return call(removeUserLicenseForUser, 'me', licenseId);
+    }));
+    const exLicensesUrls = exLicenses.map(license => license.url);
+    yield all(userLicenses.map(license => {
+      const index = exLicensesUrls.findIndex(url => url === license.url);
+      if (index < 0 || userLicenses.length === 0) {
+        return call(createUserLicenseForUser, 'me', { ...license });
+      }
+    }));
     yield call(listUserLicensesSaga);
   } catch (err) {
     const errorMessage = 'Updating User-license Failed';
@@ -101,6 +131,16 @@ function* updateUserLicenseSaga({ payload }) {
   }
 }
 
+function* updateUserLicenseSaga({ payload }) {
+  const { licenseId, params } = payload;
+  try {
+    yield call(updateUserLicenseForUser, 'me', licenseId, params);
+    yield call(listUserLicensesSaga);
+  } catch (err) {
+    const errorMessage = 'Updating User-license Failed';
+    yield put(actions.get_licenses_error({ error: errorMessage }));
+  }
+}
 
 function* createUserLicenseSaga({ payload }) {
   try {
@@ -115,12 +155,11 @@ function* createUserLicenseSaga({ payload }) {
   }
 }
 
-
 export function* userLicensesSaga() {
   yield all([
     yield takeLatest(actions.REMOVE_LICENSE, removeUserLicenseSaga),
     yield takeLatest(actions.CREATE_LICENSE, createUserLicenseSaga),
-    yield takeEvery(actions.UPDATE_LICENSE, updateUserLicenseSaga),
+    yield takeLatest(actions.UPDATE_LICENSES, updateLicensesSaga),
     yield takeLatest(actions.GET_LICENSES, listUserLicensesSaga),
   ]);
 }

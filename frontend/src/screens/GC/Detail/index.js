@@ -51,15 +51,12 @@ class Detail extends React.Component {
 				trade_type: false,
 				expected_start_date: false,
 				expected_end_date: false,
-				estimated_end_date: false,
 			},
 			newJob: {
 				trade_type: '',
 				expected_start_date: '',
 				expected_end_date: '',
-				estimated_end_date: '',
-				start_date: '',
-				end_date: '',
+				estimated_end_date: moment(new Date()).format('YYYY-MM-DD'),
 			}
 		};
 
@@ -81,10 +78,7 @@ class Detail extends React.Component {
 		jobList.forEach(job => {
 			job.id = getIdFromUrl(job.url);
 			job.expected_end_date = moment(job.expected_end_date).format('MM/DD/YYYY');
-			job.estimated_end_date = moment(job.estimated_end_date).format('MM/DD/YYYY');
 			job.expected_start_date = moment(job.expected_start_date).format('MM/DD/YYYY');
-			job.start_date = moment(job.start_date).format('MM/DD/YYYY');
-			job.end_date = moment(job.end_date).format('MM/DD/YYYY');
 			job.showdetail = false;
 		})
 		const bids = orderBy(jobList, ['id'],['asc']);
@@ -107,7 +101,12 @@ class Detail extends React.Component {
 	}
 
 	closeModal = () => {
-		this.setState({ modalIsOpen: false });
+		const	newJob = {
+			trade_type: '',
+			expected_start_date: '',
+			expected_end_date: '',
+		}
+		this.setState({ modalIsOpen: false, isInValid: {}, newJob });
 	}
 
 	tabChanged = (status) => {
@@ -130,21 +129,6 @@ class Detail extends React.Component {
 				job.expected_end_date = this.expectedEndDateEle &&
 					moment(this.expectedEndDateEle.value).format('YYYY-MM-DD');
 				inValid.expected_end_date = false;
-			}
-			if (dateType === 'estimated_end_date') {
-				job.estimated_end_date = this.estimatedEndDateEle &&
-					moment(this.estimatedEndDateEle.value).format('YYYY-MM-DD');
-				inValid.estimated_end_date = false;
-			}
-			if (dateType === 'start_date') {
-				job.start_date = this.startDateEle &&
-					moment(this.startDateEle.value).format('YYYY-MM-DD');
-				inValid.start_date = false;
-			}
-			if (dateType === 'end_date') {
-				job.end_date = this.endDateEle &&
-					moment(this.endDateEle.value).format('YYYY-MM-DD');
-				inValid.end_date = false;
 			}
 			this.setState({ newJob: job, isInValid: inValid });
 		}, 300);
@@ -179,11 +163,12 @@ class Detail extends React.Component {
 		});
 		if (this.file.files[0] === undefined) {
 			invalid = true;
+			/* eslint-disable-next-line */
 			window.alert('Please upload PFQ/P!');
 		}
 		if (!invalid) {
 			this.closeModal();
-			const { createJob, user, project } = this.props;
+			const { createJob, user } = this.props;
 			const formData = new FormData();
 			mapValues(newJob, (value, key) => {
 				formData.append(key, value);
@@ -303,7 +288,7 @@ class Detail extends React.Component {
 															</Link>
 														</td>
 														<td>
-															<p>{item.end_date}</p>
+															<p>{item.expected_end_date}</p>
 														</td>
 														<td>
 															<span className="badge badge-warning">
@@ -447,7 +432,7 @@ class Detail extends React.Component {
 												</td>
 
 												<td>
-													<p>{item.estimated_end_date}</p>
+													<p>{item.expected_end_date}</p>
 												</td>
 												<td className="text-center wrap">
 													<span className="badge badge-success">GL</span>
@@ -567,54 +552,6 @@ class Detail extends React.Component {
 								placeholder="mm/dd/yyyy"
 							/>
 							{isInValid.expected_end_date && <div className="invalid-feedback">Required</div>}
-						</div>
-						<div className="form-group">
-							Estimated End Date
-							<input
-								type="text"
-								ref={(ref) => { this.estimatedEndDateEle = ref; }}
-								className={`js-datepicker form-control ${isInValid.estimated_end_date ? 'is-invalid' : ''}`}
-								name="estimated_end_date"
-								data-week-start="1"
-								data-today-highlight="true"
-								data-autoclose="true"
-								data-date-format="mm/dd/yyyy"
-								onBlur={() => this.datepickerChanged('estimated_end_date')}
-								placeholder="mm/dd/yyyy"
-							/>
-							{isInValid.estimated_end_date && <div className="invalid-feedback">Required</div>}
-						</div>
-						<div className="form-group">
-							Start Date
-							<input
-								type="text"
-								ref={(ref) => { this.startDateEle = ref; }}
-								className={`js-datepicker form-control ${isInValid.start_date ? 'is-invalid' : ''}`}
-								name="start-date"
-								data-week-start="1"
-								data-today-highlight="true"
-								data-autoclose="true"
-								data-date-format="mm/dd/yyyy"
-								onBlur={() => this.datepickerChanged('start_date')}
-								placeholder="mm/dd/yyyy"
-							/>
-							{isInValid.start_date && <div className="invalid-feedback">Required</div>}
-						</div>
-						<div className="form-group">
-							End Date
-							<input
-								type="text"
-								ref={(ref) => { this.endDateEle = ref; }}
-								className={`js-datepicker form-control ${isInValid.end_date ? 'is-invalid' : ''}`}
-								name="end_date"
-								data-week-start="1"
-								data-today-highlight="true"
-								data-autoclose="true"
-								data-date-format="mm/dd/yyyy"
-								onBlur={() => this.datepickerChanged('end_date')}
-								placeholder="mm/dd/yyyy"
-							/>
-							{isInValid.end_date && <div className="invalid-feedback">Required</div>}
 						</div>
 						<div className="form-group">
 							Expected Budget

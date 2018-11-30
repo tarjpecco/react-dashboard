@@ -17,11 +17,8 @@ import {
 	getUserSelector,
 	actions as userActions,
 } from '../../../redux/ducks/user';
-import {
-	actions as projectActions,
-	getProjectSelector,
-} from '../../../redux/ducks/projects';
 import { API_URL } from '../../../api';
+import { getIdFromUrl } from '../../../utils';
 
 import './index.scss';
 
@@ -40,8 +37,6 @@ class Detail extends React.Component {
 		createJob: PropTypes.func.isRequired,
 		user: PropTypes.object.isRequired,
 		getUserInfo: PropTypes.func.isRequired,
-		getProject: PropTypes.func.isRequired,
-		project: PropTypes.object.isRequired,
 	}
 
 	constructor(props) {
@@ -68,8 +63,7 @@ class Detail extends React.Component {
 			}
 		};
 
-		const { user, getUserInfo, getProject } = props;
-		getProject({ id: this.projectId });
+		const { user, getUserInfo } = props;
 		if (isEmpty(user)) {
 			getUserInfo();
 		}
@@ -85,7 +79,7 @@ class Detail extends React.Component {
 	componentWillReceiveProps(newProps) {
 		const { jobList } = newProps;
 		jobList.forEach(job => {
-			job.id = this.getJobIdFromUrl(job.url);
+			job.id = getIdFromUrl(job.url);
 			job.expected_end_date = moment(job.expected_end_date).format('MM/DD/YYYY');
 			job.estimated_end_date = moment(job.estimated_end_date).format('MM/DD/YYYY');
 			job.expected_start_date = moment(job.expected_start_date).format('MM/DD/YYYY');
@@ -197,8 +191,7 @@ class Detail extends React.Component {
 			formData.append('file', this.file.files[0]);
 			formData.append('status', clicked);
 			formData.append('user', user.url);
-			console.log('project:', project);
-			formData.append('project', project);
+			formData.append('project', `${API_URL}/projects/${this.projectId}/`);
 			createJob(formData);
 		} else {
 			this.setState({ isInValid: newIsInValid });
@@ -447,7 +440,7 @@ class Detail extends React.Component {
 													<p>{item.id}</p>
 												</td>
 												<td>
-													<p className="text-info">{item.subId || ''}</p>
+													<p className="text-info">{item.sub_name || ''}</p>
 												</td>
 												<td>
 													<p>{item.trade_type}</p>
@@ -498,7 +491,7 @@ class Detail extends React.Component {
 													<p>{item.id}</p>
 												</td>
 												<td>
-													<p className="text-info">{item.subId || ''}</p>
+													<p className="text-info">{item.sub_name || ''}</p>
 												</td>
 												<td>
 													<p>{item.trade_type}</p>
@@ -667,14 +660,12 @@ class Detail extends React.Component {
 const mapStateToProps = state => ({
 	jobList: getJobsSelector(state),
 	user: getUserSelector(state),
-	project: getProjectSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({
 	listJobs: params => dispatch(jobActions.get_jobs(params)),
 	createJob: params => dispatch(jobActions.create_job(params)),
 	getUserInfo: () => dispatch(userActions.get_user()),
-	getProject: params => dispatch(projectActions.get_project(params)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Detail);

@@ -18,6 +18,7 @@ const userDuck = createDuck('user-duck');
 export const actions = createActions(userDuck,
   ...actionNames('GET_USER'),
   ...actionNames('UPDATE_USER'),
+  ...actionNames('UPDATE_USER_STATE'),
   'RESET_USER',
 )
 
@@ -53,6 +54,14 @@ const userReducer = userDuck.createReducer({
       .update('user', () => Map(payload.user))
       .set('saveloading', false),
   [actions.UPDATE_USER_ERROR]: (state, { payload }) =>
+    state
+      .set('error', payload.error)
+      .set('saveloading', false),
+  [actions.UPDATE_USER_STATE]: (state, { payload }) =>
+    state
+      .update('user', () => Map(payload.user))
+      .set('saveloading', false),
+  [actions.UPDATE_USER_STATE_ERROR]: (state, { payload }) =>
     state
       .set('error', payload.error)
       .set('saveloading', false),

@@ -10,8 +10,10 @@ class Table extends React.PureComponent {
 	}
 
 	onChangeHandler = e => {
+		const { onComapnyNameChanged } = this.props;
 		const value = e.target.value;
 		this.setState({ tableName: value });
+		onComapnyNameChanged({ tableName: value });
 	};
 
 	render() {
@@ -43,12 +45,13 @@ class Table extends React.PureComponent {
 	}
 }
 
-const { string, node } = PropTypes;
+const { string, node, func } = PropTypes;
 Table.propTypes = {
 	tableName: string.isRequired,
 	tableStyle: string,
 	editable: string,
 	children: node.isRequired,
+	onComapnyNameChanged: func.isRequired,
 };
 
 Table.defaultProps = {

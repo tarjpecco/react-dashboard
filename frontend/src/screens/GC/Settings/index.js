@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import * as moment from 'moment';
-import { isEmpty, cloneDeep, merge, mapValues } from 'lodash';
+import { isEmpty, cloneDeep, merge, mapValues, isNull } from 'lodash';
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 
@@ -36,31 +36,12 @@ class Settings extends React.PureComponent {
 			addressInvalid: {},
 			password: '',
 			showAddressDetailForm: false,
-			user: {
-				first_name: '',
-				last_name: '',
-				email: '',
-				addressObj: {
-					line_1: '',
-					line_2: '',
-					town: '',
-					state: '',
-					zip_code: '',
-				},
-			}
 		};
-		this.textInput = React.createRef();
-		this.focusTextInput = this.focusTextInput.bind(this);
-		const { user, getUserInfo, listUserLicenses } = props;
+		const { listUserLicenses, user, getUserInfo } = props;
+		listUserLicenses();
 		if (isEmpty(user)) {
 			getUserInfo();
-		}		
-		listUserLicenses();
-	}
-	
-	componentWillReceiveProps(nextProps) {
-		const { user } = nextProps;
-		this.setState({ user });
+		}
 	}
 
 	handleClickEdit = () => {
@@ -73,8 +54,8 @@ class Settings extends React.PureComponent {
 			this.setState({ editable: 'disable' });
 			this.setState({ btnname: 'Edit' });
 			this.setState({ btnicon: 'si si-pencil' });
-			const { user } = this.state;
-			const { updateUserInfo } = this.props;
+			const { updateUserInfo, updateLicenses, user } = this.props;
+			updateLicenses();
 			updateUserInfo({ user });
 		}
 	};
@@ -83,39 +64,22 @@ class Settings extends React.PureComponent {
 		const property = e.target.name;
 		const value = e.target.value;
 		this.setState({ [property]: value });
-		this.focusTextInput();
 	};
 
 	onAddLicense = () => {
-		const { createLicense } = this.props;
+		const { addLicense, user } = this.props;
 		const newelement = {
-			type: 'GC',
-			number: '12345678',
-			expire_date: moment().format("YYYY-MM-DD"),
+			type: '',
+			number: '',
+			expire_date: '',
+			user: user.url,
 		};
-		createLicense(newelement);
+		addLicense(newelement);
 	};
 
 	onDeleteLicense = id => {
-		const { userLicenses, removeLicense } = this.props;
-		const licenseUrlData = userLicenses[id].url.split('/');
-		licenseUrlData.pop();
-		const licenseId = licenseUrlData.pop();
-		const userId = licenseUrlData.pop();
-		removeLicense({ userId, licenseId });
-	};
-
-	onChangeLicenseHandler = id => e => {
-		const { value, name: prop } = e.target;
-		const { userLicenses, updateLicense } = this.props;
-		const licenseUrlData = userLicenses[id].url.split('/');
-		const params = userLicenses[id];
-		params[prop] = value;
-		params.expire_date = moment(params.expire_date).format('YYYY-MM-DD');
-		licenseUrlData.pop();
-		const licenseId = licenseUrlData.pop();
-		const userId = licenseUrlData.pop();
-		updateLicense({ userId, licenseId, params });
+		const { deleteLicense } = this.props;
+		deleteLicense({ id });
 	};
 
 	onChangeStateLicenseHandler = id => e => {
@@ -137,24 +101,25 @@ class Settings extends React.PureComponent {
 	}
 
 	onUserEditHandler = (prop, value) => {
-		const { user } = this.state;
+		console.log('user edi prop:', prop, value);
+		const { user, shallowUpdateUser } = this.props;
 		const userInfo = cloneDeep(user);
 		userInfo[prop] = value;
-		this.setState({ user: userInfo });
+		shallowUpdateUser({ user: userInfo });
 	}
 
 	onNameEditHandler = value => {
-		const { user } = this.state;
+		const { user, shallowUpdateUser } = this.props;
 		if (value) {
 			const n = value.lastIndexOf(' ');
 			const firstName = value.slice(0, n);
 			const lastName = value.slice(n + 1);
-			this.setState({ user: { ...user, first_name: firstName, last_name: lastName } });
+			shallowUpdateUser({ user: { ...user, first_name: firstName, last_name: lastName } });
 		}
 	}
 
 	onAddressChanged = () => {
-		const { user } = this.state;
+		const { user, shallowUpdateUser } = this.props;
 		const emptyAddress = {
 			line_1: '',
 			line_2: '',
@@ -174,35 +139,56 @@ class Settings extends React.PureComponent {
 		if (isInValid) {
 			this.setState({ addressInvalid });
 		} else {
-			this.setState({ user: { ...user, addressObj: newAddress }, showAddressDetailForm: false, addressInvalid });
+			shallowUpdateUser({ user: { ...user, addressObj: newAddress }});
+			this.setState({ showAddressDetailForm: false, addressInvalid });
 		}
 	}
 
 	changeAddress = (e) => {
 		const prop = e.target.name;
 		const value = e.target.value;
-		const { user, addressInvalid } = this.state;
+		const { addressInvalid } = this.state;
+		const { shallowUpdateUser, user } = this.props;
 		const newAddress = cloneDeep(user.addressObj);
 		const newAddressInvalid = cloneDeep(addressInvalid);
 		if (value) newAddressInvalid[prop] = false;
 		 else newAddressInvalid[prop] = true;
 		newAddress[prop] = value;
-		this.setState({ user: { ...user, addressObj: newAddress }, addressInvalid: newAddressInvalid});
+		shallowUpdateUser({ user: { ...user, addressObj: newAddress }});
+		this.setState({ addressInvalid: newAddressInvalid });
 	}
 
 	showAddressDetailForm = (address) => {
-		const { user } = this.state;
+		const { user, shallowUpdateUser } = this.props;
 		this.setState({
-			showAddressDetailForm: true,
+			showAddressDetailForm: true
+		});
+		shallowUpdateUser({
 			user: { 
 				...user,
 				addressObj: address,
 			}
-		});
+		})
 	}
 
-	focusTextInput() {
-		this.textInput.current.focus();
+	datepickerChanged = (id, e) => {
+		if (!isNull(e)) {
+			const data = e.target;
+			setTimeout(() => {
+				const { value, name: prop } = data;
+				const { userLicenses, updateLicenseState } = this.props;
+				const params = {};
+				Object.assign(params, userLicenses[id]);
+				params[prop] = value;
+				params.expire_date = moment(params.expire_date).format('YYYY-MM-DD');
+				updateLicenseState({ id, params });
+			}, 300);
+		}
+	}
+
+	onComapnyNameChanged = ({ tableName }) => {
+		console.log('company name: ', tableName);
+		
 	}
 
 	render() {
@@ -212,7 +198,6 @@ class Settings extends React.PureComponent {
 			btnname,
 			btnicon,
 			showResetPassform,
-			user,
 			isInValidPassword,
 			password,
 			oldPassword,
@@ -220,12 +205,13 @@ class Settings extends React.PureComponent {
 			showAddressDetailForm,
 			addressInvalid,
 		} = this.state;
-		const { userLicenses: license } = this.props;
+		const { userLicenses: license, user } = this.props;
 		const {
 			first_name: firstName,
 			last_name: lastName,
 			phone,
 			email,
+			company_name: companyName,
 			addressObj: address,
 		} = user;
 
@@ -259,7 +245,8 @@ class Settings extends React.PureComponent {
 						</button>
 					</div>
 					<Table
-						tableName="ABC Construction Company, Inc."
+						tableName={companyName}
+						onComapnyNameChanged={this.onComapnyNameChanged}
 						tableStyle="table-striped table-bordered"
 						editable={editable}
 					>
@@ -287,8 +274,9 @@ class Settings extends React.PureComponent {
 										type="text"
 										name="email"
 										value={email}
-										onChange={this.onChangeHandler}
-										disabled
+										style={{ textTransform: 'inherit' }}
+										onChange={e => this.onUserEditHandler('email', e.target.value)}
+										disabled={editable}
 									/>
 								</td>
 							</tr>
@@ -412,7 +400,6 @@ class Settings extends React.PureComponent {
 											value={item.type}
 											disabled={editable}
 											onChange={this.onChangeStateLicenseHandler(id)}
-											onBlur={this.onChangeLicenseHandler(id)}
 										/>
 									</td>
 									<td className="table-width-30">
@@ -422,23 +409,37 @@ class Settings extends React.PureComponent {
 											value={item.number}
 											disabled={editable}
 											onChange={this.onChangeStateLicenseHandler(id)}
-											onBlur={this.onChangeLicenseHandler(id)}
 										/>
 									</td>
 									<td className="table-width-40">
-										<input
-											type="text"
-											name="expire_date"
-											value={moment(item.expire_date).format('MM/DD/YY')}
-											disabled={editable}
-											onChange={this.onChangeStateLicenseHandler(id)}
-											onBlur={this.onChangeLicenseHandler(id)}
-										/>
+										{editable && 
+											<input
+												type="text"
+												value={moment(item.expire_date, 'YYYY-MM-DD', true).isValid() ? moment(item.expire_date).format('MM/DD/YYYY') : ''}
+												disabled={editable}
+											/>
+										}
+										{!editable &&
+											<input
+												type="text"
+												ref="endDateEleRef"
+												className="js-datepicker form-control"
+												name="expire_date"
+												data-week-start="1"
+												data-autoclose="true"
+												data-today-highlight="true"
+												data-date-format="mm/dd/yyyy"
+												value={moment(item.expire_date, 'YYYY-MM-DD', true).isValid() ? moment(item.expire_date).format('MM/DD/YYYY') : ''}
+												onBlur={e => this.datepickerChanged(id, e)}
+												placeholder="MM/DD/YYYY"
+											/>
+										}
 									</td>
 									<td className="text-left">
 										<div className="btn-group">	
 											<button
 												type="button"
+												disabled={editable}
 												className="btn btn-sm btn-primary js-tooltip-enabled"
 												data-toggle="tooltip"
 												data-original-title="Delete"
@@ -486,24 +487,26 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-	createLicense: params => dispatch(licenseActions.create_license(params)),
+	addLicense: params => dispatch(licenseActions.add_license(params)),
 	listUserLicenses: () => dispatch(licenseActions.get_licenses()),
-	updateLicense: params => dispatch(licenseActions.update_license(params)),
-	removeLicense: params => dispatch(licenseActions.remove_license(params)),
+	deleteLicense: params => dispatch(licenseActions.delete_license(params)),
+	updateLicenses: () => dispatch(licenseActions.update_licenses()),
 	updateLicenseState: params => dispatch(licenseActions.update_license_state(params)),
 	getUserInfo: () => dispatch(userActions.get_user()),
 	updateUserInfo: params => dispatch(userActions.update_user(params)),
+	shallowUpdateUser: params => dispatch(userActions.update_user_state(params)),
 })
 
 Settings.propTypes = {
 	userLicenses: PropTypes.array.isRequired,
-	createLicense: PropTypes.func.isRequired,
+	addLicense: PropTypes.func.isRequired,
 	listUserLicenses: PropTypes.func.isRequired,
-	updateLicense: PropTypes.func.isRequired,
-	removeLicense: PropTypes.func.isRequired,
+	updateLicenses: PropTypes.func.isRequired,
+	deleteLicense: PropTypes.func.isRequired,
 	updateLicenseState: PropTypes.func.isRequired,
 	user: PropTypes.object.isRequired,
 	getUserInfo: PropTypes.func.isRequired,
+	shallowUpdateUser: PropTypes.func.isRequired,
 	updateUserInfo: PropTypes.func.isRequired, 
 };
 

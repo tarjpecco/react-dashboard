@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import * as moment from 'moment';
-import { isEmpty, cloneDeep, merge, mapValues } from 'lodash';
+import { isEmpty, cloneDeep, merge, mapValues, isNull } from 'lodash';
 import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 
@@ -14,6 +14,10 @@ import {
 	getUserSelector,
 	actions as userActions,
 } from '../../../redux/ducks/user';
+import {
+	getCompanySelector,
+	actions as companyActions,
+} from '../../../redux/ducks/companies';
 import Table from '../../../components/Table';
 import './index.scss';
 import LocationSearchInput from '../../../components/LocationSearchInput';
@@ -23,7 +27,6 @@ class Settings extends React.PureComponent {
 		super(props);
 		this.state = {
 			editable: 'disable',
-			ein: '61-512584',
 			btnname: 'Edit',
 			btnicon: 'si si-pencil',
 			showResetPassform: false,
@@ -38,18 +41,6 @@ class Settings extends React.PureComponent {
 			oldPassword: '',
 			confirmPassword: '',
 			showAddressDetailForm: false,
-			user: {
-				first_name: '',
-				last_name: '',
-				email: '',
-				addressObj: {
-					line_1: '',
-					line_2: '',
-					town: '',
-					state: '',
-					zip_code: '',
-				},
-			}
 		};
 		const { user, getUserInfo, listUserLicenses } = props;
 		if (isEmpty(user)) {
@@ -57,13 +48,6 @@ class Settings extends React.PureComponent {
 		}
 		listUserLicenses();
 	}
-
-	
-	componentWillReceiveProps(nextProps) {
-		const { user } = nextProps;
-		this.setState({ user });
-	}
-	
 
 	handleClickEdit = () => {
 		const { editable } = this.state;
@@ -76,9 +60,10 @@ class Settings extends React.PureComponent {
 			this.setState({ btnname: 'Edit' });
 			this.setState({ btnicon: 'si si-pencil' });
 		
-			const { user } = this.state;
-			const { updateUserInfo } = this.props;
+			const { updateUserInfo, updateLicenses, user, companyInfo, updateCompanyInfo } = this.props;
+			updateLicenses();
 			updateUserInfo({ user });
+			updateCompanyInfo({ id: this.getIdFromUrl(companyInfo.url), params: companyInfo });
 		}
 	};
 
@@ -89,35 +74,19 @@ class Settings extends React.PureComponent {
 	};
 
 	onAddLicense = () => {
-		const { createLicense } = this.props;
+		const { addLicense, user } = this.props;
 		const newelement = {
-			type: 'GC',
-			number: '12345678',
-			expire_date: moment().format("YYYY-MM-DD"),
+			type: '',
+			number: '',
+			expire_date: '',
+			user: user.url,
 		};
-		createLicense(newelement);
+		addLicense(newelement);
 	};
 
 	onDeleteLicense = id => {
-		const { userLicenses, removeLicense } = this.props;
-		const licenseUrlData = userLicenses[id].url.split('/');
-		licenseUrlData.pop();
-		const licenseId = licenseUrlData.pop();
-		const userId = licenseUrlData.pop();
-		removeLicense({ userId, licenseId });
-	};
-
-	onChangeLicenseHandler = id => e => {
-		const { value, name: prop } = e.target;
-		const { userLicenses, updateLicense } = this.props;
-		const licenseUrlData = userLicenses[id].url.split('/');
-		const params = userLicenses[id];
-		params[prop] = value;
-		params.expire_date = moment(params.expire_date).format('YYYY-MM-DD');
-		licenseUrlData.pop();
-		const licenseId = licenseUrlData.pop();
-		const userId = licenseUrlData.pop();
-		updateLicense({ userId, licenseId, params });
+		const { deleteLicense } = this.props;
+		deleteLicense({ id });
 	};
 
 	onChangeStateLicenseHandler = id => e => {
@@ -170,24 +139,24 @@ class Settings extends React.PureComponent {
 	}
 
 	onUserEditHandler = (prop, value) => {
-		const { user } = this.state;
+		const { user, shallowUpdateUser } = this.props;
 		const userInfo = cloneDeep(user);
 		userInfo[prop] = value;
-		this.setState({ user: userInfo });
+		shallowUpdateUser({ user: userInfo });
 	}
 
 	onNameEditHandler = value => {
-		const { user } = this.state;
+		const { user, shallowUpdateUser } = this.props;
 		if (value) {
 			const n = value.lastIndexOf(' ');
 			const firstName = value.slice(0, n);
 			const lastName = value.slice(n + 1);
-			this.setState({ user: { ...user, first_name: firstName, last_name: lastName } });
+			shallowUpdateUser({ user: { ...user, first_name: firstName, last_name: lastName } });
 		}
 	}
 
 	onAddressChanged = () => {
-		const { user } = this.state;
+		const { user, shallowUpdateUser } = this.props;
 		const emptyAddress = {
 			line_1: '',
 			line_2: '',
@@ -207,41 +176,69 @@ class Settings extends React.PureComponent {
 		if (isInValid) {
 			this.setState({ addressInvalid });
 		} else {
-			this.setState({ user: { ...user, addressObj: newAddress }, showAddressDetailForm: false, addressInvalid });
+			shallowUpdateUser({ user: { ...user, addressObj: newAddress }});
+			this.setState({ showAddressDetailForm: false, addressInvalid });
 		}
 	}
 
 	changeAddress = (e) => {
 		const prop = e.target.name;
 		const value = e.target.value;
-		const { user, addressInvalid } = this.state;
+		const { addressInvalid } = this.state;
+		const { shallowUpdateUser, user } = this.props;
 		const newAddress = cloneDeep(user.addressObj);
 		const newAddressInvalid = cloneDeep(addressInvalid);
 		if (value) newAddressInvalid[prop] = false;
 		 else newAddressInvalid[prop] = true;
 		newAddress[prop] = value;
-		this.setState({ user: { ...user, addressObj: newAddress }, addressInvalid: newAddressInvalid});
+		shallowUpdateUser({ user: { ...user, addressObj: newAddress }});
+		this.setState({ addressInvalid: newAddressInvalid });
 	}
 
 	showAddressDetailForm = (address) => {
-		const { user } = this.state;
+		const { user, shallowUpdateUser } = this.props;
 		this.setState({
-			showAddressDetailForm: true,
+			showAddressDetailForm: true
+		});
+		shallowUpdateUser({
 			user: { 
 				...user,
 				addressObj: address,
 			}
-		});
+		})
 	}
+
+	datepickerChanged = (id, e) => {
+		if (!isNull(e)) {
+			const data = e.target;
+			setTimeout(() => {
+				const { value, name: prop } = data;
+				const { userLicenses, updateLicenseState } = this.props;
+				const params = {};
+				Object.assign(params, userLicenses[id]);
+				params[prop] = value;
+				params.expire_date = moment(params.expire_date).format('YYYY-MM-DD');
+				updateLicenseState({ id, params });
+			}, 300);
+		}
+	}
+
+	onUpdateCompanyDetails = (prop, value) => {
+		this.setState({ [`company_${prop}`]: value });
+		const { companyInfo, updateCompanyPartialInfo } = this.props;
+		const newCompanyInfo = cloneDeep(companyInfo);
+		newCompanyInfo[prop] = value;
+		updateCompanyPartialInfo({ companyInfo: newCompanyInfo })
+	};
+
+	getIdFromUrl = url => url.slice(0, -1).split('/').pop();
 
 	render() {
 		const {
-			ein,
 			editable,
 			btnname,
 			btnicon,
 			showResetPassform,
-			user,
 			isInValidPassword,
 			password,
 			oldPassword,
@@ -249,7 +246,7 @@ class Settings extends React.PureComponent {
 			showAddressDetailForm,
 			addressInvalid,
 		} = this.state;
-		const { userLicenses: license } = this.props;
+		const { userLicenses: license, user, companyInfo, getCompanyInfo } = this.props;
 		const {
 			first_name: firstName,
 			last_name: lastName,
@@ -257,6 +254,9 @@ class Settings extends React.PureComponent {
 			email,
 			addressObj: address,
 		} = user;
+		if (isEmpty(companyInfo)) {
+			getCompanyInfo({ id: this.getIdFromUrl(user.company)});
+		}
 	
 		return (
 			<div id="main">
@@ -277,7 +277,7 @@ class Settings extends React.PureComponent {
 					</div>
 				</div>
 
-				<div className="content">
+				<div className="content settings">
 					<div className="table-tool">
 						<button
 							type="button"
@@ -288,7 +288,8 @@ class Settings extends React.PureComponent {
 						</button>
 					</div>
 					<Table
-						tableName="ABC Construction Company, Inc."
+						tableName={companyInfo.name || ''}
+						onComapnyNameChanged={value => this.onUpdateCompanyDetails('name', value)}
 						tableStyle="table-striped table-bordered"
 						editable={editable}
 					>
@@ -316,8 +317,9 @@ class Settings extends React.PureComponent {
 										type="text"
 										name="email"
 										value={email}
-										onChange={this.onChangeHandler}
-										disabled
+										style={{ textTransform: 'inherit' }}
+										onChange={e => this.onUserEditHandler('email', e.target.value)}
+										disabled={editable}
 									/>
 								</td>
 							</tr>
@@ -337,44 +339,45 @@ class Settings extends React.PureComponent {
 										<React.Fragment>
 											{!showAddressDetailForm && 
 												<LocationSearchInput
+													isInValid={false}
 													onAddressChanged={value => this.showAddressDetailForm(value)}
-													className="sub-locationSearchForm"
+													className="locationSearchForm"
 													placeholder={this.getAddressStr(address)}
 												/>
 											}
 											{showAddressDetailForm && (
 												<div className="locationdetail-form">
-													<input 
-														value={address.line_1}
-														className={addressInvalid.line_1 && 'is-invalid form-control'}
+													<input
+														value={address.line_1 || ''}
+														className={addressInvalid.line_1 ? 'is-invalid form-control' : ''}
 														name="line_1"
 														placeholder="line_1"
 														onChange={this.changeAddress}
 													/>
 													<input 
-														value={address.line_2}
+														value={address.line_2 || ''}
 														name="line_2"
 														placeholder="line_2"
 														onChange={this.changeAddress}
 													/>
 													<input 
-														value={address.town}
+														value={address.town || ''}
 														name="town"
-														className={addressInvalid.town && 'is-invalid form-control'}
+														className={addressInvalid.town ? 'is-invalid form-control' : ''}
 														placeholder="town"
 														onChange={this.changeAddress}
 													/>
 													<input 
-														value={address.state}
+														value={address.state || ''}
 														name="state"
-														className={addressInvalid.state && 'is-invalid form-control'}
+														className={addressInvalid.state ? 'is-invalid form-control' : ''}
 														placeholder="state"
 														onChange={this.changeAddress}
 													/>
-													<input 
-														value={address.zip_code}
+													<input
+														value={address.zip_code || ''}
 														name="zip_code"
-														className={addressInvalid.zip_code && 'is-invalid form-control'}
+														className={addressInvalid.zip_code ? 'is-invalid form-control' : ''}
 														placeholder="zip_code"
 														onChange={this.changeAddress}
 													/>
@@ -399,9 +402,11 @@ class Settings extends React.PureComponent {
 									<PhoneInput
 										placeholder="Enter phone number"
 										value={ phone }
+										className="phoneinput"
 										country="US"
-										disabled={editable}
-										onChange={value => this.onUserEditHandler('phone', value)} />
+										disabled={!!editable}
+										onChange={value => this.onUserEditHandler('phone', value)}
+									/>
 								</td>
 							</tr>
 							<tr className="text-left">
@@ -412,8 +417,8 @@ class Settings extends React.PureComponent {
 									<input
 										type="text"
 										name="ein"
-										value={ein}
-										onChange={this.onChangeHandler}
+										value={companyInfo.ein || ''}
+										onChange={e => this.onUpdateCompanyDetails('ein', e.target.value)}
 										disabled={editable}
 									/>
 								</td>
@@ -430,7 +435,7 @@ class Settings extends React.PureComponent {
 							</tr>
 							{license.map((item, id) => (
 								// eslint-disable-next-line
-								<tr className="text-center" key={id}>
+								<tr className="text-left" key={id}>
 									<td />
 									<td className="table-width-30">
 										<input
@@ -439,7 +444,6 @@ class Settings extends React.PureComponent {
 											value={item.type}
 											disabled={editable}
 											onChange={this.onChangeStateLicenseHandler(id)}
-											onBlur={this.onChangeLicenseHandler(id)}
 										/>
 									</td>
 									<td className="table-width-30">
@@ -449,23 +453,37 @@ class Settings extends React.PureComponent {
 											value={item.number}
 											disabled={editable}
 											onChange={this.onChangeStateLicenseHandler(id)}
-											onBlur={this.onChangeLicenseHandler(id)}
 										/>
 									</td>
 									<td className="table-width-40">
-										<input
-											type="text"
-											name="expire_date"
-											value={item.expire_date}
-											disabled={editable}
-											onChange={this.onChangeStateLicenseHandler(id)}
-											onBlur={this.onChangeLicenseHandler(id)}
-										/>
+										{editable && 
+											<input
+												type="text"
+												value={moment(item.expire_date, 'YYYY-MM-DD', true).isValid() ? moment(item.expire_date).format('MM/DD/YYYY') : ''}
+												disabled={editable}
+											/>
+										}
+										{!editable &&
+											<input
+												type="text"
+												ref="endDateEleRef"
+												className="js-datepicker form-control"
+												name="expire_date"
+												data-week-start="1"
+												data-autoclose="true"
+												data-today-highlight="true"
+												data-date-format="mm/dd/yyyy"
+												defaultValue={moment(item.expire_date, 'YYYY-MM-DD', true).isValid() ? moment(item.expire_date).format('MM/DD/YYYY') : ''}
+												onBlur={e => this.datepickerChanged(id, e)}
+												placeholder="MM/DD/YYYY"
+											/>
+										}
 									</td>
-									<td className="text-center">
-										<div className="btn-group">
+									<td className="text-left">
+										<div className="btn-group">	
 											<button
 												type="button"
+												disabled={editable}
 												className="btn btn-sm btn-primary js-tooltip-enabled"
 												data-toggle="tooltip"
 												data-original-title="Delete"
@@ -568,28 +586,38 @@ class Settings extends React.PureComponent {
 const mapStateToProps = state => ({
 	userLicenses: getLicensesSelector(state),
 	user: getUserSelector(state),
+	companyInfo: getCompanySelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({
-	createLicense: params => dispatch(licenseActions.create_license(params)),
+	addLicense: params => dispatch(licenseActions.add_license(params)),
 	listUserLicenses: () => dispatch(licenseActions.get_licenses()),
-	updateLicense: params => dispatch(licenseActions.update_license(params)),
-	removeLicense: params => dispatch(licenseActions.remove_license(params)),
+	deleteLicense: params => dispatch(licenseActions.delete_license(params)),
+	updateLicenses: () => dispatch(licenseActions.update_licenses()),
 	updateLicenseState: params => dispatch(licenseActions.update_license_state(params)),
 	getUserInfo: () => dispatch(userActions.get_user()),
 	updateUserInfo: params => dispatch(userActions.update_user(params)),
+	shallowUpdateUser: params => dispatch(userActions.update_user_state(params)),
+	getCompanyInfo: params => dispatch(companyActions.get_company(params)),
+	updateCompanyInfo: params => dispatch(companyActions.update_company(params)),
+	updateCompanyPartialInfo: params => dispatch(companyActions.update_company_partial(params)),
 })
 
 Settings.propTypes = {
 	userLicenses: PropTypes.array.isRequired,
-	createLicense: PropTypes.func.isRequired,
+	addLicense: PropTypes.func.isRequired,
 	listUserLicenses: PropTypes.func.isRequired,
-	updateLicense: PropTypes.func.isRequired,
-	removeLicense: PropTypes.func.isRequired,
+	updateLicenses: PropTypes.func.isRequired,
+	deleteLicense: PropTypes.func.isRequired,
 	updateLicenseState: PropTypes.func.isRequired,
 	user: PropTypes.object.isRequired,
 	getUserInfo: PropTypes.func.isRequired,
-	updateUserInfo: PropTypes.func.isRequired, 
+	shallowUpdateUser: PropTypes.func.isRequired,
+	updateUserInfo: PropTypes.func.isRequired,
+	getCompanyInfo: PropTypes.func.isRequired,
+	updateCompanyPartialInfo: PropTypes.func.isRequired,
+	updateCompanyInfo: PropTypes.func.isRequired,
+	companyInfo: PropTypes.object.isRequired,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);

@@ -44,12 +44,13 @@ Table.propTypes = {
 	tableStyle: string,
 	editable: string,
 	children: node.isRequired,
-	onComapnyNameChanged: func.isRequired,
+	onComapnyNameChanged: func,
 };
 
 Table.defaultProps = {
 	editable: 'disable',
 	tableStyle: '',
+	onComapnyNameChanged: () => {},
 }
 
 export default Table;

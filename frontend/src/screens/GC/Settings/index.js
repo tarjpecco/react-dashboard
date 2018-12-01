@@ -297,7 +297,7 @@ class Settings extends React.PureComponent {
 									{editable &&
 										<input
 											type="text"
-											value={this.getAddressStr(address)}
+											value={this.getAddressStr(address) || ''}
 											disabled={editable}
 										/>
 									}
@@ -313,34 +313,34 @@ class Settings extends React.PureComponent {
 											{showAddressDetailForm && (
 												<div className="locationdetail-form">
 													<input 
-														value={address.line_1}
+														value={address.line_1 || ''}
 														className={addressInvalid.line_1 && 'is-invalid form-control'}
 														name="line_1"
 														placeholder="line_1"
 														onChange={this.changeAddress}
 													/>
 													<input 
-														value={address.line_2}
+														value={address.line_2 || ''}
 														name="line_2"
 														placeholder="line_2"
 														onChange={this.changeAddress}
 													/>
 													<input 
-														value={address.town}
+														value={address.town || ''}
 														name="town"
 														className={addressInvalid.town && 'is-invalid form-control'}
 														placeholder="town"
 														onChange={this.changeAddress}
 													/>
 													<input 
-														value={address.state}
+														value={address.state || ''}
 														name="state"
 														className={addressInvalid.state && 'is-invalid form-control'}
 														placeholder="state"
 														onChange={this.changeAddress}
 													/>
 													<input 
-														value={address.zip_code}
+														value={address.zip_code || ''}
 														name="zip_code"
 														className={addressInvalid.zip_code && 'is-invalid form-control'}
 														placeholder="zip_code"
@@ -369,7 +369,7 @@ class Settings extends React.PureComponent {
 										value={ phone }
 										className="phoneinput"
 										country="US"
-										disabled={editable}
+										disabled={!!editable}
 										onChange={value => this.onUserEditHandler('phone', value)}
 									/>
 								</td>
@@ -382,7 +382,7 @@ class Settings extends React.PureComponent {
 									<input
 										type="text"
 										name="ein"
-										value={companyInfo.ein}
+										value={companyInfo.ein || ''}
 										onChange={e => this.onUpdateCompanyDetails('ein', e.target.value)}
 										disabled={editable}
 									/>
@@ -415,7 +415,7 @@ class Settings extends React.PureComponent {
 										<input
 											type="text"
 											name="number"
-											value={item.number}
+											value={item.number || ''}
 											disabled={editable}
 											onChange={this.onChangeStateLicenseHandler(id)}
 										/>
@@ -469,7 +469,7 @@ class Settings extends React.PureComponent {
 									<input
 										type="password"
 										name="password"
-										value={password}
+										value={password || ''}
 										placeholder="Your Password"
 										onChange={this.onChangeHandler}
 									/>

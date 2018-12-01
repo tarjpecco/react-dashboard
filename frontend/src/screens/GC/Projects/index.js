@@ -32,6 +32,7 @@ const emptyProject = {
 		line_2: '',
 		town: '',
 		state: '',
+		country: 'USA',
 		zip_code: '',
 	},
 	status: 'active',
@@ -46,8 +47,8 @@ class Projects extends React.Component {
 			address: false,
 		},
 		modalIsOpen: false,
+		countryEditable: false,
 		addressInvalid: {},
-		showAddressDetailForm: false,
 	}
 
 	componentDidMount() {
@@ -105,11 +106,6 @@ class Projects extends React.Component {
 		});
 	}
 
-	getAddressStr = (address) => {
-		const { line_1: line1, line_2: line2, town, state, zip_code:zipCode } = address;
-		return `${line1 || ''} ${line2 || ''} ${town ? `${town},` : ''} ${state || ''} ${zipCode || ''}`;
-	}
-
 	onAddressChanged = () => {
 		const { newproject } = this.state;
 		const emptyAddress = {
@@ -117,6 +113,7 @@ class Projects extends React.Component {
 			line_2: '',
 			town: '',
 			state: '',
+			country: 'USA',
 			zip_code: '',
 		};
 		const addressInvalid = {};
@@ -131,7 +128,7 @@ class Projects extends React.Component {
 		if (isInValid) {
 			this.setState({ addressInvalid });
 		} else {
-			this.setState({ newproject: { ...newproject, address: newAddress }, showAddressDetailForm: false, addressInvalid });
+			this.setState({ newproject: { ...newproject, address: newAddress }, addressInvalid });
 		}
 	}
 
@@ -146,18 +143,7 @@ class Projects extends React.Component {
 		newAddress[prop] = value;
 		this.setState({
 			newproject: { ...newproject, address: newAddress },
-			addressInvalid: newAddressInvalid
-		});
-	}
-
-	showAddressDetailForm = (address) => {
-		const { newproject } = this.state;
-		this.setState({
-			showAddressDetailForm: true,
-			newproject: { 
-				...newproject,
-				address,
-			}
+			addressInvalid: newAddressInvalid,
 		});
 	}
 
@@ -174,12 +160,18 @@ class Projects extends React.Component {
 		}, 300);
 	}
 
+	toggleCountryEditable = (status) => {
+		this.setState({
+			countryEditable: status,
+		});
+	}
+
 	render() {
 		const {
 			modalIsOpen,
 			newproject,
 			isInValid,
-			showAddressDetailForm,
+			countryEditable,
 			addressInvalid
 		} = this.state;
 		const { address } = newproject;
@@ -273,61 +265,59 @@ class Projects extends React.Component {
 						</div>
 						<div className="form-group">
 							Address
-							{!showAddressDetailForm && 
-								<LocationSearchInput
-									onAddressChanged={this.showAddressDetailForm}
-									isInValid={isInValid.address}
-									placeholder={this.getAddressStr(address)}
+							<div className="gc-locationdetail-form">
+								<input 
+									value={address.line_1}
+									className={addressInvalid.line_1 && 'is-invalid form-control'}
+									name="line_1"
+									// eslint-disable-next-line jsx-a11y/no-autofocus
+									autoFocus
+									placeholder="Address 1"
+									onChange={this.changeAddress}
 								/>
-							}
-							{showAddressDetailForm && (
-								<div className="gc-locationdetail-form">
-									<input 
-										value={address.line_1}
-										className={addressInvalid.line_1 && 'is-invalid form-control'}
-										name="line_1"
-										// eslint-disable-next-line jsx-a11y/no-autofocus
-										autoFocus
-										placeholder="line_1"
-										onChange={this.changeAddress}
-									/>
-									<input 
-										value={address.line_2}
-										name="line_2"
-										placeholder="line_2"
-										onChange={this.changeAddress}
-									/>
-									<input 
-										value={address.town}
-										name="town"
-										className={addressInvalid.town && 'is-invalid form-control'}
-										placeholder="town"
-										onChange={this.changeAddress}
-									/>
-									<input 
-										value={address.state}
-										name="state"
-										className={addressInvalid.state && 'is-invalid form-control'}
-										placeholder="state"
-										onChange={this.changeAddress}
-									/>
-									<input 
-										value={address.zip_code}
-										name="zip_code"
-										className={addressInvalid.zip_code && 'is-invalid form-control'}
-										placeholder="zip_code"
-										onChange={this.changeAddress}
-									/>
-									<button
-										type="button"
-										className="btn btn-sm btn-primary"
-										onClick={this.onAddressChanged}
-										style={{ height: 30 }}
-									>
-										Ok
-									</button>
-								</div>
-							)}
+								<input 
+									value={address.line_2}
+									name="line_2"
+									placeholder="Address 2"
+									onChange={this.changeAddress}
+								/>
+								<input 
+									value={address.town}
+									name="town"
+									className={addressInvalid.town && 'is-invalid form-control'}
+									placeholder="City"
+									onChange={this.changeAddress}
+								/>
+								<input 
+									value={address.state}
+									name="state"
+									className={addressInvalid.state && 'is-invalid form-control'}
+									placeholder="State"
+									onChange={this.changeAddress}
+								/>
+								<input 
+									placeholder={address.country}
+									name="country"
+									className={addressInvalid.zip_code && 'is-invalid form-control'}
+									onChange={this.changeAddress}
+									disabled
+								/>
+								<input 
+									value={address.zip_code}
+									name="zip_code"
+									className={addressInvalid.zip_code && 'is-invalid form-control'}
+									placeholder="Zip Code"
+									onChange={this.changeAddress}
+								/>
+								<button
+									type="button"
+									className="btn btn-sm btn-primary"
+									onClick={this.onAddressChanged}
+									style={{ height: 30 }}
+								>
+									Ok
+								</button>
+							</div>
 						</div>
 						<div className="form-group">
 							Expected Start Date

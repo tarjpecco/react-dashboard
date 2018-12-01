@@ -20,7 +20,6 @@ import {
 } from '../../../redux/ducks/companies';
 import Table from '../../../components/Table';
 import './index.scss';
-import LocationSearchInput from '../../../components/LocationSearchInput';
 
 class Settings extends React.PureComponent {
 	constructor(props) {
@@ -38,7 +37,6 @@ class Settings extends React.PureComponent {
 			},
 			addressInvalid: {},
 			password: '',
-			showAddressDetailForm: false,
 		};
 		const { listUserLicenses, user, getUserInfo } = props;
 		listUserLicenses();
@@ -143,7 +141,7 @@ class Settings extends React.PureComponent {
 			this.setState({ addressInvalid });
 		} else {
 			shallowUpdateUser({ user: { ...user, addressObj: newAddress }});
-			this.setState({ showAddressDetailForm: false, addressInvalid });
+			this.setState({ addressInvalid });
 		}
 	}
 
@@ -159,19 +157,6 @@ class Settings extends React.PureComponent {
 		newAddress[prop] = value;
 		shallowUpdateUser({ user: { ...user, addressObj: newAddress }});
 		this.setState({ addressInvalid: newAddressInvalid });
-	}
-
-	showAddressDetailForm = (address) => {
-		const { user, shallowUpdateUser } = this.props;
-		this.setState({
-			showAddressDetailForm: true
-		});
-		shallowUpdateUser({
-			user: { 
-				...user,
-				addressObj: address,
-			}
-		})
 	}
 
 	datepickerChanged = (id, e) => {
@@ -209,7 +194,6 @@ class Settings extends React.PureComponent {
 			password,
 			oldPassword,
 			confirmPassword,
-			showAddressDetailForm,
 			addressInvalid,
 		} = this.state;
 		const { userLicenses: license, user, companyInfo, getCompanyInfo } = this.props;
@@ -303,58 +287,47 @@ class Settings extends React.PureComponent {
 									}
 									{!editable &&
 										<React.Fragment>
-											{!showAddressDetailForm && 
-												<LocationSearchInput
-													onAddressChanged={value => this.showAddressDetailForm(value)}
-													className="locationSearchForm"
-													placeholder={this.getAddressStr(address)}
+											<div className="locationdetail-form">
+												<input 
+													value={address.line_1 || ''}
+													className={addressInvalid.line_1 && 'is-invalid form-control'}
+													name="line_1"
+													placeholder="Address 1"
+													onChange={this.changeAddress}
 												/>
-											}
-											{showAddressDetailForm && (
-												<div className="locationdetail-form">
-													<input 
-														value={address.line_1 || ''}
-														className={addressInvalid.line_1 && 'is-invalid form-control'}
-														name="line_1"
-														placeholder="line_1"
-														onChange={this.changeAddress}
-													/>
-													<input 
-														value={address.line_2 || ''}
-														name="line_2"
-														placeholder="line_2"
-														onChange={this.changeAddress}
-													/>
-													<input 
-														value={address.town || ''}
-														name="town"
-														className={addressInvalid.town && 'is-invalid form-control'}
-														placeholder="town"
-														onChange={this.changeAddress}
-													/>
-													<input 
-														value={address.state || ''}
-														name="state"
-														className={addressInvalid.state && 'is-invalid form-control'}
-														placeholder="state"
-														onChange={this.changeAddress}
-													/>
-													<input 
-														value={address.zip_code || ''}
-														name="zip_code"
-														className={addressInvalid.zip_code && 'is-invalid form-control'}
-														placeholder="zip_code"
-														onChange={this.changeAddress}
-													/>
-													<button
-														type="button"
-														className="btn btn-sm btn-primary"
-														onClick={this.onAddressChanged}
-													>
-														Ok
-													</button>
-												</div>
-												)}
+												<input 
+													value={address.line_2 || ''}
+													name="line_2"
+													placeholder="Address 2"
+													onChange={this.changeAddress}
+												/>
+												<input 
+													value={address.town || ''}
+													name="town"
+													className={addressInvalid.town && 'is-invalid form-control'}
+													placeholder="City"
+													onChange={this.changeAddress}
+												/>
+												<input 
+													value={address.state || ''}
+													name="state"
+													className={addressInvalid.state && 'is-invalid form-control'}
+													placeholder="State"
+													onChange={this.changeAddress}
+												/>
+												<input 
+													placeholder="USA"
+													name="state"
+													disabled
+												/>
+												<input 
+													value={address.zip_code || ''}
+													name="zip_code"
+													className={addressInvalid.zip_code && 'is-invalid form-control'}
+													placeholder="Zip code"
+													onChange={this.changeAddress}
+												/>
+											</div>
 										</React.Fragment>
 									}
 								</td>

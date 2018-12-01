@@ -74,18 +74,16 @@
 
 	.locationdetail-form {
 		display: flex;
-		justify-content: 'space-between';
+		justify-content: space-between;
+		margin: 0 -5px;
 		
 		input {
-			border: 1px solid lightgray;
-			border-radius: 5px;
-			padding: 0 0.5em;
+			border-radius: 0;
 			margin: 0 5px;
-			height: 30px;
-			color: black;
+			height: 26px;
 		}
 	}
-
+	
 	.react-phone-number-input__country--native {
 		display: none;
 	}

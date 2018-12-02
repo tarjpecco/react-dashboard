@@ -154,8 +154,7 @@ class MyInsurance extends React.Component {
 			const policy = cloneDeep(newPolicy);
 			/* eslint-disable-next-line */
 			const value = this.refs.renewalDatePicker && this.refs.renewalDatePicker.value;
-			policy.renewal_date = moment(value, 'YYYY-MM-DD', true).isValid() ?
-				moment(value).format('YYYY-MM-DD') : moment(new Date()).format('YYYY-MM-DD');
+			policy.renewal_date = moment(value).format('YYYY-MM-DD');
 			this.setState({ newPolicy: policy });
 		}, 300);
 	}

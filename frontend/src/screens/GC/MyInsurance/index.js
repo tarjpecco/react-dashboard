@@ -179,7 +179,7 @@ class MyInsurance extends React.Component {
 					<div className="content content-full">
 						<div className="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
 							<h1 className="flex-sm-fill font-size-h2 font-w400 mt-2 mb-0 mb-sm-2">
-								Sub My Insurance
+								GC My Insurance
 							</h1>
 							<button
 								type="button"

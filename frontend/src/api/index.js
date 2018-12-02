@@ -235,3 +235,34 @@ export const getDataFromUrl = (url) => {
     }))
     .then(res => res.data)
 };
+
+export const getBids = (params) => {
+  return authHeaderService.getHeaders()
+  .then((headers) => axios.get(`${API_URL}/bids/`,
+  {
+    headers,
+    params,
+  }))
+  .then(res => res.data)
+}
+
+export const updateBid = (id, params) => {
+  return authHeaderService.getHeaders()
+  .then((headers) => axios.patch(`${API_URL}/bids/${id}/`,
+  {
+    ...params,
+  },
+  {
+    headers
+  }))
+  .then(res => res.data)
+}
+
+export const getBid = (id) => {
+  return authHeaderService.getHeaders()
+  .then((headers) => axios.get(`${API_URL}/bids/${id}/`,
+  {
+    headers
+  }))
+  .then(res => res.data)
+}

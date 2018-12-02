@@ -5,6 +5,7 @@ import classnames from 'classnames';
 import { connect } from 'react-redux';
 import * as moment from 'moment';
 import { orderBy, cloneDeep, mapValues, isEmpty } from 'lodash';
+import Download from '@axetroy/react-download';
 
 import Modal from 'react-modal';
 import Table from '../../../components/Table';
@@ -17,6 +18,10 @@ import {
 	getUserSelector,
 	actions as userActions,
 } from '../../../redux/ducks/user';
+import {
+	getBidsSelector,
+	actions as bidActions,
+} from '../../../redux/ducks/bids';
 import { API_URL } from '../../../api';
 import { getIdFromUrl } from '../../../utils';
 
@@ -34,9 +39,11 @@ class Detail extends React.Component {
 	static propTypes = {
 		match: PropTypes.object.isRequired,
 		listJobs: PropTypes.func.isRequired,
+		listBids: PropTypes.func.isRequired,
 		createJob: PropTypes.func.isRequired,
 		user: PropTypes.object.isRequired,
 		getUserInfo: PropTypes.func.isRequired,
+		updateBidInfo: PropTypes.func.isRequired,
 	}
 
 	constructor(props) {
@@ -46,7 +53,8 @@ class Detail extends React.Component {
 		this.state = {
 			clicked: 'rfq',
 			modalIsOpen: false,
-			bids: [],
+			jobs: [],
+			bids: {},
 			isInValid: {
 				trade_type: false,
 				expected_start_date: false,
@@ -68,21 +76,24 @@ class Detail extends React.Component {
 
 	componentDidMount() {
 		Modal.setAppElement('body');
-		const { listJobs } = this.props;
+		const { listJobs, listBids } = this.props;
 		const { clicked } = this.state;
 		listJobs({ id: this.projectId, status: clicked });
+		listBids({ job__project: this.projectId });
 	}
 
 	componentWillReceiveProps(newProps) {
-		const { jobList } = newProps;
+		const { jobList, bidList } = newProps;
+		const newBids = {};
 		jobList.forEach(job => {
 			job.id = getIdFromUrl(job.url);
 			job.expected_end_date = moment(job.expected_end_date).format('MM/DD/YYYY');
 			job.expected_start_date = moment(job.expected_start_date).format('MM/DD/YYYY');
 			job.showdetail = false;
-		})
-		const bids = orderBy(jobList, ['id'],['asc']);
-		this.setState({ bids });
+			newBids[job.id] = bidList.filter(bid => bid.job === job.url);
+		});
+		const jobs = orderBy(jobList, ['id'],['asc']);
+		this.setState({ jobs, bids: newBids });
 	}
 
 	onClickTabHandler = tabname => {
@@ -90,10 +101,10 @@ class Detail extends React.Component {
 	};
 
 	onClickDetail = id => {
-		const { bids } = this.state;
-		const temp = bids;
+		const { jobs } = this.state;
+		const temp = jobs;
 		temp[id].showdetail = !temp[id].showdetail;
-		this.setState({ bids: temp });
+		this.setState({ jobs: temp });
 	};
 
 	openModal = () => {
@@ -183,8 +194,15 @@ class Detail extends React.Component {
 		}
 	}
 
+	updateBidStatus = (bidId, status) => {
+		const { updateBidInfo } = this.props;
+		console.log('pdate bid status:', status, bidId);
+		updateBidInfo({ id: bidId, params: { status } });
+	}
+
 	render() {
-		const { bids, clicked, modalIsOpen, isInValid, newJob } = this.state;
+		const { jobs, bids, clicked, modalIsOpen, isInValid, newJob } = this.state;
+		console.log('bidS:', bids);
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -258,13 +276,12 @@ class Detail extends React.Component {
 											<th className="text-left table-width-20">Trade type</th>
 											<th className="text-left table-width-20">RFQ Doc</th>
 											<th className="text-left table-width-20">Due date</th>
-
 											<th className="text-left table-width-10">status</th>
 											<th />
 										</tr>
 									</thead>
 									<tbody>
-										{bids.map((item, id) =>
+										{jobs.map((item, id) =>
 											[
 											// eslint-disable-next-line
 												<React.Fragment key={id}>
@@ -278,21 +295,21 @@ class Detail extends React.Component {
 															</p>
 														</td>
 														<td>
-															<Link to="/projectdetail">
+															<Download file={item.file || ''} content='' >
 																<button
 																	type="button"
 																	className="btn btn-primary"
 																>
 																	Download
 																</button>
-															</Link>
+															</Download>
 														</td>
 														<td>
 															<p>{item.expected_end_date}</p>
 														</td>
 														<td>
 															<span className="badge badge-warning">
-																{'Bid in progress'}
+																{item.bid_status || 'Bid In Progress'}
 															</span>
 														</td>
 														<td className="text-right">
@@ -300,10 +317,10 @@ class Detail extends React.Component {
 																type="button"
 																onClick={() => this.onClickDetail(id)}
 															>
-																{!bids[id].showdetail && (
+																{!jobs[id].showdetail && (
 																	<i className="far fa-arrow-alt-circle-down" />
 																)}
-																{bids[id].showdetail && (
+																{jobs[id].showdetail && (
 																	<i className="far fa-arrow-alt-circle-up" />
 																)}
 															</button>
@@ -311,82 +328,13 @@ class Detail extends React.Component {
 													</tr>
 													<tr
 														className={classnames({
-															hidden: !bids[id].showdetail,
+															hidden: bids[jobs[id].id].length === 0 || !jobs[id].showdetail,
 														})}
 													>
 														<td colSpan="6">
-															<Proposal tableName="ABC Construction Company, Inc.">
-																<tbody>
-																	<tr className="text-left">
-																		<td className="table-width-20">
-																			<p className="text-info">
-																				Contact name
-																			</p>
-																		</td>
-																		<td
-																			className="table-width-80"
-																			colSpan="3"
-																		>
-																			<p>Name Surname</p>
-																		</td>
-																	</tr>
-																	<tr className="text-left">
-																		<td className="table-width-20">
-																			<p className="text-info">
-																				Address
-																			</p>
-																		</td>
-																		<td
-																			className="table-width-80"
-																			colSpan="3"
-																		>
-																			<p>
-																				123 Main street NY,NY
-																				1001
-																			</p>
-																		</td>
-																	</tr>
-																	<tr className="text-left">
-																		<td className="table-width-20">
-																			<p className="text-info">
-																				Phone
-																			</p>
-																		</td>
-																		<td>
-																			<p>555-444-555</p>
-																		</td>
-																	</tr>
-																	<tr className="text-left">
-																		<td className="table-width-20">
-																			<p className="text-info">
-																				EIN #
-																			</p>
-																		</td>
-																		<td>
-																			<p>61-512584</p>
-																		</td>
-																	</tr>
-																	<tr className="text-left">
-																		<td>
-																			<p className="text-info">
-																				License number
-																			</p>
-																		</td>
-																		<td className="table-width-30">
-																			Type
-																		</td>
-																		<td className="table-width-30">
-																			Number
-																		</td>
-																		<td
-																			className="table-width-40"
-																			colSpan="2"
-																		>
-																			Expiredate
-																		</td>
-																	</tr>
-																</tbody>
-															</Proposal>
+															{bids[jobs[id].id].map((data, index) =>
+																<Proposal data={data} key={index} updateBidStatus={this.updateBidStatus} />
+															)}
 														</td>
 													</tr>
 												</React.Fragment>
@@ -418,33 +366,53 @@ class Detail extends React.Component {
 										</tr>
 									</thead>
 									<tbody>
-										{bids.map((item, id) => (
-											// eslint-disable-next-line
-											<tr key={id} className="text-left">
-												<td>
-													<p>{item.id}</p>
-												</td>
-												<td>
-													<p className="text-info">{item.sub_name || ''}</p>
-												</td>
-												<td>
-													<p>{item.trade_type}</p>
-												</td>
+										{jobs.map((item, id) => (
+											<React.Fragment key={id}>
+												<tr className="text-left">
+													<td>
+														<p>{item.id}</p>
+													</td>
+													<td>
+														<p className="text-info">{item.sub_name || ''}</p>
+													</td>
+													<td>
+														<p>{item.trade_type}</p>
+													</td>
 
-												<td>
-													<p>{item.expected_end_date}</p>
-												</td>
-												<td className="text-center wrap">
-													<span className="badge badge-success">GL</span>
-													<span className="badge badge-danger">WC</span>
-													<span className="badge badge-warning">DB</span>
-												</td>
-												<td className="text-right">
-													<button type="button">
-														<i className="far fa-arrow-alt-circle-down" />
-													</button>
-												</td>
-											</tr>
+													<td>
+														<p>{item.expected_end_date}</p>
+													</td>
+													<td className="text-center wrap">
+														<span className="badge badge-success">GL</span>
+														<span className="badge badge-danger">WC</span>
+														<span className="badge badge-warning">DB</span>
+													</td>
+													<td className="text-right">
+														<button
+															type="button"
+															onClick={() => this.onClickDetail(id)}
+														>
+															{!jobs[id].showdetail && (
+																<i className="far fa-arrow-alt-circle-down" />
+															)}
+															{jobs[id].showdetail && (
+																<i className="far fa-arrow-alt-circle-up" />
+															)}
+														</button>
+													</td>
+												</tr>
+												<tr
+													className={classnames({
+														hidden: bids[jobs[id].id].length === 0 || !jobs[id].showdetail,
+													})}
+												>
+													<td colSpan="6">
+														{bids[jobs[id].id].map((data, index) =>
+															<Proposal data={data} key={index} updateBidStatus={this.updateBidStatus} />
+														)}
+													</td>
+												</tr>
+											</React.Fragment>
 										))}
 									</tbody>
 								</Table>
@@ -469,28 +437,49 @@ class Detail extends React.Component {
 										</tr>
 									</thead>
 									<tbody>
-										{bids.map((item, id) => (
+										{jobs.map((item, id) => (
 											// eslint-disable-next-line
-											<tr key={id} className="text-left">
-												<td>
-													<p>{item.id}</p>
-												</td>
-												<td>
-													<p className="text-info">{item.sub_name || ''}</p>
-												</td>
-												<td>
-													<p>{item.trade_type}</p>
-												</td>
+											<React.Fragment key={id}>
+												<tr key={id} className="text-left">
+													<td>
+														<p>{item.id}</p>
+													</td>
+													<td>
+														<p className="text-info">{item.sub_name || ''}</p>
+													</td>
+													<td>
+														<p>{item.trade_type}</p>
+													</td>
 
-												<td>
-													<p>{item.expected_end_date}</p>
-												</td>
-												<td className="text-right">
-													<button type="button">
-														<i className="far fa-arrow-alt-circle-down" />
-													</button>
-												</td>
-											</tr>
+													<td>
+														<p>{item.expected_end_date}</p>
+													</td>
+													<td className="text-right">
+														<button
+															type="button"
+															onClick={() => this.onClickDetail(id)}
+														>
+															{!jobs[id].showdetail && (
+																<i className="far fa-arrow-alt-circle-down" />
+															)}
+															{jobs[id].showdetail && (
+																<i className="far fa-arrow-alt-circle-up" />
+															)}
+														</button>
+													</td>
+												</tr>
+												<tr
+													className={classnames({
+														hidden: bids[jobs[id].id].length === 0 || !jobs[id].showdetail,
+													})}
+												>
+													<td colSpan="6">
+														{bids[jobs[id].id].map((data, index) =>
+															<Proposal data={data} key={index} updateBidStatus={this.updateBidStatus} />
+														)}
+													</td>
+												</tr>
+											</React.Fragment>
 										))}
 									</tbody>
 								</Table>
@@ -597,12 +586,15 @@ class Detail extends React.Component {
 const mapStateToProps = state => ({
 	jobList: getJobsSelector(state),
 	user: getUserSelector(state),
+	bidList: getBidsSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({
 	listJobs: params => dispatch(jobActions.get_jobs(params)),
+	listBids: params => dispatch(bidActions.get_bids(params)),
 	createJob: params => dispatch(jobActions.create_job(params)),
 	getUserInfo: () => dispatch(userActions.get_user()),
+	updateBidInfo: params => dispatch(bidActions.update_bid(params)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Detail);

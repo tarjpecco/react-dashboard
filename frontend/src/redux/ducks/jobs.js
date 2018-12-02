@@ -2,13 +2,12 @@ import { createDuck } from 'redux-duck';
 import { List, fromJS } from 'immutable';
 import { takeEvery, takeLatest, call, put, all, select } from 'redux-saga/effects';
 import { createSelector } from 'reselect';
-import { isUndefined, assign } from 'lodash';
+import { isUndefined } from 'lodash';
 
 import {
   getJobsForProject,
   createJob,
   getJobsByStatus,
-  getDataFromUrl,
 } from '../../api';
 import { actionNames, createActions } from '../helper';
 

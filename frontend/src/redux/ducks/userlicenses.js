@@ -131,17 +131,6 @@ function* updateLicensesSaga() {
   }
 }
 
-function* updateUserLicenseSaga({ payload }) {
-  const { licenseId, params } = payload;
-  try {
-    yield call(updateUserLicenseForUser, 'me', licenseId, params);
-    yield call(listUserLicensesSaga);
-  } catch (err) {
-    const errorMessage = 'Updating User-license Failed';
-    yield put(actions.get_licenses_error({ error: errorMessage }));
-  }
-}
-
 function* createUserLicenseSaga({ payload }) {
   try {
     const userInfo = yield call(getCurrentUser);

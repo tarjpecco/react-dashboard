@@ -12,6 +12,7 @@ import user from './ducks/user';
 import policies from './ducks/policies';
 import invites from './ducks/invites';
 import companies from './ducks/companies';
+import bids from './ducks/bids';
 
 import rootSaga from './sagas';
 
@@ -41,6 +42,7 @@ export default function configureStore(initialState = {}) {
 		user,
 		invites,
 		companies,
+		bids,
 	});
 	
 	const store = createStore(connectRouter(history)(reducer), initialState, compose(...enhancers));

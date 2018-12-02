@@ -8,6 +8,7 @@ import { userSaga } from './ducks/user';
 import { policiesSaga } from './ducks/policies';
 import { invitesSaga } from './ducks/invites';
 import { companiesSaga } from './ducks/companies';
+import { bidsSaga } from './ducks/bids';
 
 
 export default function* () {
@@ -20,5 +21,6 @@ export default function* () {
     policiesSaga(),
     invitesSaga(),
     companiesSaga(),
+    bidsSaga(),
   ]);
 }

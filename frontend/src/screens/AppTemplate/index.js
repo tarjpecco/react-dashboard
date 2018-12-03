@@ -8,6 +8,7 @@ import { isEmpty } from 'lodash';
 
 import GCDashboard from '../GC/Dashboard';
 import MyInsurance from '../GC/MyInsurance';
+import GCInsuranceDetail from '../GC/PolicyDetail';
 import Settings from '../GC/Settings';
 import GCBilling from '../GC/Billing';
 import Projects from '../GC/Projects';
@@ -16,6 +17,7 @@ import Team from '../GC/Team';
 import SubDashboard from '../Sub/Dashboard';
 import SubInsurance from '../Sub/MyInsurance';
 import SubSettings from '../Sub/Settings';
+import SubInsuranceDetail from '../Sub/PolicyDetail';
 import AgentDashboard from '../Agent/Dashboard';
 import AgentSettings from '../Agent/Settings';
 import AgentClients from '../Agent/Clients';
@@ -50,6 +52,7 @@ const AppTemplate = ({ showSideBar, location, history, user, getUserInfo }) => {
 					<Route exact path="/dashboard" component={GCDashboard} />
 					<Route exact path="/billing" component={GCBilling} />
 					<Route exact path="/insurance" component={MyInsurance} />
+					<Route exact path="/insurance/:id" component={GCInsuranceDetail} />
 					<Route exact path="/projects" component={Projects} />
 					<Route exact path="/projects/:id" component={Detail} />
 					<Route exact path="/settings" component={Settings} />
@@ -60,6 +63,7 @@ const AppTemplate = ({ showSideBar, location, history, user, getUserInfo }) => {
 				<Switch>
 					<Route exact path="/dashboard" component={SubDashboard} />
 					<Route exact path="/insurance" component={SubInsurance} />
+					<Route exact path="/insurance/:id" component={SubInsuranceDetail} />
 					<Route exact path="/settings" component={SubSettings} />
 				</Switch>
 			)}

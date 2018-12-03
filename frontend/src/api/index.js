@@ -176,6 +176,24 @@ export const getPoliciesForUser = (userPK) => {
     .then(res => res.data)
 };
 
+export const getPolicyForUser = (id) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.get(`${API_URL}/user-policies/${id}/detail/`, {
+      headers
+    }))
+    .then(res => res.data)
+};
+
+export const updatePolicyForUser = (id, params) => {
+  return authHeaderService.getHeaders('multipart/form-data')
+    .then((headers) => axios.patch(`${API_URL}/user-policies/${id}/detail/`,
+    params,
+    {
+      headers
+    }))
+    .then(res => res.data)
+};
+
 export const createPoliciesForUser = (userPK, params) => {
   return authHeaderService.getHeaders('multipart/form-data')
     .then((headers) => axios.post(`${API_URL}/user-policies/${userPK}/`,

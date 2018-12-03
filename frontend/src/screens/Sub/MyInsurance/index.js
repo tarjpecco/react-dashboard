@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Modal from 'react-modal';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { cloneDeep, mapValues } from 'lodash';
 import * as moment from 'moment';
@@ -17,6 +18,7 @@ import {
 } from '../../../redux/ducks/user';
 import Table from '../../../components/Table';
 import './index.scss';
+import { getIdFromUrl } from '../../../utils';
 
 const customStyles = {
 	content: {
@@ -122,6 +124,7 @@ class MyInsurance extends React.Component {
 		const formData = new FormData();
 		let isInValid = false;
 		const newInValid = cloneDeep(inValid);
+		formData.append('file', this.file.files[0]);
 		mapValues(newPolicy, (value, key) => {
 			formData.append(key, value);
 			if (value === '' || value === 'Invalid Date') {
@@ -218,9 +221,11 @@ class MyInsurance extends React.Component {
 										<span className="badge badge-success">Active</span>
 									</td>
 									<td>
-										<button type="button" className="btn btn-primary">
-											View or Edit{' '}
-										</button>
+										<Link to={`/insurance/${getIdFromUrl(policy.url)}`}>
+											<button type="button" className="btn btn-primary">
+												View or Edit{' '}
+											</button>
+										</Link>
 									</td>
 								</tr>
 							))}

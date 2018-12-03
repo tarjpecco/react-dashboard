@@ -125,7 +125,7 @@ export const createProject = (params) => {
 
 export const getJobsForProject = (id, status) => {
   return authHeaderService.getHeaders()
-    .then((headers) => axios.get(`${API_URL}/jobs/?project_id=${id}&&status=${status}`,
+    .then((headers) => axios.get(`${API_URL}/jobs/?project=${id}&status=${status}`,
     {
       headers
     }))

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-string-refs */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
@@ -47,7 +48,6 @@ class Projects extends React.Component {
 			address: false,
 		},
 		modalIsOpen: false,
-		countryEditable: false,
 		addressInvalid: {},
 	}
 
@@ -160,18 +160,11 @@ class Projects extends React.Component {
 		}, 300);
 	}
 
-	toggleCountryEditable = (status) => {
-		this.setState({
-			countryEditable: status,
-		});
-	}
-
 	render() {
 		const {
 			modalIsOpen,
 			newproject,
 			isInValid,
-			countryEditable,
 			addressInvalid
 		} = this.state;
 		const { address } = newproject;
@@ -300,10 +293,8 @@ class Projects extends React.Component {
 									)}
 								</select>
 								<input 
-									placeholder={address.country}
+									placeholder="USA"
 									name="country"
-									className={addressInvalid.zip_code && 'is-invalid form-control'}
-									onChange={this.changeAddress}
 									disabled
 								/>
 								<input 

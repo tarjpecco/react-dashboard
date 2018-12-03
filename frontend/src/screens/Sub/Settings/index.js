@@ -20,6 +20,7 @@ import {
 } from '../../../redux/ducks/companies';
 import Table from '../../../components/Table';
 import './index.scss';
+import { stateList } from '../../../utils';
 
 class Settings extends React.PureComponent {
 	constructor(props) {
@@ -342,13 +343,17 @@ class Settings extends React.PureComponent {
 													placeholder="City"
 													onChange={this.changeAddress}
 												/>
-												<input 
-													value={address.state || ''}
+												<select
+													defaultValue={address.state}
 													name="state"
-													className={addressInvalid.state ? 'is-invalid form-control' : ''}
+													className={`form-control ${addressInvalid.state && 'is-invalid'}`}
 													placeholder="State"
 													onChange={this.changeAddress}
-												/>
+												>
+													{stateList.map((state, index) =>
+														<option value={state.abbreviation} key={index}>{state.name}</option>	
+													)}
+												</select>
 												<input 
 													name="country"
 													placeholder="USA"

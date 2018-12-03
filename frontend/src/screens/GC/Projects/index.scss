@@ -48,6 +48,10 @@
     height: 30px;
     min-width: 80px;
     flex: 1;
+    background: #fff;
+    border: 1px solid #3c90df;
+    text-transform: capitalize;
+    color: black;
 
     &:focus {
       width: 150px;

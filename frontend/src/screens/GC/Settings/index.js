@@ -309,18 +309,15 @@ class Settings extends React.PureComponent {
 													placeholder="City"
 													onChange={this.changeAddress}
 												/>
-												<input 
-
-												/>
 												<select
-													defaultValue={address.state || ''}
+													defaultValue={address.state}
 													name="state"
-													className={addressInvalid.state && 'is-invalid form-control'}
+													className={`form-control ${addressInvalid.state && 'is-invalid'}`}
 													placeholder="State"
 													onChange={this.changeAddress}
 												>
-													{stateList.map(state =>
-														<option value={state} >{state}</option>
+													{stateList.map((state, index) =>
+														<option value={state.abbreviation} key={index}>{state.name}</option>	
 													)}
 												</select>
 												<input 

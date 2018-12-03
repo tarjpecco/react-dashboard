@@ -22,7 +22,7 @@ import {
 	getBidsSelector,
 	actions as bidActions,
 } from '../../../redux/ducks/bids';
-import { API_URL } from '../../../api';
+import { API_URL, getBid } from '../../../api';
 import { getIdFromUrl } from '../../../utils';
 
 import './index.scss';
@@ -84,13 +84,18 @@ class Detail extends React.Component {
 
 	componentWillReceiveProps(newProps) {
 		const { jobList, bidList } = newProps;
+		const { clicked } =  this.state;
 		const newBids = {};
 		jobList.forEach(job => {
 			job.id = getIdFromUrl(job.url);
 			job.expected_end_date = moment(job.expected_end_date).format('MM/DD/YYYY');
 			job.expected_start_date = moment(job.expected_start_date).format('MM/DD/YYYY');
 			job.showdetail = false;
-			newBids[job.id] = bidList.filter(bid => bid.job === job.url);
+			if (clicked === 'rfq') {
+				newBids[job.id] = bidList.filter(bid => bid.job === job.url);
+			} else {
+				newBids[job.id] = bidList.filter(bid => bid.url === job.active_bid);
+			}
 		});
 		const jobs = orderBy(jobList, ['id'],['asc']);
 		this.setState({ jobs, bids: newBids });

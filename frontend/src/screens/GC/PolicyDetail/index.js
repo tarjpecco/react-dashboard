@@ -133,6 +133,8 @@ class PolicyDetail extends React.PureComponent {
 			policy,
 			agentAddresses,
 		} = this.state;
+
+        const download = policy.file_url ? (<a type="button" target="_blank" rel="noopener noreferrer" href={policy.file_url} className="btn btn-success" > Download Policy </a>) : null
 	
 		return (
 			<div id="main" className="policydetail">
@@ -142,15 +144,8 @@ class PolicyDetail extends React.PureComponent {
 							<h1 className="flex-sm-fill font-size-h2 font-w400 mt-2 mb-0 mb-sm-2">
 								GC Policy Details
 							</h1>
-						</div>
-						<Download file={policy.file_url || ''} content=''>
-							<button
-								type="button"
-								className="btn btn-success"
-							>
-								Download Policy
-							</button>
-						</Download>
+                        </div>
+                        { download }
 					</div>
 				</div>
 				<div className="content settings">

@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Download from '@axetroy/react-download';
 import moment from 'moment';
 
 import './index.scss';
@@ -32,8 +31,9 @@ class Proposal extends React.Component {
 			.then(licenses => this.setState({ userLicenses: licenses }));
 	}
 
-	getAddressStr = address =>
-		`${address.line_1} ${address.line_2 || ''} ${address.town}, ${address.state} ${address.zip_code}`;
+	getAddressStr = address => {
+      return `${address.line_1} ${address.line_2 || ''} ${address.town}, ${address.state} ${address.zip_code}`;
+    }
 
 	getComplianceClassName = status => {
 		if (status === 'ok') return 'badge-success';
@@ -160,17 +160,23 @@ class Proposal extends React.Component {
 							<p className="text-info">Bid price </p>
 							<p>&nbsp;${data.bid} </p>
 						</div>
-						<div style={{ display: 'flex', flexDirection: 'row' }}>
-							<Download file={data.COI_file} content=''>
-								<button type="button" className="btn btn-primary">
-									Download COI
-								</button>
-							</Download>
-							<Download file={data.proposal_file} content=''>
-								<button type="button" className="btn btn-primary">
-									Download Proposal
-								</button>
-							</Download>
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+
+                          <a
+                            type="button"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href={data.COI_file}
+                            className="btn btn-primary"
+                          > Download COI</a>
+
+                          <a
+                            type="button"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href={data.proposal_file}
+                            className="btn btn-primary"
+                          > Download Proposal</a>
 						</div>
 						<div style={{ display: 'flex', flexDirection: 'row' }}>
 							<span className={`badge ${this.getComplianceClassName(data.compliance_GL)}`}>GL</span>&nbsp;

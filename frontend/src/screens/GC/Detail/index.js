@@ -5,7 +5,6 @@ import classnames from 'classnames';
 import { connect } from 'react-redux';
 import * as moment from 'moment';
 import { orderBy, cloneDeep, mapValues, isEmpty } from 'lodash';
-import Download from '@axetroy/react-download';
 
 import Modal from 'react-modal';
 import Table from '../../../components/Table';
@@ -299,15 +298,14 @@ class Detail extends React.Component {
 																{item.trade_type}
 															</p>
 														</td>
-														<td>
-															<Download file={item.file || ''} content='' >
-																<button
-																	type="button"
-																	className="btn btn-primary"
-																>
-																	Download
-																</button>
-															</Download>
+                                                        <td>
+                                                          <a
+                                                            type="button"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            href={item.file}
+                                                            className="btn btn-primary"
+                                                          > Download</a>
 														</td>
 														<td>
 															<p>{item.expected_end_date}</p>

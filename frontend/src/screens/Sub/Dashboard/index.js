@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
+import { Link } from 'react-router-dom';
 
 import Table from '../../../components/Table';
 import {
@@ -12,6 +13,7 @@ import {
 	actions as jobActions,
 	getJobsSelector
 } from '../../../redux/ducks/jobs';
+import { getIdFromUrl } from '../../../utils';
 
 const Dashboard = ({ projectList, listProjects, jobList, listJobs }) => {
 	const getAddressStr = (address) => {
@@ -62,9 +64,11 @@ const Dashboard = ({ projectList, listProjects, jobList, listJobs }) => {
 									<p className="text-info">{project.status}</p>
 								</td>
 								<td className="font-w600 text-center">
-									<button type="button" className="btn btn-primary">
-										View
-									</button>
+									<Link to={`/projects/${getIdFromUrl(project.url)}`}>
+										<button type="button" className="btn btn-primary">
+											View
+										</button>
+									</Link>
 								</td>
 							</tr>
 						))}

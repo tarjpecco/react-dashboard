@@ -15,6 +15,7 @@ import Projects from '../GC/Projects';
 import Detail from '../GC/Detail';
 import Team from '../GC/Team';
 import SubDashboard from '../Sub/Dashboard';
+import ProjectDetail from '../Sub/ProjectDetail';
 import SubInsurance from '../Sub/MyInsurance';
 import SubSettings from '../Sub/Settings';
 import SubInsuranceDetail from '../Sub/PolicyDetail';
@@ -62,6 +63,7 @@ const AppTemplate = ({ showSideBar, location, history, user, getUserInfo }) => {
 			{userRole === 'sub' && (
 				<Switch>
 					<Route exact path="/dashboard" component={SubDashboard} />
+					<Route exact path="/projects/:id" component={ProjectDetail} />
 					<Route exact path="/insurance" component={SubInsurance} />
 					<Route exact path="/insurance/:id" component={SubInsuranceDetail} />
 					<Route exact path="/settings" component={SubSettings} />

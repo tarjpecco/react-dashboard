@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { isEmpty, cloneDeep, merge, mapValues } from 'lodash';
 
 import Table from '../../../components/Table';
-import LocationSearchInput from '../../../components/LocationSearchInput';
+import { stateList } from '../../../utils';
 import {
 	actions as projectActions,
 	getProjectsSelector
@@ -152,9 +152,9 @@ class Projects extends React.Component {
 		setTimeout(() => {
 			const project = cloneDeep(newproject);
 			if (dateType === 'startdate') {
-				project.startDate = this.refs.startDateEleRef.value;
+				project.startDate = this.refs.startDateEleRef && this.refs.startDateEleRef.value;
 			} else {
-				project.endDate = this.refs.endDateEleRef.value;
+				project.endDate = this.refs.endDateEleRef && this.refs.endDateEleRef.value;
 			}
 			this.setState({ newproject: project });
 		}, 300);
@@ -288,13 +288,17 @@ class Projects extends React.Component {
 									placeholder="City"
 									onChange={this.changeAddress}
 								/>
-								<input 
-									value={address.state}
+								<select
+									defaultValue={address.state}
 									name="state"
-									className={addressInvalid.state && 'is-invalid form-control'}
+									className={`form-control ${addressInvalid.state && 'is-invalid'}`}
 									placeholder="State"
 									onChange={this.changeAddress}
-								/>
+								>
+									{stateList.map((state, index) =>
+										<option value={state.abbreviation} key={index}>{state.name}</option>	
+									)}
+								</select>
 								<input 
 									placeholder={address.country}
 									name="country"

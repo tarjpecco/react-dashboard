@@ -209,6 +209,18 @@ export const updatePolicyForUser = (id, params) => {
     .then(res => res.data)
 };
 
+export const updatePolicyJSONForUser = (id, params) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.patch(`${API_URL}/user-policies/${id}/detail/`,
+    { 
+      ...params
+    },
+    {
+      headers
+    }))
+    .then(res => res.data)
+};
+
 export const createPoliciesForUser = (userPK, params) => {
   return authHeaderService.getHeaders('multipart/form-data')
     .then((headers) => axios.post(`${API_URL}/user-policies/${userPK}/`,

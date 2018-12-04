@@ -32,7 +32,7 @@ class Clients extends React.Component {
 		listCompanies({ name: search.toLowerCase() });
 	};
 
-	getIdFromUrl = (url) => url.slice(0, -1).split('/').pop();
+	getIdFromUrl = (url) => (url && url !== null && url !== undefined) ? url.slice(0, -1).split('/').pop() : '';
 
 	render() {
 		const { companyList } = this.props;

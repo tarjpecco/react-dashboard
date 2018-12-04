@@ -116,7 +116,7 @@ class PolicyDetail extends React.PureComponent {
 			});
 	}
 
-	getIdFromUrl = url => url.slice(0, -1).split('/').pop();
+	getIdFromUrl = url => (url && url !== null && url !== undefined) ? url.slice(0, -1).split('/').pop() : '';
 
 	getAddress = (index, url) => {
 		const id = this.getIdFromUrl(url);

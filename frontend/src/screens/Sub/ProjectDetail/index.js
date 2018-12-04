@@ -2,64 +2,68 @@ import React from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
 import { isEmpty, cloneDeep } from 'lodash';
+import * as moment from 'moment';
 
-import Modal from 'react-modal';
 import Table from '../../../components/Table';
 import {
-	actions as projectActions, getProjectSelector,
-} from '../../../redux/ducks/projects';
-import {
-	getBidsSelector,
 	actions as bidActions,
 } from '../../../redux/ducks/bids';
 import {
-	getCompanySelector,
-	actions as companyActions,
-} from '../../../redux/ducks/companies';
-import { getIdFromUrl } from '../../../utils';
+	actions as jobActions,
+	getProgressJobsSelector,
+} from '../../../redux/ducks/jobs';
 import './index.scss';
-
+import { getBid } from '../../../api';
+import { getIdFromUrl } from '../../../utils';
 
 class Detail extends React.Component {
 	static propTypes = {
 		match: PropTypes.object.isRequired,
-		listBids: PropTypes.func.isRequired,
-		bidList: PropTypes.array.isRequired,
-		getProjectInfo: PropTypes.func.isRequired,
-		// updateBidInfo: PropTypes.func.isRequired,
-		projectInfo: PropTypes.object.isRequired,
-		companyInfo: PropTypes.object.isRequired,
+		listProgressJobs: PropTypes.func.isRequired,
+		progressJobList: PropTypes.array.isRequired,
+		updateBidInfo: PropTypes.func.isRequired,
 	}
 
 	constructor(props) {
 		super(props);
 		this.projectId = props.match.params.id;
-
 		this.state = {
 			editable: 'disable',
 			btnname: 'Edit',
 			btnicon: 'si si-pencil',
+			bids: [],
 		};
 
-		const { getProjectInfo } = props;
-		getProjectInfo({ id: this.projectId });
 	}
 
 	componentDidMount() {
-		Modal.setAppElement('body');
-		const { listBids } = this.props;
-		listBids({ job__project: this.projectId });
-	}
-
-	componentWillReceiveProps(newProps) {
-		const { companyInfo, projectInfo, getCompanyInfo } = newProps;
-		if (projectInfo.company && isEmpty(companyInfo)) {
-			getCompanyInfo({ id: getIdFromUrl(projectInfo.company)});
+		const { progressJobList, listProgressJobs } = this.props;
+		if (isEmpty(progressJobList)) {
+			listProgressJobs();
 		}
 	}
 
-	handleClickEdit = () => {
-		const { editable } = this.state;
+	componentWillReceiveProps(nextProps) {
+		const { progressJobList } = nextProps;
+		if (progressJobList.length > 0) {
+			this.getBidList(progressJobList);
+		}
+	}
+
+	getBidList = (progressJobList) => {
+		const bids = [];
+		progressJobList.forEach((job, index) => getBid(getIdFromUrl(job.active_bid))
+			.then(res => {
+				bids[index] = res;
+				if (bids.length === progressJobList.length) {
+					this.setState({ bids })
+				}
+			})
+		);
+	}
+
+	handleClickEdit = (index) => {
+		const { editable, bids } = this.state;
 		if (editable === 'disable') {
 			this.setState({ editable: '' });
 			this.setState({ btnname: 'Save' });
@@ -68,6 +72,12 @@ class Detail extends React.Component {
 			this.setState({ editable: 'disable' });
 			this.setState({ btnname: 'Edit' });
 			this.setState({ btnicon: 'si si-pencil' });
+			const { updateBidInfo } = this.props;
+			const bidId = getIdFromUrl(bids[index].url);
+			const params = {
+				bid: bids[index].bid,
+			}
+			updateBidInfo({ id: bidId, params });
 		}
 	}
 
@@ -85,11 +95,26 @@ class Detail extends React.Component {
 	}
 
 	getAddressStr = address =>
-	`${address.line_1} ${address.line_2 || ''} ${address.town}, ${address.state} ${address.zip_code}`;
+	`${address.line_1 || ''} ${address.line_2 || ''} ${address.town || ''}, ${address.state || ''} ${address.zip_code || ''}`;
+	
+	getProjectInfo = jobList => {
+		const jobs = cloneDeep(jobList);
+		let project = {
+			name: '',
+			status: '',
+			address: {},
+		};
+		if (jobs.length > 0) {
+			const job = jobs.pop();
+			project = job.project;
+		}
+		return project;
+	}
 
 	render() {
-		const { editable, btnname, btnicon } = this.state;
-		const { projectInfo, companyInfo, bidList } = this.props;
+		const { editable, btnname, btnicon, bids } = this.state;
+		const { progressJobList } = this.props;
+		const projectInfo = this.getProjectInfo(progressJobList);
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -124,68 +149,7 @@ class Detail extends React.Component {
 									<input
 										type="text"
 										disabled
-										value={companyInfo.address && this.getAddressStr(projectInfo.address)}
-									/>
-								</td>
-							</tr>
-						</tbody>
-					</Table>
-					<Table
-						tableName="Company Info"
-						onComapnyNameChanged={value => this.onUpdateCompanyDetails('name', value)}
-						tableStyle="table-striped table-bordered"
-					>
-						<tbody>
-							<tr className="text-left">
-								<td className="table-width-20">
-									<p className="text-info">Company name</p>
-								</td>
-								<td className="table-width-80" colSpan="4">
-									<input
-										type="text"
-										name="name"
-										value={companyInfo.name}
-										disabled
-									/>
-								</td>
-							</tr>
-
-							<tr className="text-left">
-								<td className="table-width-20">
-									<p className="text-info">Address</p>
-								</td>
-								<td className="table-width-80" colSpan="4">
-									<input
-										type="text"
-										disabled
-										value={companyInfo.address && this.getAddressStr(projectInfo.address)}
-									/>
-								</td>
-							</tr>
-							<tr className="text-left">
-								<td className="table-width-20">
-									<p className="text-info">Phone</p>
-								</td>
-								<td className="table-width-80" colSpan="4">
-									<input
-										type="text"
-										name="email"
-										value={companyInfo.phone}
-										disabled
-										style={{ textTransform: 'inherit' }}
-									/>
-								</td>
-							</tr>
-							<tr className="text-left">
-								<td className="table-width-20">
-									<p className="text-info">EIN #</p>
-								</td>
-								<td className="table-width-80" colSpan="4">
-									<input
-										type="text"
-										name="ein"
-										value={companyInfo.ein || ''}
-										disabled
+										value={this.getAddressStr(projectInfo.address)}
 									/>
 								</td>
 							</tr>
@@ -193,63 +157,127 @@ class Detail extends React.Component {
 					</Table>
 				</div>
 				<div className="content settings">
-					<div className="table-tool">
-						<button
-							type="button"
-							className="btn btn-sm btn-hero-dark mr-1 mb-3"
-							onClick={this.handleClickEdit}
-						>
-							<i className={btnicon} /> {btnname}
-						</button>
-					</div>
-					<Table
-						tableName="Bid Info"
-						onComapnyNameChanged={value => this.onUpdateCompanyDetails('name', value)}
-						tableStyle="table-striped table-bordered"
-					>
-						{bidList.map((bid, index) =>
-							<tbody key={index}>
-								<tr className="text-left">
-									<td className="table-width-20">
-										<p className="text-info">Bid Price</p>
-									</td>
-									<td className="table-width-80" colSpan="4">
-										<div className="input-group" style={{ maxWidth: 300 }}>
-											<div className="input-group-prepend">
-												<span className="input-group-text">$</span>
-											</div>
-											<input
-												type="text"
-												className="form-control text-center"
-												id="example-group1-input3"
-												style={{ border: 'solid 1px #cecacaee' }}
-												name="price"
-												placeholder="00"
-												value={bid.price}
-												disabled={editable}
-												onChange={e => this.onBidEditHandler(index, 'price', e.target.value)}
-											/>
-											<div className="input-group-append">
-												<span className="input-group-text">,00</span>
-											</div>
-										</div>
-									</td>
-								</tr>
-								<tr className="text-left">
-									<td className="table-width-20">
-										<p className="text-info">Bid Status</p>
-									</td>
-									<td className="table-width-80" colSpan="4">
-										<div style={{ display: 'flex', flexDirection: 'row' }}>
-											<span className={`badge ${this.getComplianceClassName(bid.compliance_GL)}`}>GL</span>&nbsp;
-											<span className={`badge ${this.getComplianceClassName(bid.compliance_WC)}`}>WC</span>&nbsp;
-											<span className={`badge ${this.getComplianceClassName(bid.compliance_DB)}`}>DB</span>&nbsp;
-										</div>
-									</td>
-								</tr>
-							</tbody>
-						)}
-					</Table>
+					{progressJobList && progressJobList.map((job, index) =>
+						<React.Fragment key={index}>
+							<div className="table-tool">
+								<button
+									type="button"
+									className="btn btn-sm btn-hero-dark mr-1 mb-3"
+									onClick={() => this.handleClickEdit(index)}
+								>
+									<i className={btnicon} /> {btnname}
+								</button>
+							</div>
+							<div className="wrap align-items-start">
+								<div style={{ flex: 1 }}>
+									<Table
+										tableName="Job Info"
+										onComapnyNameChanged={value => this.onUpdateCompanyDetails('name', value)}
+										tableStyle="table-striped table-bordered flex-fill"
+									>
+										<tbody key={index}>
+											<tr className="text-left">
+												<td className="table-width-30">
+													<p className="text-info">Trade Type</p>
+												</td>
+												<td className="table-width-70" colSpan="4">
+													<div>{job.trade_type}</div>
+												</td>
+											</tr>
+											<tr className="text-left">
+												<td className="table-width-30">
+													<p className="text-info">Expected Start Date</p>
+												</td>
+												<td className="table-width-70" colSpan="4">
+													<div>{moment(job.expected_start_date, 'YYYY-MM-DD', true).isValid() ? moment(job.expected_start_date).format('MM/DD/YYYY') : ''}</div>
+												</td>
+											</tr>
+											<tr className="text-left">
+												<td className="table-width-30">
+													<p className="text-info">Expected End Date</p>
+												</td>
+												<td className="table-width-70" colSpan="4">
+													<div>{moment(job.expected_end_date, 'YYYY-MM-DD', true).isValid() ? moment(job.expected_end_date).format('MM/DD/YYYY') : ''}</div>
+												</td>
+											</tr>
+											<tr className="text-left">
+												<td className="table-width-30">
+													<p className="text-info">Estimated Completion Date</p>
+												</td>
+												<td className="table-width-70" colSpan="4">
+													<div>{moment(job.estimated_end_date, 'YYYY-MM-DD', true).isValid() ? moment(job.estimated_end_date).format('MM/DD/YYYY') : ''}</div>
+												</td>
+											</tr>
+											<tr className="text-left">
+												<td className="table-width-30">
+													<p className="text-info">Start Date</p>
+												</td>
+												<td className="table-width-70" colSpan="4">
+													<div>{moment(job.start_date, 'YYYY-MM-DD', true).isValid() ? moment(job.start_date).format('MM/DD/YYYY') : ''}</div>
+												</td>
+											</tr>
+											<tr className="text-left">
+												<td className="table-width-30">
+													<p className="text-info">End Date</p>
+												</td>
+												<td className="table-width-70" colSpan="4">
+													<div>{moment(job.end_date, 'YYYY-MM-DD', true).isValid() ? moment(job.end_date).format('MM/DD/YYYY') : ''}</div>
+												</td>
+											</tr>
+										</tbody>
+									</Table>
+								</div>
+								<div style={{ width: 400, marginLeft: 30 }}>
+									<Table
+										tableName="Bid Info"
+										onComapnyNameChanged={value => this.onUpdateCompanyDetails('name', value)}
+										tableStyle="table-striped table-bordered"
+									>
+										<tbody key={index}>
+											<tr className="text-left">
+												<td className="table-width-40">
+													<p className="text-info">Bid Price</p>
+												</td>
+												<td className="table-width-60" colSpan="4">
+													<div className="input-group" style={{ maxWidth: 300 }}>
+														<div className="input-group-prepend">
+															<span className="input-group-text">$</span>
+														</div>
+														<input
+															type="text"
+															className="form-control text-center"
+															id="example-group1-input3"
+															style={{ border: 'solid 1px #cecacaee' }}
+															name="bid"
+															placeholder="00"
+															value={bids[index] && bids[index].bid || 0}
+															disabled={editable}
+															onChange={e => this.onBidEditHandler(index, 'bid', e.target.value)}
+														/>
+														<div className="input-group-append">
+															<span className="input-group-text">,00</span>
+														</div>
+													</div>
+												</td>
+											</tr>
+											<tr className="text-left">
+												<td className="table-width-40">
+													<p className="text-info">Bid Status</p>
+												</td>
+												<td className="table-width-60" colSpan="4">
+													<div style={{ display: 'flex', flexDirection: 'row' }}>
+														<span className={`badge ${this.getComplianceClassName(bids[index] && bids[index].compliance_GL)}`}>GL</span>&nbsp;
+														<span className={`badge ${this.getComplianceClassName(bids[index] && bids[index].compliance_WC)}`}>WC</span>&nbsp;
+														<span className={`badge ${this.getComplianceClassName(bids[index] && bids[index].compliance_DB)}`}>DB</span>&nbsp;
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</Table>
+								</div>
+							</div>
+						</React.Fragment>
+					)}
 				</div>
 			</div>
 		);
@@ -257,16 +285,12 @@ class Detail extends React.Component {
 }
 
 const mapStateToProps = state => ({
-	bidList: getBidsSelector(state),
-	projectInfo: getProjectSelector(state),
-	companyInfo: getCompanySelector(state),
+	progressJobList: getProgressJobsSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({
-	getProjectInfo: params => dispatch(projectActions.get_project(params)),
 	updateBidInfo: params => dispatch(bidActions.update_bid(params)),
-	listBids: params => dispatch(bidActions.get_bids(params)),
-	getCompanyInfo: params => dispatch(companyActions.get_company(params)),
+	listProgressJobs: () => dispatch(jobActions.get_progress_jobs()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Detail);

@@ -84,17 +84,12 @@ function* listJobsSaga({ payload }) {
     if (!isUndefined(payload.id)) {
       const { results } = yield call(getJobsForProject, payload.id, payload.status);
       jobList = results;
-      yield put(actions.get_jobs_success({ jobList }));
     } else {
       const { results } = yield call(getJobsByStatus, payload.status);
       jobList = results;
-      if (payload.status === 'rfq') {
-        yield put(actions.get_rfq_jobs_success({ jobList }));
-      }
-      if (payload.status === 'progress') {
-        yield put(actions.get_progress_jobs_success({ jobList }));
-      }
     }
+    yield put(actions.get_jobs_success({ jobList }));
+
   } catch (err) {
     const errorMessage = 'Listing jobs Failed';
     yield put(actions.get_jobs_error({ error: errorMessage }));

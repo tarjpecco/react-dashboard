@@ -43,12 +43,7 @@ class SubmitQuote extends React.Component {
 		const { bid, formData } = this.state;
 		const { createBidInfo, rfqJobList } = this.props;
 		const job = rfqJobList[0];
-		if (this.coiFile.files.length === 0) {
-			// eslint-disable-next-line no-alert
-			window.alert('COI File is Required!');
-			return;
-		}
-		if (this.proposalFile.files.length === 0) {
+		if (this.proposalFile.files.length === 0 || formData.get('proposal_file') === null) {
 			// eslint-disable-next-line no-alert
 			window.alert('Proposal File is Required!');
 			return;
@@ -58,15 +53,13 @@ class SubmitQuote extends React.Component {
 		formData.append('status', 'reviewing_compliance');
 		formData.append('bid', bid.bid);
 		createBidInfo(formData);
-		this.setState({ showError: true });
+		this.setState({ showError: true, formData: new FormData() });
 	}
 
 	onFileChange = (fileType) => {
 		const  { formData } = this.state;
 		if (fileType === 'proposal') {
 			formData.append('proposal_file', this.proposalFile.files[0]);
-		} else {
-			formData.append('COI_file', this.coiFile.files[0]);
 		}
 		this.setState({ formData });
 	}
@@ -242,29 +235,6 @@ class SubmitQuote extends React.Component {
 													<div className="input-group-append">
 														<span className="input-group-text">,00</span>
 													</div>
-												</div>
-											</td>
-										</tr>
-										<tr className="text-left">
-											<td className="table-width-20">
-												<p className="text-info">COI File</p>
-											</td>
-											<td className="table-width-80" colSpan="4">
-												<div>
-													<input
-														type="file"
-														name="COI_file"
-														ref={(ref) => { this.coiFile = ref; }}
-														onChange={() => this.onFileChange('coi')}
-														style={{ display: 'none' }}
-													/>
-													<button
-														type="button"
-														className="btn btn-success"
-														onClick={() => this.coiFile && this.coiFile.click()}
-													>
-														Upload COI
-													</button>
 												</div>
 											</td>
 										</tr>

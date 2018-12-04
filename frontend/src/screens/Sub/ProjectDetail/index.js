@@ -104,6 +104,7 @@ class Detail extends React.Component {
 		if (jobs.length > 0) {
 			const job = jobs.pop();
 			project = job.project;
+			project.company_name = job.project_company_name;
 		}
 		return project;
 	}
@@ -143,11 +144,15 @@ class Detail extends React.Component {
 									<p className="text-info">Address</p>
 								</td>
 								<td className="table-width-80" colSpan="4">
-									<input
-										type="text"
-										disabled
-										value={this.getAddressStr(projectInfo.address)}
-									/>
+									<p>{this.getAddressStr(projectInfo.address)}</p>
+								</td>
+							</tr>
+							<tr className="text-left">
+								<td className="table-width-20">
+									<p className="text-info">Company</p>
+								</td>
+								<td className="table-width-80" colSpan="4">
+									<p>{projectInfo.company_name}</p>
 								</td>
 							</tr>
 						</tbody>

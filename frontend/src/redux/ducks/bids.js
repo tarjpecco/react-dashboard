@@ -7,6 +7,7 @@ import {
   getBids,
   getBid,
   updateBid,
+  createBid,
 } from '../../api';
 import { actionNames, createActions } from '../helper';
 
@@ -16,6 +17,7 @@ const bidsDuck = createDuck('bids-duck');
 export const actions = createActions(bidsDuck,
   ...actionNames('GET_BIDS'),
   ...actionNames('UPDATE_BID'),
+  ...actionNames('CREATE_BID'),
   ...actionNames('GET_BID'),
   'UPDATE_BID_PARTIAL',
 )
@@ -77,6 +79,13 @@ const bidListReducer = bidsDuck.createReducer({
   [actions.GET_BID_REQUEST]: (state) =>
     state
       .set('loading', true),
+  [actions.CREATE_BID_SUCCESS]: (state, { payload }) =>
+    state
+      .update('bids', (bids) => {
+        bids.push(payload.bidInfo);
+        return List(bids);
+      })
+      .set('loading', false),
 }, initialState);
 
 export default bidListReducer;
@@ -92,9 +101,18 @@ function* listBidsSaga({ payload }) {
   }
 }
 
+function* createBidSaga({ payload }) {
+  try {
+    const bidInfo = yield call(createBid, payload.params);
+    yield put(actions.create_bid_success({ bidInfo }));
+  } catch (err) {
+    const errorMessage = 'Listing bids Failed';
+    yield put(actions.get_bid_error({ error: errorMessage }));
+  }
+}
+
 function* updateBidSaga({ payload }) {
   try {
-    console.log('update bid saga:', payload);
     const bidInfo = yield call(updateBid, payload.id, payload.params);
     yield put(actions.get_bid_success({ bidInfo }));
   } catch (err) {
@@ -115,6 +133,7 @@ function* getBidSaga({ payload }) {
 
 export function* bidsSaga() {
   yield all([
+    yield takeLatest(actions.CREATE_BID, createBidSaga),
     yield takeLatest(actions.GET_BIDS, listBidsSaga),
     yield takeLatest(actions.UPDATE_BID, updateBidSaga),
     yield takeLatest(actions.GET_BID, getBidSaga),

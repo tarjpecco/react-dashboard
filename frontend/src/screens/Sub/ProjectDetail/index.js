@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
-import { isEmpty, cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash';
 import * as moment from 'moment';
 
 import Table from '../../../components/Table';
@@ -33,14 +33,11 @@ class Detail extends React.Component {
 			btnicon: 'si si-pencil',
 			bids: [],
 		};
-
 	}
 
 	componentDidMount() {
-		const { progressJobList, listProgressJobs } = this.props;
-		if (isEmpty(progressJobList)) {
-			listProgressJobs();
-		}
+		const { listProgressJobs } = this.props;
+		listProgressJobs({ id: this.projectId });
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -290,7 +287,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
 	updateBidInfo: params => dispatch(bidActions.update_bid(params)),
-	listProgressJobs: () => dispatch(jobActions.get_progress_jobs()),
+	listProgressJobs: params => dispatch(jobActions.get_progress_jobs(params)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Detail);

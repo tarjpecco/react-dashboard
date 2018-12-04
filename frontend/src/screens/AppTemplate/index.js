@@ -18,6 +18,7 @@ import SubDashboard from '../Sub/Dashboard';
 import ProjectDetail from '../Sub/ProjectDetail';
 import SubInsurance from '../Sub/MyInsurance';
 import SubSettings from '../Sub/Settings';
+import SubSubmitQuote from '../Sub/SubmitQuote';
 import SubInsuranceDetail from '../Sub/PolicyDetail';
 import AgentDashboard from '../Agent/Dashboard';
 import AgentSettings from '../Agent/Settings';
@@ -67,6 +68,7 @@ const AppTemplate = ({ showSideBar, location, history, user, getUserInfo }) => {
 					<Route exact path="/insurance" component={SubInsurance} />
 					<Route exact path="/insurance/:id" component={SubInsuranceDetail} />
 					<Route exact path="/settings" component={SubSettings} />
+					<Route exact path="/submitquote/:id" component={SubSubmitQuote} />
 				</Switch>
 			)}
 			{userRole === 'agent' && (

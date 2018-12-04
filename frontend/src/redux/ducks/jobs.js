@@ -8,6 +8,7 @@ import {
   getJobsForProject,
   createJob,
   getJobsByStatus,
+  updateJob,
 } from '../../api';
 import { actionNames, createActions } from '../helper';
 
@@ -47,10 +48,15 @@ const jobListReducer = jobsDuck.createReducer({
   [actions.GET_JOBS_REQUEST]: (state) =>
     state
       .set('loading', true),
-  [actions.UPDATE_JOB_SUCCESS]: (state, { payload }) =>
-  state
-    .update('jobs', () => List(payload.jobs))
-    .set('saveloading', false),
+  [actions.UPDATE_JOB_SUCCESS]: (state, { payload }) => {
+    const job = payload.job
+    return state.update('jobs', jobs => {
+      const index = jobs.findIndex(j => {
+        return j.url === job.url
+      })
+      return jobs.set(index, job)
+    })
+  },
   [actions.UPDATE_JOB_ERROR]: (state, { payload }) =>
     state
       .set('error', payload.error)
@@ -89,9 +95,20 @@ function* createJobSaga({ payload }) {
   }
 }
 
+function* updateJobSaga({ payload }) {
+  try {
+    const job = yield call(updateJob, payload);
+    yield put(actions.update_job_success({ job }));
+  } catch (err) {
+    const errorMessage = 'Updating Job Failed';
+    yield put(actions.update_job_error({ error: errorMessage }));
+  }
+}
+
 export function* jobsSaga() {
   yield all([
     yield takeEvery(actions.GET_JOBS, listJobsSaga),
     yield takeLatest(actions.CREATE_JOB, createJobSaga),
+    yield takeLatest(actions.UPDATE_JOB, updateJobSaga),
   ]);
 }

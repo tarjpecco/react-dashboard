@@ -443,6 +443,7 @@ class Settings extends React.PureComponent {
 										{!editable &&
 											<input
 												type="text"
+												// eslint-disable-next-line react/no-string-refs
 												ref="endDateEleRef"
 												className="js-datepicker form-control"
 												name="expire_date"

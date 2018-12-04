@@ -4,7 +4,6 @@ import { compose } from 'redux';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withRouter, Route, Switch } from 'react-router-dom';
-import { isEmpty } from 'lodash';
 
 import GCDashboard from '../GC/Dashboard';
 import MyInsurance from '../GC/MyInsurance';
@@ -33,54 +32,59 @@ import {
 } from '../../redux/ducks/user';
 import './index.scss';
 
-const AppTemplate = ({ showSideBar, location, history, user, getUserInfo }) => {
-	if (isEmpty(user)) {
+class AppTemplate extends React.Component {
+	componentDidMount() {
+		const { getUserInfo } = this.props;
 		getUserInfo();
 	}
-	const userRole = user && user.role ? user.role.toLowerCase() : '';
-	return (
-		<div
-			id="page-container"
-			className={classNames(
-				'enable-page-overlay side-scroll page-header-fixed page-header-dark main-content-narrow side-trans-enabled',
-				{ 'sidebar-o': showSideBar }
-			)}
-		>
-			<Sidebar location={location} userRole={userRole} />
+	
+	render() {
+		const { showSideBar, location, history, user } = this.props;
+		const userRole = user && user.role ? user.role.toLowerCase() : '';
+		return (
+			<div
+				id="page-container"
+				className={classNames(
+					'enable-page-overlay side-scroll page-header-fixed page-header-dark main-content-narrow side-trans-enabled',
+					{ 'sidebar-o': showSideBar }
+				)}
+			>
+				<Sidebar location={location} userRole={userRole} />
 
-			<Header history={history} username={user && user.username || ''} />
-			{userRole === 'gc' && (
-				<Switch>
-					<Route exact path="/dashboard" component={GCDashboard} />
-					<Route exact path="/billing" component={GCBilling} />
-					<Route exact path="/insurance" component={MyInsurance} />
-					<Route exact path="/insurance/:id" component={GCInsuranceDetail} />
-					<Route exact path="/projects" component={Projects} />
-					<Route exact path="/projects/:id" component={Detail} />
-					<Route exact path="/settings" component={Settings} />
-					<Route exact path="/team" component={Team} />
-				</Switch>
-			)}
-			{userRole === 'sub' && (
-				<Switch>
-					<Route exact path="/dashboard" component={SubDashboard} />
-					<Route exact path="/projects/:id" component={ProjectDetail} />
-					<Route exact path="/insurance" component={SubInsurance} />
-					<Route exact path="/insurance/:id" component={SubInsuranceDetail} />
-					<Route exact path="/settings" component={SubSettings} />
-					<Route exact path="/submitquote/:id" component={SubSubmitQuote} />
-				</Switch>
-			)}
-			{userRole === 'agent' && (
-				<Switch>
-					<Route exact path="/dashboard" component={AgentDashboard} />
-					<Route exact path="/clients" component={AgentClients} />
-					<Route exact path="/clients/:id" component={AgentDetail} />
-					<Route exact path="/settings" component={AgentSettings} />
-				</Switch>
-			)}
-		</div>
-	);
+				<Header history={history} username={user && user.username || ''} />
+				{userRole === 'gc' && (
+					<Switch>
+						<Route exact path="/dashboard" component={GCDashboard} />
+						<Route exact path="/billing" component={GCBilling} />
+						<Route exact path="/insurance" component={MyInsurance} />
+						<Route exact path="/insurance/:id" component={GCInsuranceDetail} />
+						<Route exact path="/projects" component={Projects} />
+						<Route exact path="/projects/:id" component={Detail} />
+						<Route exact path="/settings" component={Settings} />
+						<Route exact path="/team" component={Team} />
+					</Switch>
+				)}
+				{userRole === 'sub' && (
+					<Switch>
+						<Route exact path="/dashboard" component={SubDashboard} />
+						<Route exact path="/projects/:id" component={ProjectDetail} />
+						<Route exact path="/insurance" component={SubInsurance} />
+						<Route exact path="/insurance/:id" component={SubInsuranceDetail} />
+						<Route exact path="/settings" component={SubSettings} />
+						<Route exact path="/submitquote/:id" component={SubSubmitQuote} />
+					</Switch>
+				)}
+				{userRole === 'agent' && (
+					<Switch>
+						<Route exact path="/dashboard" component={AgentDashboard} />
+						<Route exact path="/clients" component={AgentClients} />
+						<Route exact path="/clients/:id" component={AgentDetail} />
+						<Route exact path="/settings" component={AgentSettings} />
+					</Switch>
+				)}
+			</div>
+		);
+	}
 };
 
 const mapStateToProps = state => ({

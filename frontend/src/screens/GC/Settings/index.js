@@ -38,6 +38,8 @@ class Settings extends React.PureComponent {
 			},
 			addressInvalid: {},
 			password: '',
+			oldPassword: '',
+			confirmPassword: '',
 		};
 		const { listUserLicenses, user, getUserInfo } = props;
 		listUserLicenses();
@@ -95,8 +97,38 @@ class Settings extends React.PureComponent {
 		updateLicenseState({ id, params });
 	};
 
-	onResetPassword = () => {};
+	onResetPasswordHandler = () => {
+		this.setState({ showResetPassform: true });
+	};
 
+	onResetPassword = () => {
+		const { password, oldPassword, confirmPassword } = this.state;
+		const { updateUserInfo } = this.props;
+		const isInValidPassword = {
+			notequal: false,
+			password: false,
+			oldPassword: false,
+			confirmPassword: false,
+		};
+		let isInValid = false;
+		if (password !== confirmPassword) {
+			isInValidPassword.notequal = true;
+			isInValid = true;
+		}
+		if (isEmpty(password)) { isInValidPassword.password = true; isInValid = true;}
+		if (isEmpty(confirmPassword)) { isInValidPassword.confirmPassword = true; isInValid = true; }
+		if (isEmpty(oldPassword)) { isInValidPassword.oldPassword = true; isInValid = true; }
+		if (isInValid) {
+			this.setState({ isInValidPassword });
+		} else {
+			this.setState({ isInValidPassword });
+			updateUserInfo({ user: {
+				old_password: oldPassword,
+				confirm_password: confirmPassword,
+				password,
+			}});
+		}
+	};
 
 	getAddressStr = (address) => {
 		const { line_1: line1, line_2: line2, town, state, zip_code:zipCode } = address;
@@ -409,6 +441,7 @@ class Settings extends React.PureComponent {
 										{!editable &&
 											<input
 												type="text"
+												// eslint-disable-next-line react/no-string-refs
 												ref="endDateEleRef"
 												className="js-datepicker form-control"
 												name="expire_date"
@@ -438,26 +471,84 @@ class Settings extends React.PureComponent {
 									</td>
 								</tr>
 							))}
-
 							<tr className="text-left">
 								<td>
 									<p className="text-info">Password</p>
 								</td>
 								<td colSpan="4" className="password">
-									<input
-										type="password"
-										name="password"
-										value={password || ''}
-										placeholder="Your Password"
-										onChange={this.onChangeHandler}
-									/>
-									<button
-										type="button"
-										className="btn btn-primary"
-										onClick={() => this.onResetPassword}
-									>
-										Reset here
-									</button>
+									{showResetPassform && 
+										<React.Fragment>
+											<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+												<div>
+													<input
+														type="password"
+														name="oldPassword"
+														value={oldPassword}
+														className={isInValidPassword.oldPassword && 'is-invalid'}
+														placeholder="Old Password"
+														onChange={this.onChangeHandler}
+													/>
+													{isInValidPassword.oldPassword && (
+														<div id="login-password-error" className="invalid-feedback animated fadeIn">
+															{'Required'}
+														</div>
+													)}
+												</div>
+												<div>
+													<input
+														type="password"
+														name="password"
+														value={password}
+														className={isInValidPassword.password && 'is-invalid'}
+														placeholder="New Password"
+														onChange={this.onChangeHandler}
+													/>
+													{isInValidPassword.password && (
+														<div id="login-password-error" className="invalid-feedback animated fadeIn">
+															{'Required'}
+														</div>
+													)}
+												</div>
+												<div>
+													<input
+														type="password"
+														name="confirmPassword"
+														className={isInValidPassword.confirmPassword && 'is-invalid'}
+														value={confirmPassword}
+														placeholder="Confirm Password"
+														onChange={this.onChangeHandler}
+													/>
+													{isInValidPassword.password && (
+														<div id="login-password-error" className="invalid-feedback animated fadeIn">
+															{'Required'}
+														</div>
+													)}
+												</div>
+												<button
+													type="button"
+													className="btn btn-primary"
+													style={{ height: 'max-content' }}
+													onClick={this.onResetPassword}
+												>
+													Reset Password
+												</button>
+											</div>
+											{isInValidPassword.notequal && (
+												<div id="login-password-error" className="invalid-feedback animated fadeIn">
+													{'Confirm Password doesn\'t match with password'}
+												</div>
+											)}
+										</React.Fragment>
+									}
+									{!showResetPassform &&
+										<button
+											type="button"
+											className="btn btn-primary"
+											onClick={this.onResetPasswordHandler}
+										>
+											Reset here
+										</button>
+									}
 								</td>
 							</tr>
 						</tbody>

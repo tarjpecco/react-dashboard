@@ -40,6 +40,7 @@ class Dashboard extends React.Component {
 	render() {
 		const { rfqJobList, progressJobList } = this.props;
 		const projectList = this.groupByProject(progressJobList);
+		const jobList = this.groupByProject(rfqJobList);
 
 		return (
 			<div id="main">
@@ -95,7 +96,7 @@ class Dashboard extends React.Component {
 							</tr>
 						</thead>
 						<tbody>
-							{rfqJobList.map((job, index) => (
+							{jobList.map((job, index) => (
 								<tr key={index}>
 									<td className="font-w600 text-center">
 										<p className="text-info">{job.project.name}</p>
@@ -107,9 +108,11 @@ class Dashboard extends React.Component {
 										<p className="text-info">{job.project.status}</p>
 									</td>
 									<td className="font-w600 text-center">
-										<button type="button" className="btn btn-primary">
-											Submit Quote
-										</button>
+										<Link to={`/submitquote/${getIdFromUrl(job.project.url)}`}>
+											<button type="button" className="btn btn-primary">
+												Submit Quote
+											</button>
+										</Link>
 									</td>
 								</tr>
 							))}

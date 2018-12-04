@@ -122,8 +122,8 @@ class PolicyDetail extends React.PureComponent {
 							<h1 className="flex-sm-fill font-size-h2 font-w400 mt-2 mb-0 mb-sm-2">
 								Sub Policy Details
 							</h1>
-                          </div>
-                          { download }
+						</div>
+						{ download }
 					</div>
 				</div>
 				<div className="content settings">
@@ -199,7 +199,7 @@ class PolicyDetail extends React.PureComponent {
 									<div>
 										<input
 											type="text"
-											value={policy.number}
+											value={policy.number || ''}
 											className="form-control"
 											onChange={e => this.onNumberChangeHandler('number', e.target.value)}
 											placeholder="Number"
@@ -262,23 +262,25 @@ class PolicyDetail extends React.PureComponent {
 									</div>
 								</td>
 							</tr>
-							<tr className="text-left">
-								<td className="table-width-20">
-									<p className="text-info">Agent</p>
-								</td>
-								<td className="table-width-80" colSpan="4">
-									<div>
-										<button
-											type="button"
-											className="btn btn-success"
-											disabled={editable || policy.agent && policy.agent.length < 0}
-											onClick={this.unlinkAgent}
-										>
-											De-link Agent
-										</button>
-									</div>
-								</td>
-							</tr>
+							{(policy.agent && policy.agent.length > 0) &&
+								<tr className="text-left">
+									<td className="table-width-20">
+										<p className="text-info">Agent</p>
+									</td>
+									<td className="table-width-80" colSpan="4">
+										<div>
+											<button
+												type="button"
+												className="btn btn-success"
+												disabled={editable}
+												onClick={this.unlinkAgent}
+											>
+												De-link Agent
+											</button>
+										</div>
+									</td>
+								</tr>
+								}
 						</tbody>
 					</Table>
 				</div>

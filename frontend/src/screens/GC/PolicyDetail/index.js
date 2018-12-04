@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import * as moment from 'moment';
 import { cloneDeep, mapValues } from 'lodash';
 import 'react-phone-number-input/style.css'
-import Download from '@axetroy/react-download';
 
 import { getPolicyForUser, updatePolicyForUser, getAddressById } from '../../../api';
 import Table from '../../../components/Table';
@@ -144,8 +143,8 @@ class PolicyDetail extends React.PureComponent {
 							<h1 className="flex-sm-fill font-size-h2 font-w400 mt-2 mb-0 mb-sm-2">
 								GC Policy Details
 							</h1>
-                        </div>
-                        { download }
+						</div>
+						{ download }
 					</div>
 				</div>
 				<div className="content settings">
@@ -291,11 +290,13 @@ class PolicyDetail extends React.PureComponent {
 							</tr>
 						</tbody>
 					</Table>
-					<div style={{ marginTop: 50, marginBottom: -40 }}>
-						<h4 className="flex-sm-fill">
-							Agent Info
-						</h4>
-					</div>
+					{(policy.agent && policy.agent.length > 0) &&
+						<div style={{ marginTop: 50, marginBottom: -40 }}>
+							<h4 className="flex-sm-fill">
+								Agent Info
+							</h4>
+						</div>
+					}
 					{policy.agent && policy.agent.map((agent, index) =>
 						<React.Fragment key={index}>
 							<div className="table-tool mb-2">

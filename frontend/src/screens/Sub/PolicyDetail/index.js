@@ -4,7 +4,7 @@ import * as moment from 'moment';
 import { cloneDeep, mapValues } from 'lodash';
 import 'react-phone-number-input/style.css'
 
-import { getPolicyForUser, updatePolicyForUser, getAddressById } from '../../../api';
+import { getPolicyForUser, updatePolicyForUser, updatePolicyJSONForUser, getAddressById } from '../../../api';
 import Table from '../../../components/Table';
 import './index.scss';
 
@@ -100,9 +100,7 @@ class PolicyDetail extends React.PureComponent {
 	}
 
 	unlinkAgent = () => {
-		const newFormData = new FormData();
-		newFormData.append('agent', []);
-		updatePolicyForUser(this.policyId, newFormData)
+		updatePolicyJSONForUser(this.policyId, {'agent': []})
 			.then(res => {
 				const newPolicy = {
 					type: res.type,

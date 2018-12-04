@@ -1,5 +1,8 @@
 export const getIdFromUrl = (url) => {
-  const arr = (url && url !== null && url !== undefined) ? url.slice(0, -1).split('/').pop() : [''];
+  const arr = (url && url !== null && url !== undefined) ? url.slice(0, -1).split('/') : [];
+  if (arr.length === 0) {
+    return '';
+  }
   const id = arr.pop();
   if (id !== 'detail') {
     return id;

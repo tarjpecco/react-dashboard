@@ -217,7 +217,7 @@ class Settings extends React.PureComponent {
 		updateCompanyPartialInfo({ companyInfo: newCompanyInfo })
 	};
 
-	getIdFromUrl = url => url.slice(0, -1).split('/').pop();
+	getIdFromUrl = url => (url && url !== null && url !== undefined) ? url.slice(0, -1).split('/').pop() : '';
 
 	render() {
 		const {
@@ -240,7 +240,7 @@ class Settings extends React.PureComponent {
 			addressObj: address,
 		} = user;
 		if (isEmpty(companyInfo)) {
-			getCompanyInfo({ id: this.getIdFromUrl(user.company)});
+			getCompanyInfo({ id: user.company && this.getIdFromUrl(user.company)});
 		}
 	
 		return (

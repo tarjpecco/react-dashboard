@@ -29,11 +29,21 @@ const customStyles = {
 	},
 };
 
+const customStyles2 = {
+	content: {
+		top: '60%',
+		left: '60%',
+		transform: 'translate(-60%, -60%)',
+		height: 190,
+	},
+};
+
 class MyInsurance extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			modalIsOpen: false,
+			coiModalIsOpen: false,
 			showInvitationForm: false,
 			invitation: {
 				email: '',
@@ -76,6 +86,16 @@ class MyInsurance extends React.Component {
 			},
 			invitation: {},
 			showInvitationForm: false });
+	}
+
+
+	openCOIModal = () => {
+		console.log('close coi modal');
+		this.setState({ coiModalIsOpen: true });
+	}
+
+	closeCOIModal = () => {
+		this.setState({ coiModalIsOpen: false });
 	}
 
 	validateEmail = (email) => {
@@ -175,7 +195,7 @@ class MyInsurance extends React.Component {
 	}
 
 	render() {
-		const { modalIsOpen, showInvitationForm, inValid, invitation, newPolicy } = this.state;
+		const { modalIsOpen, showInvitationForm, inValid, invitation, newPolicy, coiModalIsOpen } = this.state;
 		const { policies } = this.props;
 		return (
 			<div id="main">
@@ -192,7 +212,7 @@ class MyInsurance extends React.Component {
 							>
 								+ Add New Policy
 							</button>
-							<button type="button" className="btn btn-dark">
+							<button type="button" className="btn btn-dark" onClick={this.openCOIModal}>
 								Send My COI
 							</button>
 						</div>
@@ -234,108 +254,144 @@ class MyInsurance extends React.Component {
 						</tbody>
 					</Table>
 				</div>
-				<Modal
-					isOpen={modalIsOpen}
-					onAfterOpen={this.afterOpenModal}
-					onRequestClose={this.closeModal}
-					style={customStyles}
-					contentLabel="Example Modal"
-				>
-					<center>
-						<h2>Select Policy type(s) you would like to add:</h2>
-					</center>
+				{modalIsOpen ?
+					<Modal
+						isOpen={modalIsOpen}
+						onAfterOpen={this.afterOpenModal}
+						onRequestClose={this.closeModal}
+						style={customStyles}
+						contentLabel="Example Modal"
+					>
+						<center>
+							<h2>Select Policy type(s) you would like to add:</h2>
+						</center>
 
-					<form method="post" encType="multipart/form-data" id="create_policy_form" >
-						<div className="form-group wrap">
-							<div className="form-check form-check-inline">
-								<input
-									className="form-check-input"
-									type="radio"
-									id="example-radios-inline1"
-									name="example-radios-inline"
-									value="GL"
-									defaultChecked
-									onClick={this.changePolicyType}
-								/>
-								GL
+						<form method="post" encType="multipart/form-data" id="create_policy_form" >
+							<div className="form-group wrap">
+								<div className="form-check form-check-inline">
+									<input
+										className="form-check-input"
+										type="radio"
+										id="example-radios-inline1"
+										name="example-radios-inline"
+										value="GL"
+										defaultChecked
+										onClick={this.changePolicyType}
+									/>
+									GL
+								</div>
+								<div className="form-check form-check-inline">
+									<input
+										className="form-check-input"
+										type="radio"
+										id="example-radios-inline2"
+										name="example-radios-inline"
+										value="WC"
+										onClick={this.changePolicyType}
+									/>
+									WC
+								</div>
+								<div className="form-check form-check-inline">
+									<input
+										className="form-check-input"
+										type="radio"
+										id="example-radios-inline3"
+										name="example-radios-inline"
+										value="DBL"
+										onClick={this.changePolicyType}
+									/>
+									DBL
+								</div>
 							</div>
-							<div className="form-check form-check-inline">
-								<input
-									className="form-check-input"
-									type="radio"
-									id="example-radios-inline2"
-									name="example-radios-inline"
-									value="WC"
-									onClick={this.changePolicyType}
-								/>
-								WC
-							</div>
-							<div className="form-check form-check-inline">
-								<input
-									className="form-check-input"
-									type="radio"
-									id="example-radios-inline3"
-									name="example-radios-inline"
-									value="DBL"
-									onClick={this.changePolicyType}
-								/>
-								DBL
-							</div>
+							<input
+								type="file"
+								ref={(ref) => { this.file = ref; }}
+								onChange={this.addNewPolicy}
+								style={{ display: 'none' }}
+							/>
+						</form>
+						<br />
+						<div className="form-group">
+							<input
+								type="text"
+								value={newPolicy.number}
+								className={`form-control ${inValid.number ? 'is-invalid' : ''}`}
+								onChange={e => this.onChangeHandler('number', e.target.value)}
+								placeholder="Number"
+							/>
+							{inValid.number && <div className="invalid-feedback animated fadeIn">Required</div>}
 						</div>
-						<input
-							type="file"
-							ref={(ref) => { this.file = ref; }}
-							onChange={this.addNewPolicy}
-							style={{ display: 'none' }}
-						/>
-					</form>
-					<br />
-					<div className="form-group">
-						<input
-							type="text"
-							value={newPolicy.number}
-							className={`form-control ${inValid.number ? 'is-invalid' : ''}`}
-							onChange={e => this.onChangeHandler('number', e.target.value)}
-							placeholder="Number"
-						/>
-						{inValid.number && <div className="invalid-feedback animated fadeIn">Required</div>}
-					</div>
-					<div className="form-group">
-						<input
-							type="text"
-							/* eslint-disable-next-line */
-							ref="renewalDatePicker"
-							className={`js-datepicker form-control ${inValid.renewal_date && 'is-invalid'}`}
-							name="datepicker1"
-							data-week-start="1"
-							data-autoclose="true"
-							data-today-highlight="true"
-							data-date-format="mm/dd/yyyy"
-							onBlur={this.datepickerChanged}
-							placeholder="Expiration Date"
-						/>
-						{inValid.renewal_date && <div className="invalid-feedback animated fadeIn">Required</div>}
-					</div>
-					<center>
-						<h2>Who will upload the document(s)?</h2>
-					</center>
-					<div className="wrap">
-						<button
-							type="button"
-							className="btn btn-success"
-							onClick={() => this.file && this.file.click()}
-						>
-							Upload Myself
-						</button>
-						<button
-							type="button"
-							className="btn btn-success"
-							onClick={() => this.setState({ showInvitationForm: !showInvitationForm })}
-						>
-							Link My agent
-						</button>
-					</div>
-					{showInvitationForm &&
+						<div className="form-group">
+							<input
+								type="text"
+								/* eslint-disable-next-line */
+								ref="renewalDatePicker"
+								className={`js-datepicker form-control ${inValid.renewal_date && 'is-invalid'}`}
+								name="datepicker1"
+								data-week-start="1"
+								data-autoclose="true"
+								data-today-highlight="true"
+								data-date-format="mm/dd/yyyy"
+								onBlur={this.datepickerChanged}
+								placeholder="Expiration Date"
+							/>
+							{inValid.renewal_date && <div className="invalid-feedback animated fadeIn">Required</div>}
+						</div>
+						<center>
+							<h2>Who will upload the document(s)?</h2>
+						</center>
+						<div className="wrap">
+							<button
+								type="button"
+								className="btn btn-success"
+								onClick={() => this.file && this.file.click()}
+							>
+								Upload Myself
+							</button>
+							<button
+								type="button"
+								className="btn btn-success"
+								onClick={() => this.setState({ showInvitationForm: !showInvitationForm })}
+							>
+								Link My agent
+							</button>
+						</div>
+						{showInvitationForm &&
+							<div className="text-center mt-3 mb-3 mr-5 ml-5">
+								<div className="invite-form">
+									<input type="email"
+										onChange={this.changeInviteEmail}
+										value={invitation.email}
+										className={`invite-mail form-control ${inValid.errorMessage && 'is-invalid'}`}
+									/>
+									<button
+										type="button"
+										className="btn btn-primary invite-submit"
+										onClick={this.sendInvite}
+									>
+										Send Invitation
+									</button>
+								</div>
+								{inValid.errorMessage &&
+									<div id="error" className="invalid-feedback animated fadeIn">
+										{inValid.errorMessage}
+									</div>
+								}
+							</div>
+						}
+					</Modal>
+				: null}
+				{coiModalIsOpen ?
+					<Modal
+						isOpen={coiModalIsOpen}
+						onAfterOpen={() => {}}
+						onRequestClose={this.closeCOIModal}
+						style={customStyles2}
+						contentLabel="COI Modal"
+					>
+						<center>
+							<h2>Send My COI</h2>
+						</center>
 						<div className="text-center mt-3 mb-3 mr-5 ml-5">
 							<div className="invite-form">
 								<input type="email"
@@ -346,9 +402,9 @@ class MyInsurance extends React.Component {
 								<button
 									type="button"
 									className="btn btn-primary invite-submit"
-									onClick={this.sendInvite}
+									onClick={this.closeCOIModal}
 								>
-									Send Invitation
+									Send
 								</button>
 							</div>
 							{inValid.errorMessage &&
@@ -357,8 +413,8 @@ class MyInsurance extends React.Component {
 								</div>
 							}
 						</div>
-					}
-				</Modal>
+					</Modal>
+				: null}
 			</div>
 		);
 	}

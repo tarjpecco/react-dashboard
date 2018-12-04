@@ -160,23 +160,22 @@ class Proposal extends React.Component {
 							<p className="text-info">Bid price </p>
 							<p>&nbsp;${data.bid} </p>
 						</div>
-                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+						<div style={{ display: 'flex', flexDirection: 'row' }}>
+							<a
+								type="button"
+								target="_blank"
+								rel="noopener noreferrer"
+								href={data.COI_file}
+								className="btn btn-primary"
+							> Download COI</a>
 
-                          <a
-                            type="button"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            href={data.COI_file}
-                            className="btn btn-primary"
-                          > Download COI</a>
-
-                          <a
-                            type="button"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            href={data.proposal_file}
-                            className="btn btn-primary"
-                          > Download Proposal</a>
+							<a
+								type="button"
+								target="_blank"
+								rel="noopener noreferrer"
+								href={data.proposal_file}
+								className="btn btn-primary"
+							> Download Proposal</a>
 						</div>
 						<div style={{ display: 'flex', flexDirection: 'row' }}>
 							<span className={`badge ${this.getComplianceClassName(data.compliance_GL)}`}>GL</span>&nbsp;

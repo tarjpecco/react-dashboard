@@ -4,7 +4,7 @@ import * as moment from 'moment';
 import { cloneDeep, mapValues } from 'lodash';
 import 'react-phone-number-input/style.css'
 
-import { getPolicyForUser, updatePolicyForUser } from '../../../api';
+import { getPolicyForUser, updatePolicyForUser, getAddressById } from '../../../api';
 import Table from '../../../components/Table';
 import './index.scss';
 
@@ -17,6 +17,7 @@ class PolicyDetail extends React.PureComponent {
 			btnicon: 'si si-pencil',
 			policy: {},
 			formData: new FormData(),
+			agentAddresses: [],
 		};
 		const { match } = props;
 		this.policyId = match.params.id;
@@ -30,6 +31,7 @@ class PolicyDetail extends React.PureComponent {
 					company: res.company,
 					agent: res.agent,
 				}
+				res.agent.map((agent, index) => this.getAddress(index, agent.address));
 				return this.setState({ policy })
 			});
 	}
@@ -98,13 +100,39 @@ class PolicyDetail extends React.PureComponent {
 	}
 
 	unlinkAgent = () => {
-		const { policy } = this.state;
-		const newPolicy = cloneDeep(policy);
-		newPolicy.agent = [];
-		this.setState({ policy: newPolicy });
+		const newFormData = new FormData();
+		newFormData.append('agent', []);
+		updatePolicyForUser(this.policyId, newFormData)
+			.then(res => {
+				const newPolicy = {
+					type: res.type,
+					number: res.number,
+					renewal_date: res.renewal_date,
+					file_url: res.file,
+					company: res.company,
+					agent: res.agent,
+				};
+				return this.setState({ policy: newPolicy })
+			});
 	}
 
-	getIdFromUrl = url => url.slice(0, -1).split('/').pop();
+	getIdFromUrl = url => (url && url !== null && url !== undefined) ? url.slice(0, -1).split('/').pop() : '';
+
+	getAddress = (index, url) => {
+		const id = this.getIdFromUrl(url);
+		return getAddressById(id).then(res => {
+			const { agentAddresses } = this.state;
+			const addresses = cloneDeep(agentAddresses);
+			addresses[index] = res;
+			this.setState({ agentAddresses: addresses });
+			return res;
+		});
+	}
+
+	getAddressStr = (address) => {
+		const { line_1: line1, line_2: line2, town, state, zip_code:zipCode } = address;
+		return `${line1 || ''} ${line2 || ''} ${town || ''}, ${state || ''} ${zipCode || ''}`;
+	}
 
 	render() {
 		const {
@@ -112,8 +140,9 @@ class PolicyDetail extends React.PureComponent {
 			btnname,
 			btnicon,
 			policy,
+			agentAddresses,
 		} = this.state;
-        const download = policy.file_url ? (<a type="button" target="_blank" rel="noopener noreferrer" href={policy.file_url} className="btn btn-success" > Download Policy </a>) : null
+        const download = policy.file_url ? (<a target="_blank" rel="noopener noreferrer" href={policy.file_url} className="btn btn-primary" > Download Policy </a>) : null
 		return (
 			<div id="main" className="policydetail">
 				<div className="bg-body-light">
@@ -262,27 +291,69 @@ class PolicyDetail extends React.PureComponent {
 									</div>
 								</td>
 							</tr>
-							{(policy.agent && policy.agent.length > 0) &&
-								<tr className="text-left">
-									<td className="table-width-20">
-										<p className="text-info">Agent</p>
-									</td>
-									<td className="table-width-80" colSpan="4">
-										<div>
-											<button
-												type="button"
-												className="btn btn-success"
-												disabled={editable}
-												onClick={this.unlinkAgent}
-											>
-												De-link Agent
-											</button>
-										</div>
-									</td>
-								</tr>
-								}
 						</tbody>
 					</Table>
+					{(policy.agent && policy.agent.length > 0) &&
+						<div style={{ marginTop: 50, marginBottom: -40 }}>
+							<h4 className="flex-sm-fill">
+								Agent Info
+							</h4>
+						</div>
+					}
+					{policy.agent && policy.agent.map((agent, index) =>
+						<React.Fragment key={index}>
+							<div className="table-tool mb-2">
+								<button
+									type="button"
+									className="btn btn-success"
+									onClick={this.unlinkAgent}
+								>
+									De-link Agent
+								</button>
+							</div>
+							<Table
+								tableName={`${agent.first_name}  ${agent.last_name}` || ''}
+								onComapnyNameChanged={value => this.onUpdateCompanyDetails('name', value)}
+								tableStyle="table-striped table-bordered"
+								editable={editable}
+							>
+								<tbody>
+									<tr className="text-left">
+										<td className="table-width-20">
+											<p className="text-info">Email</p>
+										</td>
+										<td className="table-width-80" colSpan="4">
+											<p>{agent.email}</p>
+										</td>
+									</tr>
+									<tr className="text-left">
+										<td className="table-width-20">
+											<p className="text-info">Phone</p>
+										</td>
+										<td className="table-width-80" colSpan="4">
+											<p>{agent.phone}</p>
+										</td>
+									</tr>
+									<tr className="text-left">
+										<td className="table-width-20">
+											<p className="text-info">Company Name</p>
+										</td>
+										<td className="table-width-80" colSpan="4">
+											<p>{agent.company_name}</p>
+										</td>
+									</tr>
+									<tr className="text-left">
+										<td className="table-width-20">
+											<p className="text-info">Address</p>
+										</td>
+										<td className="table-width-80" colSpan="4">
+											<p>{agentAddresses[index] && this.getAddressStr(agentAddresses[index])}</p>
+										</td>
+									</tr>
+								</tbody>
+							</Table>
+						</React.Fragment>
+					)}
 				</div>
 			</div>
 		);

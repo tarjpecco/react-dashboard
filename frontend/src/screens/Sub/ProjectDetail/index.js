@@ -221,6 +221,19 @@ class Detail extends React.Component {
 													<div>{moment(job.end_date, 'YYYY-MM-DD', true).isValid() ? moment(job.end_date).format('MM/DD/YYYY') : ''}</div>
 												</td>
 											</tr>
+											<tr className="text-left">
+												<td className="table-width-30">
+													<p className="text-info">RFQ Document</p>
+												</td>
+												<td className="table-width-70" colSpan="4">
+													<a
+														target="_blank"
+														rel="noopener noreferrer"
+														href={job && job.file}
+														className="btn btn-primary"
+													> Download RFQ</a>
+												</td>
+											</tr>
 										</tbody>
 									</Table>
 								</div>

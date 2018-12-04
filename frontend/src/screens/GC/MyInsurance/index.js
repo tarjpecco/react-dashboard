@@ -139,6 +139,7 @@ class MyInsurance extends React.Component {
 			const sub = [];
 			sub.push(user.url);
 			formData.append('sub', sub);
+			formData.append('status', 'add_new');
 			formData.append('company', user.company);
 			createPolicy(formData);
 		}
@@ -218,7 +219,7 @@ class MyInsurance extends React.Component {
 									<td>{policy.number}</td>
 									<td>{moment(policy.renewal_date).format('MM/DD/YYYY')}</td>
 									<td>
-										<span className="badge badge-success">Active</span>
+										<span className="badge badge-success">{policy.status}</span>
 									</td>
 									<td>
 										<Link to={`/insurance/${getIdFromUrl(policy.url)}`}>

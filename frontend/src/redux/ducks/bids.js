@@ -30,13 +30,16 @@ export const getBidsSelector = createSelector([stateSelector], state => {
 export const getBidSelector = createSelector([stateSelector], state => {
   return state.get('bidInfo').toJS();
 });
+export const getBidErrorSelector = createSelector([stateSelector], state => {
+  return state.get('error');
+});
 
 // Reducer Intial State
 const initialState = fromJS({
   bids: [],
   bidInfo: {},
   loading: false,
-  error: null,
+  error: '',
   updateError: null,
 });
 
@@ -79,13 +82,16 @@ const bidListReducer = bidsDuck.createReducer({
   [actions.GET_BID_REQUEST]: (state) =>
     state
       .set('loading', true),
-  [actions.CREATE_BID_SUCCESS]: (state, { payload }) =>
+  [actions.CREATE_BID]: (state) =>
     state
-      .update('bids', (bids) => {
-        bids.push(payload.bidInfo);
-        return List(bids);
-      })
+      .set('error', ''),
+  [actions.CREATE_BID_SUCCESS]: (state) =>
+    state
       .set('loading', false),
+  [actions.CREATE_BID_ERROR]: (state, { payload }) =>
+    state
+      .set('loading', false)
+      .set('error', payload.error),
 }, initialState);
 
 export default bidListReducer;
@@ -103,11 +109,11 @@ function* listBidsSaga({ payload }) {
 
 function* createBidSaga({ payload }) {
   try {
-    const bidInfo = yield call(createBid, payload.params);
-    yield put(actions.create_bid_success({ bidInfo }));
+    yield call(createBid, payload);
+    yield put(actions.create_bid_success());
   } catch (err) {
-    const errorMessage = 'Listing bids Failed';
-    yield put(actions.get_bid_error({ error: errorMessage }));
+    const errorMessage = 'Bid Submission Failed';
+    yield put(actions.create_bid_error({ error: errorMessage }));
   }
 }
 

@@ -1,3 +1,10 @@
 .hidden {
 	display: none;
 }
+.alert-error-box {
+	position: fixed !important;
+	bottom: 30px;
+	right: 20px;
+	z-index: 1000;
+	width: 300px;
+}

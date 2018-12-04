@@ -292,11 +292,9 @@ export const updateBid = (id, params) => {
 }
 
 export const createBid = (params) => {
-  return authHeaderService.getHeaders()
+  return authHeaderService.getHeaders('multipart/form-data')
   .then((headers) => axios.post(`${API_URL}/bids/`,
-  {
-    ...params,
-  },
+  params,
   {
     headers
   }))

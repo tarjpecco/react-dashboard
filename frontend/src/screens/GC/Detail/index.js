@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import classnames from 'classnames';
 import { connect } from 'react-redux';
 import * as moment from 'moment';
-import { orderBy, cloneDeep, mapValues, isEmpty } from 'lodash';
+import { orderBy, cloneDeep, mapValues, isEmpty, includes } from 'lodash';
 
 import Modal from 'react-modal';
 import Table from '../../../components/Table';
@@ -21,7 +21,11 @@ import {
 	getBidsSelector,
 	actions as bidActions,
 } from '../../../redux/ducks/bids';
-import { API_URL, getBid } from '../../../api';
+import {
+  getFriendsSelector,
+  actions as inviteActions,
+} from '../../../redux/ducks/invites';
+import { API_URL } from '../../../api';
 import { getIdFromUrl } from '../../../utils';
 
 import './index.scss';
@@ -39,10 +43,12 @@ class Detail extends React.Component {
 		match: PropTypes.object.isRequired,
 		listJobs: PropTypes.func.isRequired,
 		listBids: PropTypes.func.isRequired,
+		listFriends: PropTypes.func.isRequired,
 		createJob: PropTypes.func.isRequired,
 		user: PropTypes.object.isRequired,
 		getUserInfo: PropTypes.func.isRequired,
-		updateBidInfo: PropTypes.func.isRequired,
+        updateBidInfo: PropTypes.func.isRequired,
+        friends: PropTypes.object.isRequired,
 	}
 
 	constructor(props) {
@@ -52,8 +58,8 @@ class Detail extends React.Component {
 		this.state = {
 			clicked: 'rfq',
 			modalIsOpen: false,
-			jobs: [],
-			bids: {},
+            jobs: [],
+            bids: {},
 			isInValid: {
 				trade_type: false,
 				expected_start_date: false,
@@ -75,10 +81,11 @@ class Detail extends React.Component {
 
 	componentDidMount() {
 		Modal.setAppElement('body');
-		const { listJobs, listBids } = this.props;
+		const { listJobs, listBids, listFriends } = this.props;
 		const { clicked } = this.state;
 		listJobs({ id: this.projectId, status: clicked });
-		listBids({ job__project: this.projectId });
+        listBids({ job__project: this.projectId });
+        listFriends()
 	}
 
 	componentWillReceiveProps(newProps) {
@@ -98,7 +105,27 @@ class Detail extends React.Component {
 		});
 		const jobs = orderBy(jobList, ['id'],['asc']);
 		this.setState({ jobs, bids: newBids });
-	}
+    }
+
+    onChangeSub = (jobId, subId) => {
+      const key = `job-friend-selector-${jobId}`
+      this.setState({
+        [key]: subId,
+      })
+    }
+
+    onInviteSub = (job) => {
+      const { updateJob } = this.props
+      const key = `job-friend-selector-${job.id}`
+      const subId = this.state[key]
+      const data = {
+        rfq_subs: [
+          subId,
+          ...job.rfq_subs,
+        ]
+      }
+      updateJob({id: job.id, data })
+    }
 
 	onClickTabHandler = tabname => {
 		this.setState({ [tabname]: 'nav-link active' });
@@ -205,8 +232,8 @@ class Detail extends React.Component {
 	}
 
 	render() {
-		const { jobs, bids, clicked, modalIsOpen, isInValid, newJob } = this.state;
-		console.log('bidS:', bids);
+        const { jobs, bids, clicked, modalIsOpen, isInValid, newJob, } = this.state;
+        const { friends } = this.props;
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -328,13 +355,43 @@ class Detail extends React.Component {
 																)}
 															</button>
 														</td>
-													</tr>
+                                                      </tr>
+
+                                                      <tr
+                                                        className={classnames({
+                                                          hidden: bids[jobs[id].id].length !== 0 || !jobs[id].showdetail,
+                                                        })}
+                                                      >
+                                                        <td colSpan="6">
+                                                          <select
+                                                            name="sub-friend"
+                                                            placeholder="Sub"
+                                                            value={this.state[`job-friend-selector-${item.id}`] || ''}
+                                                            onChange={e => this.onChangeSub(item.id, e.target.value)}
+                                                          >
+                                                            <option value='' disabled selected> --- </option>
+                                                            {friends.subs.map((sub, index) =>
+                                                              <option value={sub.url} key={index} disabled={includes(item.rfq_subs, sub.url)}>
+                                                                { sub.company_name } { includes(item.rfq_subs, sub.url) ? '- (invited)' : '' }
+                                                              </option>
+                                                            )}
+                                                          </select>
+                                                          <button
+                                                            type="bitton"
+                                                            disabled={!this.state[`job-friend-selector-${item.id}`]}
+                                                            className="btn btn-sm btn-success"
+                                                            onClick={() => this.onInviteSub(item)}
+                                                          >Invite Sub</button>
+                                                        </td>
+                                                      </tr>
+
 													<tr
 														className={classnames({
 															hidden: bids[jobs[id].id].length === 0 || !jobs[id].showdetail,
 														})}
 													>
 														<td colSpan="6">
+                                                            {!bids[item.id].length && <button type="button">Invite Sub</button>}
 															{bids[jobs[id].id].map((data, index) =>
 																<Proposal data={data} key={index} updateBidStatus={this.updateBidStatus} />
 															)}
@@ -470,7 +527,8 @@ class Detail extends React.Component {
 															)}
 														</button>
 													</td>
-												</tr>
+                                                  </tr>
+
 												<tr
 													className={classnames({
 														hidden: bids[jobs[id].id].length === 0 || !jobs[id].showdetail,
@@ -479,7 +537,7 @@ class Detail extends React.Component {
 													<td colSpan="6">
 														{bids[jobs[id].id].map((data, index) =>
 															<Proposal data={data} key={index} updateBidStatus={this.updateBidStatus} />
-														)}
+                                                        )}
 													</td>
 												</tr>
 											</React.Fragment>
@@ -589,15 +647,19 @@ class Detail extends React.Component {
 const mapStateToProps = state => ({
 	jobList: getJobsSelector(state),
 	user: getUserSelector(state),
-	bidList: getBidsSelector(state),
+    bidList: getBidsSelector(state),
+    friends: getFriendsSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({
 	listJobs: params => dispatch(jobActions.get_jobs(params)),
 	listBids: params => dispatch(bidActions.get_bids(params)),
-	createJob: params => dispatch(jobActions.create_job(params)),
+    createJob: params => dispatch(jobActions.create_job(params)),
+    updateJob: params => dispatch(jobActions.update_job(params)),
 	getUserInfo: () => dispatch(userActions.get_user()),
-	updateBidInfo: params => dispatch(bidActions.update_bid(params)),
+    updateBidInfo: params => dispatch(bidActions.update_bid(params)),
+    listFriends: () => dispatch(inviteActions.get_friends()),
+
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Detail);

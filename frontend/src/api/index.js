@@ -156,11 +156,26 @@ export const createJob = (params) => {
     })
 };
 
+export const updateJob = ({id, data}) => {
+  return authHeaderService.getHeaders()
+    .then((headers) =>
+      axios.patch(`${API_URL}/jobs/${id}/`, data, {
+        headers,
+      }))
+    .then(res => res.data)
+}
+
+export const getFriends = () => {
+  return authHeaderService.getHeaders()
+    .then(headers => axios.get(`${API_URL}/users/`, { headers }))
+    .then(res => res.data)
+}
+
 export const updateCurrentUser = (params) => {
   return authHeaderService.getHeaders()
     .then((headers) => axios.patch(`${API_URL}/users/me/`,
     {
-      ...params,  
+      ...params,
     },
     {
       headers

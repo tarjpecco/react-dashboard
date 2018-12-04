@@ -463,14 +463,12 @@ class Detail extends React.Component {
 												</tr>
 												<tr
 													className={classnames({
-														hidden: bids[jobs[id].id].length === 0 || !jobs[id].showdetail,
+														hidden: !item.showdetail,
 													})}
 												>
-													<td colSpan="6">
-														{bids[jobs[id].id].map((data, index) =>
-															<Proposal data={data} key={index} updateBidStatus={this.updateBidStatus} />
-														)}
-													</td>
+                                                  <td colSpan="6">
+                                                    { item.active_bid ? <Proposal data={bids[item.id].find(b => b.url === item.active_bid)} updateBidStatus={this.updateBidStatus} /> : null }
+                                                  </td>
 												</tr>
 											</React.Fragment>
 										))}
@@ -534,11 +532,9 @@ class Detail extends React.Component {
 														hidden: bids[jobs[id].id].length === 0 || !jobs[id].showdetail,
 													})}
 												>
-													<td colSpan="6">
-														{bids[jobs[id].id].map((data, index) =>
-															<Proposal data={data} key={index} updateBidStatus={this.updateBidStatus} />
-                                                        )}
-													</td>
+                                                  <td colSpan="6">
+                                                    { item.active_bid ? <Proposal data={bids[item.id].find(b => b.url === item.active_bid)} updateBidStatus={this.updateBidStatus} /> : null }
+                                                  </td>
 												</tr>
 											</React.Fragment>
 										))}

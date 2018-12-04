@@ -47,8 +47,9 @@ class Detail extends React.Component {
 		createJob: PropTypes.func.isRequired,
 		user: PropTypes.object.isRequired,
 		getUserInfo: PropTypes.func.isRequired,
-        updateBidInfo: PropTypes.func.isRequired,
-        friends: PropTypes.object.isRequired,
+		updateBidInfo: PropTypes.func.isRequired,
+		friends: PropTypes.object.isRequired,
+		updateJob: PropTypes.func.isRequired,
 	}
 
 	constructor(props) {
@@ -58,8 +59,8 @@ class Detail extends React.Component {
 		this.state = {
 			clicked: 'rfq',
 			modalIsOpen: false,
-            jobs: [],
-            bids: {},
+			jobs: [],
+			bids: {},
 			isInValid: {
 				trade_type: false,
 				expected_start_date: false,
@@ -115,9 +116,10 @@ class Detail extends React.Component {
     }
 
     onInviteSub = (job) => {
-      const { updateJob } = this.props
+			const { updateJob } = this.props;
       const key = `job-friend-selector-${job.id}`
-      const subId = this.state[key]
+      // eslint-disable-next-line react/destructuring-assignment
+      const subId = this.state[key];
       const data = {
         rfq_subs: [
           subId,
@@ -325,14 +327,14 @@ class Detail extends React.Component {
 																{item.trade_type}
 															</p>
 														</td>
-                                                        <td>
-                                                          <a
-                                                            type="button"
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            href={item.file}
-                                                            className="btn btn-primary"
-                                                          > Download</a>
+														<td>
+															<a
+																type="button"
+																target="_blank"
+																rel="noopener noreferrer"
+																href={item.file}
+																className="btn btn-primary"
+															> Download</a>
 														</td>
 														<td>
 															<p>{item.expected_end_date}</p>
@@ -355,35 +357,36 @@ class Detail extends React.Component {
 																)}
 															</button>
 														</td>
-                                                      </tr>
-
-                                                      <tr
-                                                        className={classnames({
-                                                          hidden: bids[jobs[id].id].length !== 0 || !jobs[id].showdetail,
-                                                        })}
-                                                      >
-                                                        <td colSpan="6">
-                                                          <select
-                                                            name="sub-friend"
-                                                            placeholder="Sub"
-                                                            value={this.state[`job-friend-selector-${item.id}`] || ''}
-                                                            onChange={e => this.onChangeSub(item.id, e.target.value)}
-                                                          >
-                                                            <option value='' disabled selected> --- </option>
-                                                            {friends.subs.map((sub, index) =>
-                                                              <option value={sub.url} key={index} disabled={includes(item.rfq_subs, sub.url)}>
-                                                                { sub.company_name } { includes(item.rfq_subs, sub.url) ? '- (invited)' : '' }
-                                                              </option>
-                                                            )}
-                                                          </select>
-                                                          <button
-                                                            type="bitton"
-                                                            disabled={!this.state[`job-friend-selector-${item.id}`]}
-                                                            className="btn btn-sm btn-success"
-                                                            onClick={() => this.onInviteSub(item)}
-                                                          >Invite Sub</button>
-                                                        </td>
-                                                      </tr>
+													</tr>
+													<tr
+														className={classnames({
+															hidden: bids[jobs[id].id].length !== 0 || !jobs[id].showdetail,
+														})}
+													>
+														<td colSpan="6">
+															<select
+																name="sub-friend"
+																placeholder="Sub"
+																// eslint-disable-next-line react/destructuring-assignment
+																value={this.state[`job-friend-selector-${item.id}`] || ''}
+																onChange={e => this.onChangeSub(item.id, e.target.value)}
+															>
+																<option value='' disabled selected> --- </option>
+																{friends.subs.map((sub, index) =>
+																	<option value={sub.url} key={index} disabled={includes(item.rfq_subs, sub.url)}>
+																		{ sub.company_name } { includes(item.rfq_subs, sub.url) ? '- (invited)' : '' }
+																	</option>
+																)}
+															</select>
+															<button
+																type="button"
+																// eslint-disable-next-line react/destructuring-assignment
+																disabled={!this.state[`job-friend-selector-${item.id}`]}
+																className="btn btn-sm btn-success"
+																onClick={() => this.onInviteSub(item)}
+															>Invite Sub</button>
+														</td>
+													</tr>
 
 													<tr
 														className={classnames({
@@ -391,7 +394,7 @@ class Detail extends React.Component {
 														})}
 													>
 														<td colSpan="6">
-                                                            {!bids[item.id].length && <button type="button">Invite Sub</button>}
+															{!bids[item.id].length && <button type="button">Invite Sub</button>}
 															{bids[jobs[id].id].map((data, index) =>
 																<Proposal data={data} key={index} updateBidStatus={this.updateBidStatus} />
 															)}
@@ -448,17 +451,19 @@ class Detail extends React.Component {
 														<span className="badge badge-warning">DB</span>
 													</td>
 													<td className="text-right">
-														<button
-															type="button"
-															onClick={() => this.onClickDetail(id)}
-														>
-															{!jobs[id].showdetail && (
-																<i className="far fa-arrow-alt-circle-down" />
-															)}
-															{jobs[id].showdetail && (
-																<i className="far fa-arrow-alt-circle-up" />
-															)}
-														</button>
+														{(bids[jobs[id].id].length > 0 &&
+															<button
+																type="button"
+																onClick={() => this.onClickDetail(id)}
+															>
+																{!jobs[id].showdetail && (
+																	<i className="far fa-arrow-alt-circle-down" />
+																)}
+																{jobs[id].showdetail && (
+																	<i className="far fa-arrow-alt-circle-up" />
+																)}
+															</button>
+														)}
 													</td>
 												</tr>
 												<tr
@@ -466,9 +471,9 @@ class Detail extends React.Component {
 														hidden: !item.showdetail,
 													})}
 												>
-                                                  <td colSpan="6">
-                                                    { item.active_bid ? <Proposal data={bids[item.id].find(b => b.url === item.active_bid)} updateBidStatus={this.updateBidStatus} /> : null }
-                                                  </td>
+													<td colSpan="6">
+														{ item.active_bid ? <Proposal data={bids[item.id].find(b => b.url === item.active_bid)} updateBidStatus={this.updateBidStatus} /> : null }
+													</td>
 												</tr>
 											</React.Fragment>
 										))}
@@ -513,28 +518,29 @@ class Detail extends React.Component {
 														<p>{item.expected_end_date}</p>
 													</td>
 													<td className="text-right">
-														<button
-															type="button"
-															onClick={() => this.onClickDetail(id)}
-														>
-															{!jobs[id].showdetail && (
-																<i className="far fa-arrow-alt-circle-down" />
-															)}
-															{jobs[id].showdetail && (
-																<i className="far fa-arrow-alt-circle-up" />
-															)}
-														</button>
+														{(bids[jobs[id].id].length > 0 &&
+															<button
+																type="button"
+																onClick={() => this.onClickDetail(id)}
+															>
+																{!jobs[id].showdetail && (
+																	<i className="far fa-arrow-alt-circle-down" />
+																)}
+																{jobs[id].showdetail && (
+																	<i className="far fa-arrow-alt-circle-up" />
+																)}
+															</button>
+														)}
 													</td>
-                                                  </tr>
-
+												</tr>
 												<tr
 													className={classnames({
 														hidden: bids[jobs[id].id].length === 0 || !jobs[id].showdetail,
 													})}
 												>
-                                                  <td colSpan="6">
-                                                    { item.active_bid ? <Proposal data={bids[item.id].find(b => b.url === item.active_bid)} updateBidStatus={this.updateBidStatus} /> : null }
-                                                  </td>
+													<td colSpan="6">
+														{ item.active_bid ? <Proposal data={bids[item.id].find(b => b.url === item.active_bid)} updateBidStatus={this.updateBidStatus} /> : null }
+													</td>
 												</tr>
 											</React.Fragment>
 										))}

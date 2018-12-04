@@ -1,12 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isNull } from 'lodash';
 import * as moment from 'moment';
 
 import Table from '../../../components/Table';
 import {
 	actions as bidActions,
+	getBidErrorSelector,
 } from '../../../redux/ducks/bids';
 import {
 	actions as jobActions,
@@ -20,6 +21,7 @@ class SubmitQuote extends React.Component {
 		listRFQJobs: PropTypes.func.isRequired,
 		rfqJobList: PropTypes.array.isRequired,
 		createBidInfo: PropTypes.func.isRequired,
+		error: PropTypes.string.isRequired,
 	}
 
 	constructor(props) {
@@ -27,6 +29,8 @@ class SubmitQuote extends React.Component {
 		this.projectId = props.match.params.id;
 		this.state = {
 			bid: {},
+			formData: new FormData(),
+			showError: true,
 		};
 	}
 
@@ -36,17 +40,35 @@ class SubmitQuote extends React.Component {
 	}
 
 	submitBid = () => {
-		const { bid } = this.state;
-		const { createBidInfo } = this.props;
-		const { rfqJobList } = this.props;
+		const { bid, formData } = this.state;
+		const { createBidInfo, rfqJobList } = this.props;
 		const job = rfqJobList[0];
-		console.log('job:', job);
-		const params = {
-			bid: bid.bid,
-			sub: job.user.url,
-			job: job.url,
-		};
-		createBidInfo({ params });
+		if (this.coiFile.files.length === 0) {
+			// eslint-disable-next-line no-alert
+			window.alert('COI File is Required!');
+			return;
+		}
+		if (this.proposalFile.files.length === 0) {
+			// eslint-disable-next-line no-alert
+			window.alert('Proposal File is Required!');
+			return;
+		}
+		formData.append('sub', job.user.url);
+		formData.append('job', job.url);
+		formData.append('status', 'reviewing_compliance');
+		formData.append('bid', bid.bid);
+		createBidInfo(formData);
+		this.setState({ showError: true });
+	}
+
+	onFileChange = (fileType) => {
+		const  { formData } = this.state;
+		if (fileType === 'proposal') {
+			formData.append('proposal_file', this.proposalFile.files[0]);
+		} else {
+			formData.append('COI_file', this.coiFile.files[0]);
+		}
+		this.setState({ formData });
 	}
 
 	onBidEditHandler = (prop, value) => {
@@ -80,12 +102,20 @@ class SubmitQuote extends React.Component {
 	}
 
 	render() {
-		const { bid } = this.state;
-		const { rfqJobList } = this.props;
+		const { bid, showError } = this.state;
+		const { rfqJobList, error } = this.props;
 		const projectInfo = this.getProjectInfo(rfqJobList);
 		const job = rfqJobList[0];
 		return (
 			<div id="main">
+				{error && showError &&
+					<div className="alert alert-danger alert-dismissable animated bounceInRight alert-error-box" role="alert">
+						<button type="button" className="close" aria-label="Close" onClick={() => this.setState({ showError: false })}>
+							<span>×</span>
+						</button>
+						<p className="mb-0">{error}</p>
+					</div>
+				}
 				<div className="bg-body-light">
 					<div className="content content-full">
 						<div className="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
@@ -216,14 +246,59 @@ class SubmitQuote extends React.Component {
 														<span className="input-group-text">,00</span>
 													</div>
 												</div>
-											
+											</td>
+										</tr>
+										<tr className="text-left">
+											<td className="table-width-20">
+												<p className="text-info">COI File</p>
+											</td>
+											<td className="table-width-80" colSpan="4">
+												<div>
+													<input
+														type="file"
+														name="COI_file"
+														ref={(ref) => { this.coiFile = ref; }}
+														onChange={() => this.onFileChange('coi')}
+														style={{ display: 'none' }}
+													/>
+													<button
+														type="button"
+														className="btn btn-success"
+														onClick={() => this.coiFile && this.coiFile.click()}
+													>
+														Upload COI
+													</button>
+												</div>
+											</td>
+										</tr>
+										<tr className="text-left">
+											<td className="table-width-20">
+												<p className="text-info">Proposal</p>
+											</td>
+											<td className="table-width-80" colSpan="4">
+												<div>
+													<input
+														type="file"
+														name="proposal_file"
+														ref={(ref) => { this.proposalFile = ref; }}
+														onChange={() => this.onFileChange('proposal')}
+														style={{ display: 'none' }}
+													/>
+													<button
+														type="button"
+														className="btn btn-success"
+														onClick={() => this.proposalFile && this.proposalFile.click()}
+													>
+														Upload Proposal
+													</button>
+												</div>
 											</td>
 										</tr>
 									</tbody>
 								</Table>
 								<div className="input-group" style={{ justifyContent: 'flex-end', marginRight: 0 }}>
 									<button
-										type="button" className="btn btn-success"
+										type="button" className="btn btn-primary"
 										onClick={this.submitBid}
 									>
 										Submit Bid
@@ -240,6 +315,7 @@ class SubmitQuote extends React.Component {
 
 const mapStateToProps = state => ({
 	rfqJobList: getRFQJobsSelector(state),
+	error: getBidErrorSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({

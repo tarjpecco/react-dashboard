@@ -65,7 +65,7 @@ class MyInsurance extends React.Component {
 	}
 
 	closeModal = () => {
-		this.setState({ 
+		this.setState({
 			modalIsOpen: false,
 			inValid: {},
 			newPolicy: {
@@ -333,7 +333,7 @@ class MyInsurance extends React.Component {
 							Link My agent
 						</button>
 					</div>
-					{showInvitationForm && 
+					{showInvitationForm &&
 						<div className="text-center mt-3 mb-3 mr-5 ml-5">
 							<div className="invite-form">
 								<input type="email"

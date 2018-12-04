@@ -44,7 +44,7 @@ export default function configureStore(initialState = {}) {
 		companies,
 		bids,
 	});
-	
+
 	const store = createStore(connectRouter(history)(reducer), initialState, compose(...enhancers));
 	sagaMiddleware.run(rootSaga);
 

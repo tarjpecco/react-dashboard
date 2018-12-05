@@ -109,6 +109,16 @@ class Detail extends React.Component {
 		return project;
 	}
 
+	changeBidStatus = (index, status) => {
+		const { updateBidInfo } = this.props;
+		const { bids } = this.state;
+		const bidId = getIdFromUrl(bids[index].url);
+		const params = {
+			status,
+		};
+		updateBidInfo({ id: bidId, params});
+	}
+
 	render() {
 		const { editable, btnname, btnicon, bids } = this.state;
 		const { progressJobList } = this.props;
@@ -244,7 +254,7 @@ class Detail extends React.Component {
 										</tbody>
 									</Table>
 								</div>
-								<div style={{ width: 400, marginLeft: 30 }}>
+								<div style={{ width: 550, marginLeft: 30 }}>
 									<Table
 										tableName="Bid Info"
 										onComapnyNameChanged={value => this.onUpdateCompanyDetails('name', value)}
@@ -279,7 +289,7 @@ class Detail extends React.Component {
 											</tr>
 											<tr className="text-left">
 												<td className="table-width-40">
-													<p className="text-info">Bid Status</p>
+													<p className="text-info">Compliance Status</p>
 												</td>
 												<td className="table-width-60" colSpan="4">
 													<div style={{ display: 'flex', flexDirection: 'row' }}>
@@ -302,8 +312,56 @@ class Detail extends React.Component {
 													> Download</a>
 												</td>
 											</tr>
+											{bids[index] && bids[index].status === 'contingent_accept' &&
+												<React.Fragment>
+													<tr className="text-left">
+														<td className="table-width-40">
+															<p className="text-info">Contingency Description</p>
+														</td>
+														<td className="table-width-60" colSpan="4">
+															<p>{bids[index] && bids[index].contingency_description}</p>
+														</td>
+													</tr>
+													<tr className="text-left">
+														<td className="table-width-40">
+															<p className="text-info">Policy Update</p>
+														</td>
+														<td className="table-width-60" colSpan="4">
+															&nbsp;
+														</td>
+													</tr>
+												</React.Fragment>
+											}
 										</tbody>
 									</Table>
+									{bids[index] && bids[index].status === 'contingent_accept' &&
+										<div className="text-right">
+											<button
+												type="button"
+												className="btn btn-primary"
+												onClick={() => this.changeBidStatus(index, 'rejected_by_sub')}
+												disabled={editable}
+											>
+												Reject
+											</button>
+											<button
+												type="button"
+												className="btn btn-primary"
+												onClick={() => this.changeBidStatus(index, 'reviewing_compliance')}
+												disabled={editable}
+											>
+												Verify Compliance Again
+											</button>
+											<button
+												type="button"
+												className="btn btn-primary"
+												onClick={() => this.changeBidStatus(index, 'pending')}
+												disabled={editable}
+											>
+												Proposal Updated
+											</button>
+										</div>
+									}
 								</div>
 							</div>
 						</React.Fragment>

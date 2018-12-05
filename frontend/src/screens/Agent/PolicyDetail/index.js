@@ -138,7 +138,6 @@ class PolicyDetail extends React.PureComponent {
 			btnname,
 			btnicon,
 			policy,
-			agentAddresses,
 		} = this.state;
         const download = policy.file_url ? (<a target="_blank" rel="noopener noreferrer" href={policy.file_url} className="btn btn-primary" > Download Policy </a>) : null
 		return (

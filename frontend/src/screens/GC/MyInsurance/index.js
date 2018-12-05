@@ -47,8 +47,6 @@ class MyInsurance extends React.Component {
 			showInvitationForm: false,
 			invitation: {
 				email: '',
-				project: [],
-				job: [],
 			},
 			newPolicy: {
 				type: 'GL',
@@ -108,7 +106,7 @@ class MyInsurance extends React.Component {
 	}
 
 	sendInvite = () => {
-		const { createInvite, user } = this.props;
+		const { createInvite } = this.props;
 		const {
 			invitation,
 			inValid,
@@ -128,7 +126,7 @@ class MyInsurance extends React.Component {
 			mapValues(invitation, (value, key) => {
 				formData.append(key, value);
 			});
-			formData.append('type', user.role);
+			formData.append('user_type', 'agent');
 			createInvite(formData);
 		}
 	}
@@ -259,10 +257,11 @@ class MyInsurance extends React.Component {
 						style={customStyles}
 						contentLabel="Example Modal"
 					>
-						<center>
-							<h2>Select Policy type(s) you would like to add:</h2>
-						</center>
-
+						<div className="mt-4">
+							<center>
+								<h3>Select Policy type(s) you would like to add:</h3>
+							</center>
+						</div>
 						<form method="post" encType="multipart/form-data" id="create_policy_form" >
 							<div className="form-group wrap">
 								<div className="form-check form-check-inline">
@@ -335,7 +334,7 @@ class MyInsurance extends React.Component {
 							{inValid.renewal_date && <div className="invalid-feedback animated fadeIn">Required</div>}
 						</div>
 						<center>
-							<h2>Who will upload the document(s)?</h2>
+							<h3>Who will upload the document(s)?</h3>
 						</center>
 						<div className="wrap">
 							<button

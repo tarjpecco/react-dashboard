@@ -4,7 +4,7 @@ import moment from 'moment';
 
 import './index.scss';
 import { getDataFromUrl, getUserLicensesForUser, getPoliciesForUser, updateBid } from '../../api';
-import { getIdFromUrl } from '../../utils';
+import { getIdFromUrl, numberWithCommas } from '../../utils';
 
 class Proposal extends React.Component {
 	state = {
@@ -34,12 +34,16 @@ class Proposal extends React.Component {
 				this.setState({ userLicenses: licenses });
 				if (jobInProgress) {
 					const id = getIdFromUrl(user.url);
+					console.log('sub user id:', id);
 					return getPoliciesForUser(id)
 				}
 				return { results: [] };
 			})
 			.then(res => res.results)
-			.then(policies => this.setState({ userPolicies: policies }))
+			.then(policies => {
+				console.log('user policies:', policies);
+				this.setState({ userPolicies: policies })
+			})
 	}
 
 	getAddressStr = address => {
@@ -67,10 +71,10 @@ class Proposal extends React.Component {
 	changeContingencyDesc = (e) => {
 		this.setState({ contingencyDescription: e.target.value });
 	}
-
+	
 	render() {
 		const { subUserInfo, address, userLicenses, userPolicies, showContingentBox, contingencyDescription } = this.state;
-		const { data } = this.props;
+		const { data, jobInProgress } = this.props;
 		const classname = `table table-vcenter table-bordered`;
 
 		return (
@@ -167,6 +171,23 @@ class Proposal extends React.Component {
 									</td>
 								</tr>
 							))}
+							{userLicenses.length === 0 &&
+								<tr className="text-left">
+									<td />
+									<td className="table-width-30">
+										&nbsp;
+									</td>
+									<td className="table-width-30">
+										&nbsp;
+									</td>
+									<td
+										className="table-width-40"
+										colSpan="2"
+									>
+										&nbsp;
+									</td>
+								</tr>
+							}
 						</tbody>
 					</table>
 					<div
@@ -174,13 +195,13 @@ class Proposal extends React.Component {
 							display: 'flex',
 							flexDirection: 'column',
 							alignItems: 'center',
-							justifyContent: 'space-evenly',
+							justifyContent: 'space-around',
 							marginLeft: 20,
 						}}
 					>
-						<div style={{ display: 'flex', flexDirection: 'row' }}>
-							<p className="text-info">Bid price </p>
-							<p>&nbsp;${data.bid} </p>
+						<div className="d-flex font-weight-bold mt-2 mb-2" style={{ fontSize: '1.2em' }}>
+							<p className="text-info mr-2">Bid price: </p>
+							<p>&nbsp;${numberWithCommas(data.bid)} </p>
 						</div>
 						<div style={{ display: 'flex', flexDirection: 'row' }}>
 							<a
@@ -227,37 +248,51 @@ class Proposal extends React.Component {
 								</button>
 							</div>
 						}
-						<div hidden={data.status === 'pending' && data.status === 'reviewing_compliance'} style={{ height: 100 }} />
+						{!showContingentBox &&
+							<div style={{ height: 38 }} />
+						}
+						<div hidden={data.status === 'pending' || data.status === 'reviewing_compliance'} style={{ height: 50 }} />
 					</div>
 				</div>
-				<div className="block-content">
-					<table className={classname}>
-						<thead className="thead-light">
-							<tr>
-								<th className="text-center table-width-20">Agent/Broker name</th>
-								<th className="text-center table-width-15">Policy type</th>
-								<th className="text-center table-width-15">Policy number</th>
-								<th className="text-center table-width-20">Renewal Date</th>
-								<th className="text-center table-width-15">Status</th>
-							</tr>
-						</thead>
-						<tbody>
-							{userPolicies.map((policy, index) => (
-								<tr className="text-center" key={index}>
-									<td>
-										<p className="text-info">{(policy.agent[0] && policy.agent[0].first_name + policy.agent[0].last_name) || ''}</p>
-									</td>
-									<td>{policy.type}</td>
-									<td>{policy.number}</td>
-									<td>{moment(policy.renewal_date, 'YYYY-MM-DD', true).isValid() ? moment(policy.renewal_date).format('MM/DD/YYYY') : moment().format('MM/DD/YYYY')}</td>
-									<td>
-										<span className="badge badge-success">{policy.status}</span>
-									</td>
+				{jobInProgress &&
+					<div className="block-content">
+						<table className={classname}>
+							<thead className="thead-light">
+								<tr>
+									<th className="text-center table-width-20">Agent/Broker name</th>
+									<th className="text-center table-width-15">Policy type</th>
+									<th className="text-center table-width-15">Policy number</th>
+									<th className="text-center table-width-20">Renewal Date</th>
+									<th className="text-center table-width-15">Status</th>
 								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
+							</thead>
+							<tbody>
+								{userPolicies.map((policy, index) => (
+									<tr className="text-center" key={index}>
+										<td>
+											<p className="text-info">{(policy.agent[0] && policy.agent[0].first_name + policy.agent[0].last_name) || ''}</p>
+										</td>
+										<td>{policy.type}</td>
+										<td>{policy.number}</td>
+										<td>{moment(policy.renewal_date, 'YYYY-MM-DD', true).isValid() ? moment(policy.renewal_date).format('MM/DD/YYYY') : moment().format('MM/DD/YYYY')}</td>
+										<td>
+											<span className="badge badge-success">{policy.status}</span>
+										</td>
+									</tr>
+								))}
+								{userPolicies.length === 0 &&
+									<tr className="text-center">
+										<td>&nbsp;</td>
+										<td>&nbsp;</td>
+										<td>&nbsp;</td>
+										<td>&nbsp;</td>
+										<td>&nbsp;</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				}
 			</div>
 		);
 	}

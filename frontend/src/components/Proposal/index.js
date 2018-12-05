@@ -162,7 +162,6 @@ class Proposal extends React.Component {
 						</div>
 						<div style={{ display: 'flex', flexDirection: 'row' }}>
 							<a
-								type="button"
 								target="_blank"
 								rel="noopener noreferrer"
 								href={data.COI_file}
@@ -170,7 +169,6 @@ class Proposal extends React.Component {
 							> Download COI</a>
 
 							<a
-								type="button"
 								target="_blank"
 								rel="noopener noreferrer"
 								href={data.proposal_file}

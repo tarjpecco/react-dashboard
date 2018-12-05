@@ -88,9 +88,7 @@ class MyInsurance extends React.Component {
 			showInvitationForm: false });
 	}
 
-
 	openCOIModal = () => {
-		console.log('close coi modal');
 		this.setState({ coiModalIsOpen: true });
 	}
 

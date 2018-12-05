@@ -133,7 +133,7 @@ class PolicyDetail extends React.PureComponent {
 			agentAddresses,
 		} = this.state;
 
-        const download = policy.file_url ? (<a type="button" target="_blank" rel="noopener noreferrer" href={policy.file_url} className="btn btn-success" > Download Policy </a>) : null
+        const download = policy.file_url ? (<a target="_blank" rel="noopener noreferrer" href={policy.file_url} className="btn btn-success" > Download Policy </a>) : null
 	
 		return (
 			<div id="main" className="policydetail">

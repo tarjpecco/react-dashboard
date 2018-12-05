@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { isEmpty, cloneDeep, isNull } from 'lodash';
 import 'react-phone-number-input/style.css';
 import PhoneInput from 'react-phone-number-input';
@@ -9,6 +10,10 @@ import {
 	getCompanySelector,
 	actions as companyActions,
 } from '../../../redux/ducks/companies';
+import {
+	actions as policiesAction,
+	getPoliciesSelector
+} from '../../../redux/ducks/policies';
 import Table from '../../../components/Table';
 import './index.scss';
 import { stateList, getIdFromUrl } from '../../../utils';
@@ -20,14 +25,13 @@ class Details extends React.PureComponent {
 		this.state = {
 			editable: 'disable',
 			mainContact: null,
-			license: '',
 			addressInvalid: {},
 			addressObj: {},
 		};
-		const { match, getCompanyInfo } = props;
+		const { match, getCompanyInfo, listPoliciesForCompany } = props;
 		const companyId = match.params.id;
 		getCompanyInfo({ id: companyId });
-
+		listPoliciesForCompany({ company: companyId });
 	}
 
 	componentWillReceiveProps (nextProps) {
@@ -99,9 +103,15 @@ class Details extends React.PureComponent {
 		}
 	}
 
+	getComplianceClassName = status => {
+		if (status === 'ok') return 'badge-success';
+		if (status === 'requires_modification') return 'badge-warning';
+		return 'badge-primary';
+	}
+
 	render() {
-		const { license, editable, addressInvalid, addressObj, mainContact } = this.state;
-		const { companyInfo } = this.props;
+		const { editable, addressInvalid, addressObj, mainContact } = this.state;
+		const { companyInfo, policies } = this.props;
 		const {
 			ein,
 			phone,
@@ -240,54 +250,34 @@ class Details extends React.PureComponent {
 							</tr>
 						</thead>
 						<tbody>
-							<tr className="text-left">
-								<td>Workers comp</td>
-								<td>XXX</td>
-								<td>
-									<span className="badge badge-primary">New</span>
-								</td>
-								<td className="text-right">
-									<button type="button" className="btn btn-primary">
-										Go
-									</button>
-								</td>
-							</tr>
-							<tr className="text-left">
-								<td>Disability</td>
-								<td>XXX</td>
-								<td>
-									<span className="badge badge-success">Complete</span>
-								</td>
-								<td className="text-right">
-									<button type="button" className="btn btn-primary">
-										Go
-									</button>
-								</td>
-							</tr>
-							<tr className="text-left">
-								<td>General liability</td>
-								<td>XXX</td>
-								<td>
-									<span className="badge badge-warning">Submitted</span>
-								</td>
-								<td className="text-right">
-									<button type="button" className="btn btn-primary">
-										Go
-									</button>
-								</td>
-							</tr>
-							<tr className="text-left">
-								<td>Disability</td>
-								<td>XXX</td>
-								<td>
-									<span className="badge badge-primary">New</span>
-								</td>
-								<td className="text-right">
-									<button type="button" className="btn btn-primary">
-										Go
-									</button>
-								</td>
-							</tr>
+							{policies.map((policy, index) =>
+								<tr className="text-left" key={index}>
+									<td>{policy.type}</td>
+									<td>{policy.number}</td>
+									<td>
+										<span className="badge badge-success">{policy.status}</span>
+									</td>
+									<td className="text-right">
+										<Link to={`/insurance/${getIdFromUrl(policy.url)}`}>
+											<button type="button" className="btn btn-primary">
+												Go
+											</button>
+										</Link>
+									</td>
+								</tr>
+							)}
+							{policies && policies.length === 0 &&
+								<tr className="text-left">
+									<td>&nbsp;</td>
+									<td>&nbsp;</td>
+									<td>
+										&nbsp;
+									</td>
+									<td className="text-right">
+										&nbsp;
+									</td>
+								</tr>
+							}
 						</tbody>
 					</Table>
 				</div>
@@ -302,32 +292,24 @@ Details.propTypes = {
 
 
 const mapStateToProps = state => ({
-	// userLicenses: getLicensesSelector(state),
 	companyInfo: getCompanySelector(state),
+	policies: getPoliciesSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({
-	// addLicense: params => dispatch(licenseActions.add_license(params)),
-	// listUserLicenses: () => dispatch(licenseActions.get_licenses()),
-	// deleteLicense: params => dispatch(licenseActions.delete_license(params)),
-	// updateLicenses: () => dispatch(licenseActions.update_licenses()),
-	// updateLicenseState: params => dispatch(licenseActions.update_license_state(params)),
 	getCompanyInfo: params => dispatch(companyActions.get_company(params)),
 	updateCompanyInfo: params => dispatch(companyActions.update_company(params)),
 	updateCompanyPartialInfo: params => dispatch(companyActions.update_company_partial(params)),
+	listPoliciesForCompany: params => dispatch(policiesAction.get_policies(params)),
 })
 
 Details.propTypes = {
-	// userLicenses: PropTypes.array.isRequired,
-	// addLicense: PropTypes.func.isRequired,
-	// listUserLicenses: PropTypes.func.isRequired,
-	// updateLicenses: PropTypes.func.isRequired,
-	// deleteLicense: PropTypes.func.isRequired,
-	// updateLicenseState: PropTypes.func.isRequired,
 	getCompanyInfo: PropTypes.func.isRequired,
 	updateCompanyPartialInfo: PropTypes.func.isRequired,
 	updateCompanyInfo: PropTypes.func.isRequired,
 	companyInfo: PropTypes.object.isRequired,
+	policies: PropTypes.array.isRequired,
+	listPoliciesForCompany: PropTypes.func.isRequired,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Details);

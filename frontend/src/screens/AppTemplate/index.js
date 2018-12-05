@@ -23,6 +23,7 @@ import AgentDashboard from '../Agent/Dashboard';
 import AgentSettings from '../Agent/Settings';
 import AgentClients from '../Agent/Clients';
 import AgentDetail from '../Agent/Detail';
+import AgentInsuranceDetail from '../Agent/PolicyDetail';
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 
@@ -80,6 +81,7 @@ class AppTemplate extends React.Component {
 						<Route exact path="/clients" component={AgentClients} />
 						<Route exact path="/clients/:id" component={AgentDetail} />
 						<Route exact path="/settings" component={AgentSettings} />
+						<Route exact path="/insurance/:id" component={AgentInsuranceDetail} />
 					</Switch>
 				)}
 			</div>

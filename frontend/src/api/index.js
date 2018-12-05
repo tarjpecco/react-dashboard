@@ -192,10 +192,11 @@ export const updateCurrentUser = (params) => {
     .then(res => res.data)
 };
 
-export const getPoliciesForUser = (userPK) => {
+export const getPoliciesForUser = (userPK, params) => {
   return authHeaderService.getHeaders()
     .then((headers) => axios.get(`${API_URL}/user-policies/${userPK}/`, {
-      headers
+      headers,
+      params,
     }))
     .then(res => res.data)
 };

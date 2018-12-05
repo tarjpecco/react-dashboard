@@ -51,9 +51,9 @@ const policiesReducer = policiesDuck.createReducer({
 export default policiesReducer;
 
 // Sagas
-function* listPoliciesSaga() {
+function* listPoliciesSaga({ payload }) {
   try {
-    const { results: policies } = yield call(getPoliciesForUser, 'me');
+    const { results: policies } = yield call(getPoliciesForUser, 'me', payload);
     yield put(actions.get_policies_success({ policies }));
   } catch (err) {
     const errorMessage = 'Listing Policies Failed';

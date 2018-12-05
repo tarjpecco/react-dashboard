@@ -329,7 +329,6 @@ class Detail extends React.Component {
 														</td>
 														<td>
 															<a
-																type="button"
 																target="_blank"
 																rel="noopener noreferrer"
 																href={item.file}

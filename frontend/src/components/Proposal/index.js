@@ -1,20 +1,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import { Link } from 'react-router-dom';
 
 import './index.scss';
-import { getDataFromUrl, getUserLicensesForUser } from '../../api';
+import { getDataFromUrl, getUserLicensesForUser, getPoliciesForUser } from '../../api';
 import { getIdFromUrl } from '../../utils';
+import Table from '../Table';
 
 class Proposal extends React.Component {
 	state = {
 		subUserInfo: {},
 		address: {},
 		userLicenses: [],
+		userPolicies: [],
 	};
 
 	componentDidMount() {
-		const { data } = this.props;
+		const { data, jobInProgress } = this.props;
 		let user = {};
 		getDataFromUrl(data.sub)
 			.then(userInfo => {
@@ -28,7 +31,16 @@ class Proposal extends React.Component {
 				return getUserLicensesForUser(id)
 			})
 			.then(res => res.results)
-			.then(licenses => this.setState({ userLicenses: licenses }));
+			.then(licenses => {
+				this.setState({ userLicenses: licenses });
+				if (jobInProgress) {
+					const id = getIdFromUrl(user.url);
+					return getPoliciesForUser(id)
+				}
+				return { results: [] };
+			})
+			.then(res => res.results)
+			.then(policies => this.setState({ userPolicies: policies }))
 	}
 
 	getAddressStr = address => {
@@ -48,7 +60,7 @@ class Proposal extends React.Component {
 	}
 
 	render() {
-		const { subUserInfo, address, userLicenses } = this.state;
+		const { subUserInfo, address, userLicenses, userPolicies } = this.state;
 		const { data } = this.props;
 		const classname = `table table-vcenter table-bordered`;
 
@@ -194,6 +206,34 @@ class Proposal extends React.Component {
 						<div hidden={data.status === 'pending'} style={{ height: 100 }} />
 					</div>
 				</div>
+				<div className="block-content">
+					<table className={classname}>
+						<thead className="thead-light">
+							<tr>
+								<th className="text-center table-width-20">Agent/Broker name</th>
+								<th className="text-center table-width-15">Policy type</th>
+								<th className="text-center table-width-15">Policy number</th>
+								<th className="text-center table-width-20">Renewal Date</th>
+								<th className="text-center table-width-15">Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							{userPolicies.map((policy, index) => (
+								<tr className="text-center" key={index}>
+									<td>
+										<p className="text-info">{(policy.agent[0] && policy.agent[0].first_name + policy.agent[0].last_name) || ''}</p>
+									</td>
+									<td>{policy.type}</td>
+									<td>{policy.number}</td>
+									<td>{moment(policy.renewal_date, 'YYYY-MM-DD', true).isValid() ? moment(policy.renewal_date).format('MM/DD/YYYY') : moment().format('MM/DD/YYYY')}</td>
+									<td>
+										<span className="badge badge-success">{policy.status}</span>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
 			</div>
 		);
 	}
@@ -202,10 +242,12 @@ class Proposal extends React.Component {
 Proposal.propTypes = {
 	data: PropTypes.object,
 	updateBidStatus: PropTypes.func.isRequired,
+	jobInProgress: PropTypes.bool,
 };
 
 Proposal.defaultProps = {
 	data: {},
+	jobInProgress: false,
 }
 
 export default Proposal;

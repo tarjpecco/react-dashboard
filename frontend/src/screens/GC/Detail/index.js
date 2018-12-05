@@ -492,7 +492,7 @@ class Detail extends React.Component {
 													})}
 												>
 													<td colSpan="6">
-														{ item.active_bid ? <Proposal data={bids[item.id].find(b => b.url === item.active_bid)} updateBidStatus={this.updateBidStatus} /> : null }
+														{ item.active_bid ? <Proposal data={bids[item.id].find(b => b.url === item.active_bid)} jobInProgress updateBidStatus={this.updateBidStatus} /> : null }
 													</td>
 												</tr>
 											</React.Fragment>
@@ -669,19 +669,18 @@ class Detail extends React.Component {
 const mapStateToProps = state => ({
 	jobList: getJobsSelector(state),
 	user: getUserSelector(state),
-    bidList: getBidsSelector(state),
-    friends: getFriendsSelector(state),
+	bidList: getBidsSelector(state),
+	friends: getFriendsSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({
 	listJobs: params => dispatch(jobActions.get_jobs(params)),
 	listBids: params => dispatch(bidActions.get_bids(params)),
-    createJob: params => dispatch(jobActions.create_job(params)),
-    updateJob: params => dispatch(jobActions.update_job(params)),
+	createJob: params => dispatch(jobActions.create_job(params)),
+	updateJob: params => dispatch(jobActions.update_job(params)),
 	getUserInfo: () => dispatch(userActions.get_user()),
-    updateBidInfo: params => dispatch(bidActions.update_bid(params)),
-    listFriends: () => dispatch(inviteActions.get_friends()),
-
-})
+	updateBidInfo: params => dispatch(bidActions.update_bid(params)),
+	listFriends: () => dispatch(inviteActions.get_friends()),
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Detail);

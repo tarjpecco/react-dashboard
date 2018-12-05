@@ -47,8 +47,6 @@ class MyInsurance extends React.Component {
 			showInvitationForm: false,
 			invitation: {
 				email: '',
-				project: [],
-				job: [],
 			},
 			newPolicy: {
 				type: 'GL',
@@ -128,7 +126,7 @@ class MyInsurance extends React.Component {
 			mapValues(invitation, (value, key) => {
 				formData.append(key, value);
 			});
-			formData.append('type', user.role);
+			formData.append('user_type', 'agent');
 			createInvite(formData);
 		}
 	}

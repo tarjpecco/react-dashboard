@@ -1,17 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import { Link } from 'react-router-dom';
 
 import './index.scss';
-import { getDataFromUrl, getUserLicensesForUser, getPoliciesForUser } from '../../api';
+import { getDataFromUrl, getUserLicensesForUser, getPoliciesForUser, updateBid } from '../../api';
 import { getIdFromUrl } from '../../utils';
-import Table from '../Table';
 
 class Proposal extends React.Component {
 	state = {
 		subUserInfo: {},
 		address: {},
+		contingencyDescription: '',
 		userLicenses: [],
 		userPolicies: [],
 	};
@@ -54,13 +53,23 @@ class Proposal extends React.Component {
 	}
 
 	changeBidStatus = status => {
-		const { data, updateBidStatus } = this.props;
+		const { data } = this.props;
+		const { contingencyDescription } = this.state;
 		const bidId = getIdFromUrl(data.url);
-		updateBidStatus(bidId, status);
+		const params = {
+			status,
+			contingency_description: status === 'contingent_accept' ? contingencyDescription : '',
+		};
+		updateBid(bidId, params);
+		this.setState({ showContingentBox: false });
+	}
+
+	changeContingencyDesc = (e) => {
+		this.setState({ contingencyDescription: e.target.value });
 	}
 
 	render() {
-		const { subUserInfo, address, userLicenses, userPolicies } = this.state;
+		const { subUserInfo, address, userLicenses, userPolicies, showContingentBox, contingencyDescription } = this.state;
 		const { data } = this.props;
 		const classname = `table table-vcenter table-bordered`;
 
@@ -166,6 +175,7 @@ class Proposal extends React.Component {
 							flexDirection: 'column',
 							alignItems: 'center',
 							justifyContent: 'space-evenly',
+							marginLeft: 20,
 						}}
 					>
 						<div style={{ display: 'flex', flexDirection: 'row' }}>
@@ -192,18 +202,32 @@ class Proposal extends React.Component {
 							<span className={`badge ${this.getComplianceClassName(data.compliance_WC)}`}>WC</span>&nbsp;
 							<span className={`badge ${this.getComplianceClassName(data.compliance_DB)}`}>DB</span>&nbsp;
 						</div>
-						<div style={{ display: 'flex', flexDirection: 'row' }} hidden={data.status !== 'pending'}>
+						<div style={{ display: 'flex', flexDirection: 'row' }} hidden={data.status !== 'pending' && data.status !== 'reviewing_compliance'}>
 							<button type="button" className="btn btn-primary" onClick={() => this.changeBidStatus('accepted')}>
 								Accept
 							</button>
 							<button type="button" className="btn btn-primary" onClick={() => this.changeBidStatus('declined')}>
 								Decline
 							</button>
-							<button type="button" className="btn btn-primary" onClick={() => this.changeBidStatus('contingent_agent')}>
-								Contigent accept
+							<button type="button" className="btn btn-primary" onClick={() => this.setState({ showContingentBox: true })}>
+								Contingent accept
 							</button>
 						</div>
-						<div hidden={data.status === 'pending'} style={{ height: 100 }} />
+						{showContingentBox &&
+							<div className="d-flex">
+								<input
+									className="form-control"
+									type="text"
+									name="example-radios-inline"
+									value={contingencyDescription}
+									onChange={this.changeContingencyDesc}
+								/>
+								<button type="button" className="btn btn-primary btn-sm" onClick={() => this.changeBidStatus('contingent_accept')}>
+									Add Description
+								</button>
+							</div>
+						}
+						<div hidden={data.status === 'pending' && data.status === 'reviewing_compliance'} style={{ height: 100 }} />
 					</div>
 				</div>
 				<div className="block-content">
@@ -241,7 +265,6 @@ class Proposal extends React.Component {
 
 Proposal.propTypes = {
 	data: PropTypes.object,
-	updateBidStatus: PropTypes.func.isRequired,
 	jobInProgress: PropTypes.bool,
 };
 

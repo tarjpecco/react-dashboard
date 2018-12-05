@@ -162,13 +162,15 @@ class Detail extends React.Component {
 					{progressJobList && progressJobList.map((job, index) =>
 						<React.Fragment key={index}>
 							<div className="table-tool">
-								<button
-									type="button"
-									className="btn btn-sm btn-hero-dark mr-1 mb-3"
-									onClick={() => this.handleClickEdit(index)}
-								>
-									<i className={btnicon} /> {btnname}
-								</button>
+								{(projectInfo && projectInfo.status !== 'in_progress') &&
+									<button
+										type="button"
+										className="btn btn-sm btn-hero-dark mr-1 mb-3"
+										onClick={() => this.handleClickEdit(index)}
+									>
+										<i className={btnicon} /> {btnname}
+									</button>
+								}
 							</div>
 							<div className="wrap align-items-start">
 								<div style={{ flex: 1 }}>
@@ -285,6 +287,19 @@ class Detail extends React.Component {
 														<span className={`badge ${this.getComplianceClassName(bids[index] && bids[index].compliance_WC)}`}>WC</span>&nbsp;
 														<span className={`badge ${this.getComplianceClassName(bids[index] && bids[index].compliance_DB)}`}>DB</span>&nbsp;
 													</div>
+												</td>
+											</tr>
+											<tr className="text-left">
+												<td className="table-width-30">
+													<p className="text-info">Proposal</p>
+												</td>
+												<td className="table-width-70" colSpan="4">
+													<a
+														target="_blank"
+														rel="noopener noreferrer"
+														href={bids[index] && bids[index].proposal_file}
+														className="btn btn-primary"
+													> Download</a>
 												</td>
 											</tr>
 										</tbody>

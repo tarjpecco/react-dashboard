@@ -72,6 +72,15 @@ export const getCurrentUser = () => {
     .then(res => res.data)
 };
 
+export const getUser = (id) => {
+  return authHeaderService.getHeaders()
+    .then((headers) => axios.get(`${API_URL}/users/${id}/`,
+    {
+      headers
+    }))
+    .then(res => res.data)
+};
+
 export const getAuthToken = ({ username, password }) => {
   return fetch(`${API_URL}/token/`, {
     method: 'post',

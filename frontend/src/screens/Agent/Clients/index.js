@@ -62,7 +62,6 @@ class Clients extends React.Component {
 						<thead className="thead-light">
 							<tr>
 								<th className="text-left table-width-50">Company</th>
-								<th className="text-center table-width-45">Compliance</th>
 								<th />
 							</tr>
 						</thead>
@@ -72,12 +71,6 @@ class Clients extends React.Component {
 								<tr key={id}>
 									<td className="text-left">
 										<p className="text-info">{item.name}</p>
-									</td>
-
-									<td className="text-center wrap">
-										<span className="badge badge-success">GL</span>
-										<span className="badge badge-danger">WC</span>
-										<span className="badge badge-warning">DB</span>
 									</td>
 									<td className="text-right">
 										<Link

@@ -1,36 +1,60 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Table from '../../../components/Table';
+import { connect } from 'react-redux';
+import { isEmpty, cloneDeep, isNull } from 'lodash';
+import 'react-phone-number-input/style.css';
+import PhoneInput from 'react-phone-number-input';
 
+import {
+	getCompanySelector,
+	actions as companyActions,
+} from '../../../redux/ducks/companies';
+import Table from '../../../components/Table';
 import './index.scss';
+import { stateList, getIdFromUrl } from '../../../utils';
+import { getAddressById, updateAddressById, getUser } from '../../../api';
 
 class Details extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
 			editable: 'disable',
-			name: 'Name Surname',
-			address: '123 Main Street NY, NY 10001',
-			phone: '555-555-5555',
-			ein: '61-512584',
-			license: '123 456 789',
-			btnname: 'Modify',
-			btnicon: 'si si-pencil',
+			mainContact: null,
+			license: '',
+			addressInvalid: {},
+			addressObj: {},
 		};
-		this.handleClickEdit.bind(this);
-		this.onChangeHandler.bind(this);
+		const { match, getCompanyInfo } = props;
+		const companyId = match.params.id;
+		getCompanyInfo({ id: companyId });
+
+	}
+
+	componentWillReceiveProps (nextProps) {
+		const { companyInfo } = nextProps;
+		const { addressObj, mainContact } = this.state;
+		if (isEmpty(addressObj)) {
+			getAddressById(getIdFromUrl(companyInfo.address))
+				.then(res => this.setState({ addressObj: res }));
+		}
+		if (isNull(mainContact)) {
+			getUser(companyInfo.main_contact)
+				.then(res => this.setState({ mainContact: `${res.first_name} ${res.last_name}` }))
+		}
 	}
 
 	handleClickEdit = () => {
-		const { editable } = this.state;
+		const { editable, addressObj } = this.state;
 		if (editable === 'disable') {
 			this.setState({ editable: '' });
-			this.setState({ btnname: 'Save' });
-			this.setState({ btnicon: 'far fa-save' });
 		} else {
 			this.setState({ editable: 'disable' });
-			this.setState({ btnname: 'Modify' });
-			this.setState({ btnicon: 'si si-pencil' });
+			const { companyInfo, updateCompanyInfo } = this.props;
+			const params = {
+				phone: companyInfo.phone,
+			}
+			updateCompanyInfo({ id: getIdFromUrl(companyInfo.url), params });
+			updateAddressById(getIdFromUrl(companyInfo.address), addressObj)
 		}
 	};
 
@@ -42,33 +66,55 @@ class Details extends React.PureComponent {
 		this.setState({ [property]: value });
 	};
 
+	onUpdateCompanyDetails = (prop, value) => {
+		const { companyInfo, updateCompanyPartialInfo } = this.props;
+		const newCompanyInfo = cloneDeep(companyInfo);
+		newCompanyInfo[prop] = value;
+		updateCompanyPartialInfo({ companyInfo: newCompanyInfo })
+	};
+
+	changeAddress = (e) => {
+		const prop = e.target.name;
+		const value = e.target.value;
+		const { addressInvalid, addressObj } = this.state;
+		const newAddress = cloneDeep(addressObj);
+		const newAddressInvalid = cloneDeep(addressInvalid);
+		if (value) newAddressInvalid[prop] = false;
+		 else newAddressInvalid[prop] = true;
+		newAddress[prop] = value;
+		this.setState({ addressInvalid: newAddressInvalid, addressObj: newAddress });
+	}
+
+	getAddressStr = (address) => {
+		const { line_1: line1, line_2: line2, town, state, zip_code:zipCode } = address;
+		return `${line1 || ''} ${line2 || ''} ${town || ''}${town ? ',' : ''} ${state || ''} ${zipCode || ''}`;
+	}
+
+	onNameEditHandler = value => {
+		if (value) {
+			const n = value.lastIndexOf(' ');
+			const firstName = value.slice(0, n);
+			const lastName = value.slice(n + 1);
+			this.setState({ mainContact: `${firstName} ${lastName}` });
+		}
+	}
+
 	render() {
-		const { name, phone, address, ein, license, editable, btnname, btnicon } = this.state;
-		const { match } = this.props;
-		const agentId = match.params.id;
-		;
+		const { license, editable, addressInvalid, addressObj, mainContact } = this.state;
+		const { companyInfo } = this.props;
+		const {
+			ein,
+			phone,
+		} = companyInfo;
+	
 		return (
 			<div id="main">
 				<div className="bg-body-light">
 					<div className="content content-full">
 						<div className="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
 							<h1 className="flex-sm-fill font-size-h2 font-w400 mt-2 mb-0 mb-sm-2">
-								Agent clients - {agentId}
+								{companyInfo.name || ''}
 							</h1>
-							<button
-								type="button"
-								className="btn btn-primary"
-								onClick={this.handleClickEdit}
-							>
-								<i className={btnicon} /> {btnname}
-							</button>
-							<button
-								type="button"
-								className="btn btn-dark"
-								onClick={this.handleClickArchive}
-							>
-								<i className="si si-envelope-letter" /> Archive
-							</button>
 						</div>
 					</div>
 				</div>
@@ -84,9 +130,9 @@ class Details extends React.PureComponent {
 									<input
 										type="text"
 										name="name"
-										value={name}
-										onChange={this.onChangeHandler}
-										disabled={editable}
+										value={mainContact}
+										onChange={e => this.onNameEditHandler(e.target.value)}
+										disabled
 									/>
 								</td>
 							</tr>
@@ -95,13 +141,62 @@ class Details extends React.PureComponent {
 									<p className="text-info">Address</p>
 								</td>
 								<td className="table-width-80" colSpan="4">
-									<input
-										type="text"
-										name="address"
-										value={address}
-										onChange={this.onChangeHandler}
-										disabled={editable}
-									/>
+									{editable &&
+										<input
+											type="text"
+											value={addressObj && this.getAddressStr(addressObj)}
+											disabled={editable}
+										/>
+									}
+									{!editable &&
+										<React.Fragment>
+											<div className="locationdetail-form">
+												<input
+													value={addressObj.line_1 || ''}
+													className={addressInvalid.line_1 ? 'is-invalid form-control' : ''}
+													name="line_1"
+													placeholder="Address 1"
+													onChange={this.changeAddress}
+												/>
+												<input 
+													value={addressObj.line_2 || ''}
+													name="line_2"
+													placeholder="Address 2"
+													onChange={this.changeAddress}
+												/>
+												<input 
+													value={addressObj.town || ''}
+													name="town"
+													className={addressInvalid.town ? 'is-invalid form-control' : ''}
+													placeholder="City"
+													onChange={this.changeAddress}
+												/>
+												<select
+													defaultValue={addressObj.state}
+													name="state"
+													className={`form-control ${addressInvalid.state && 'is-invalid'}`}
+													placeholder="State"
+													onChange={this.changeAddress}
+												>
+													{stateList.map((state, index) =>
+														<option value={state.abbreviation} key={index}>{state.name}</option>	
+													)}
+												</select>
+												<input 
+													name="country"
+													placeholder="USA"
+													disabled
+												/>
+												<input
+													value={addressObj.zip_code || ''}
+													name="zip_code"
+													className={addressInvalid.zip_code ? 'is-invalid form-control' : ''}
+													placeholder="Zip code"
+													onChange={this.changeAddress}
+												/>
+											</div>
+										</React.Fragment>
+									}
 								</td>
 							</tr>
 							<tr className="text-left">
@@ -109,11 +204,11 @@ class Details extends React.PureComponent {
 									<p className="text-info">Phone</p>
 								</td>
 								<td className="table-width-80" colSpan="4">
-									<input
-										type="text"
-										name="phone"
-										value={phone}
-										onChange={this.onChangeHandler}
+									<PhoneInput
+										placeholder="Enter phone number"
+										value={ phone }
+										className="phoneinput"
+										country="US"
 										disabled={editable}
 									/>
 								</td>
@@ -126,22 +221,7 @@ class Details extends React.PureComponent {
 									<input
 										type="text"
 										name="ein"
-										value={ein}
-										onChange={this.onChangeHandler}
-										disabled={editable}
-									/>
-								</td>
-							</tr>
-							<tr className="text-left">
-								<td>
-									<p className="text-info">License number</p>
-								</td>
-								<td className="table-width-80" colSpan="4">
-									<input
-										type="text"
-										name="license"
-										value={license}
-										onChange={this.onChangeHandler}
+										value={ein || ''}
 										disabled={editable}
 									/>
 								</td>
@@ -220,4 +300,34 @@ Details.propTypes = {
 	match: PropTypes.object.isRequired,
 };
 
-export default Details;
+
+const mapStateToProps = state => ({
+	// userLicenses: getLicensesSelector(state),
+	companyInfo: getCompanySelector(state),
+});
+
+const mapDispatchToProps = dispatch => ({
+	// addLicense: params => dispatch(licenseActions.add_license(params)),
+	// listUserLicenses: () => dispatch(licenseActions.get_licenses()),
+	// deleteLicense: params => dispatch(licenseActions.delete_license(params)),
+	// updateLicenses: () => dispatch(licenseActions.update_licenses()),
+	// updateLicenseState: params => dispatch(licenseActions.update_license_state(params)),
+	getCompanyInfo: params => dispatch(companyActions.get_company(params)),
+	updateCompanyInfo: params => dispatch(companyActions.update_company(params)),
+	updateCompanyPartialInfo: params => dispatch(companyActions.update_company_partial(params)),
+})
+
+Details.propTypes = {
+	// userLicenses: PropTypes.array.isRequired,
+	// addLicense: PropTypes.func.isRequired,
+	// listUserLicenses: PropTypes.func.isRequired,
+	// updateLicenses: PropTypes.func.isRequired,
+	// deleteLicense: PropTypes.func.isRequired,
+	// updateLicenseState: PropTypes.func.isRequired,
+	getCompanyInfo: PropTypes.func.isRequired,
+	updateCompanyPartialInfo: PropTypes.func.isRequired,
+	updateCompanyInfo: PropTypes.func.isRequired,
+	companyInfo: PropTypes.object.isRequired,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Details);

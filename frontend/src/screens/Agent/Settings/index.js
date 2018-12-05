@@ -1,248 +1,611 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import * as moment from 'moment';
+import { isEmpty, cloneDeep, merge, mapValues, isNull } from 'lodash';
+import 'react-phone-number-input/style.css'
+import PhoneInput from 'react-phone-number-input'
+
+import {
+	actions as licenseActions,
+	getLicensesSelector
+} from '../../../redux/ducks/userlicenses';
+import {
+	getUserSelector,
+	actions as userActions,
+} from '../../../redux/ducks/user';
+import {
+	getCompanySelector,
+	actions as companyActions,
+} from '../../../redux/ducks/companies';
 import Table from '../../../components/Table';
 import './index.scss';
+import { stateList } from '../../../utils';
 
-class Settings extends React.Component {
+class Settings extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
-			values: {
-				agency: ['Agency', 'disabled'],
-				address: ['One Apple Park Way Cupertino,CA 95014', 'disabled'],
-				phone: ['+1( 800 )2344565, +1( 800 )2344565', 'disabled'],
-				name: ['Name Surname', 'disabled'],
-				email: ['email@gmail.com', 'disabled'],
-				license: ['123 456 789', 'disabled'],
+			editable: 'disable',
+			btnname: 'Edit',
+			btnicon: 'si si-pencil',
+			showResetPassform: false,
+			isInValidPassword: {
+				password: false,
+				oldPassword: false,
+				confirmPassword: false,
+				notequal: false,
 			},
+			addressInvalid: {},
+			password: '',
+			oldPassword: '',
+			confirmPassword: '',
 		};
-		this.Save.bind(this);
-		this.handleChange.bind(this);
-		this.onEnableEditMember.bind(this);
+		const { listUserLicenses, user, getUserInfo } = props;
+		listUserLicenses();
+		if (isEmpty(user)) {
+			getUserInfo();
+		}
 	}
 
-	handleChange = e => {
-		const { values } = this.state;
-		const temp = values;
-		const { name, value } = e.target;
-		temp[name][0] = value;
-		this.setState({ values: temp });
+	handleClickEdit = () => {
+		const { editable } = this.state;
+		if (editable === 'disable') {
+			this.setState({ editable: '' });
+			this.setState({ btnname: 'Save' });
+			this.setState({ btnicon: 'far fa-save' });
+		} else {
+			this.setState({ editable: 'disable' });
+			this.setState({ btnname: 'Edit' });
+			this.setState({ btnicon: 'si si-pencil' });
+			const { updateUserInfo, updateLicenses, user, companyInfo, updateCompanyInfo } = this.props;
+			updateLicenses();
+			updateUserInfo({ user });
+			updateCompanyInfo({ id: this.getIdFromUrl(companyInfo.url), params: companyInfo });
+		}
 	};
 
-	onEnableEditMember = id => {
-		const { values } = this.state;
-		const value = values[id];
-		value[1] = '';
-		this.setState({
-			values: {
-				...values,
-				[id]: value,
-			},
+	onChangeHandler = e => {
+		const property = e.target.name;
+		const value = e.target.value;
+		this.setState({ [property]: value });
+	};
+
+	onAddLicense = () => {
+		const { addLicense, user } = this.props;
+		const newelement = {
+			type: '',
+			number: '',
+			expire_date: '',
+			user: user.url,
+		};
+		addLicense(newelement);
+	};
+
+	onDeleteLicense = id => {
+		const { deleteLicense } = this.props;
+		deleteLicense({ id });
+	};
+
+	onChangeStateLicenseHandler = id => e => {
+		const { value, name: prop } = e.target;
+		const { userLicenses, updateLicenseState } = this.props;
+		const params = {};
+		Object.assign(params, userLicenses[id]);
+		params[prop] = value;
+		params.expire_date = moment(params.expire_date).format('YYYY-MM-DD');
+		updateLicenseState({ id, params });
+	};
+
+	onResetPasswordHandler = () => {
+		this.setState({ showResetPassform: true });
+	};
+
+	onResetPassword = () => {
+		const { password, oldPassword, confirmPassword } = this.state;
+		const { updateUserInfo } = this.props;
+		const isInValidPassword = {
+			notequal: false,
+			password: false,
+			oldPassword: false,
+			confirmPassword: false,
+		};
+		let isInValid = false;
+		if (password !== confirmPassword) {
+			isInValidPassword.notequal = true;
+			isInValid = true;
+		}
+		if (isEmpty(password)) { isInValidPassword.password = true; isInValid = true;}
+		if (isEmpty(confirmPassword)) { isInValidPassword.confirmPassword = true; isInValid = true; }
+		if (isEmpty(oldPassword)) { isInValidPassword.oldPassword = true; isInValid = true; }
+		if (isInValid) {
+			this.setState({ isInValidPassword });
+		} else {
+			this.setState({ isInValidPassword });
+			updateUserInfo({ user: {
+				old_password: oldPassword,
+				confirm_password: confirmPassword,
+				password,
+			}});
+		}
+	};
+
+	getAddressStr = (address) => {
+		const { line_1: line1, line_2: line2, town, state, zip_code:zipCode } = address;
+		return `${line1 || ''} ${line2 || ''} ${town || ''}, ${state || ''} ${zipCode || ''}`;
+	}
+
+	onUserEditHandler = (prop, value) => {
+		const { user, shallowUpdateUser } = this.props;
+		const userInfo = cloneDeep(user);
+		userInfo[prop] = value;
+		shallowUpdateUser({ user: userInfo });
+	}
+
+	onNameEditHandler = value => {
+		const { user, shallowUpdateUser } = this.props;
+		if (value) {
+			const n = value.lastIndexOf(' ');
+			const firstName = value.slice(0, n);
+			const lastName = value.slice(n + 1);
+			shallowUpdateUser({ user: { ...user, first_name: firstName, last_name: lastName } });
+		}
+	}
+
+	onAddressChanged = () => {
+		const { user, shallowUpdateUser } = this.props;
+		const emptyAddress = {
+			line_1: '',
+			line_2: '',
+			town: '',
+			state: '',
+			zip_code: '',
+		};
+		const addressInvalid = {};
+		const newAddress = merge(emptyAddress, user.addressObj);
+		let isInValid = false;
+		mapValues(newAddress, (value, key) => {
+			if (!value && key !== 'line_2') {
+				addressInvalid[key] = true;
+				isInValid = true;
+			}
 		});
+		if (isInValid) {
+			this.setState({ addressInvalid });
+		} else {
+			shallowUpdateUser({ user: { ...user, addressObj: newAddress }});
+			this.setState({ addressInvalid });
+		}
+	}
+
+	changeAddress = (e) => {
+		const prop = e.target.name;
+		const value = e.target.value;
+		const { addressInvalid } = this.state;
+		const { shallowUpdateUser, user } = this.props;
+		const newAddress = cloneDeep(user.addressObj);
+		const newAddressInvalid = cloneDeep(addressInvalid);
+		if (value) newAddressInvalid[prop] = false;
+		 else newAddressInvalid[prop] = true;
+		newAddress[prop] = value;
+		shallowUpdateUser({ user: { ...user, addressObj: newAddress }});
+		this.setState({ addressInvalid: newAddressInvalid });
+	}
+
+	datepickerChanged = (id, e) => {
+		if (!isNull(e)) {
+			const data = e.target;
+			setTimeout(() => {
+				const { value, name: prop } = data;
+				const { userLicenses, updateLicenseState } = this.props;
+				const params = {};
+				Object.assign(params, userLicenses[id]);
+				params[prop] = value;
+				params.expire_date = moment(params.expire_date).format('YYYY-MM-DD');
+				updateLicenseState({ id, params });
+			}, 300);
+		}
+	}
+
+	onUpdateCompanyDetails = (prop, value) => {
+		this.setState({ [`company_${prop}`]: value });
+		const { companyInfo, updateCompanyPartialInfo } = this.props;
+		const newCompanyInfo = cloneDeep(companyInfo);
+		newCompanyInfo[prop] = value;
+		updateCompanyPartialInfo({ companyInfo: newCompanyInfo })
 	};
 
-	uploadLicense = () => {};
-
-	Save = () => {
-		const { values } = this.state;
-		const temp = values;
-
-		temp.agency[1] = 'disable';
-		temp.address[1] = 'disable';
-		temp.phone[1] = 'disable';
-		temp.name[1] = 'disable';
-		temp.email[1] = 'disable';
-		temp.license[1] = 'disable';
-		this.setState({ values: temp });
-	};
+	getIdFromUrl = url => (url && url !== null && url !== undefined) ? url.slice(0, -1).split('/').pop() : '';
 
 	render() {
-		const { values } = this.state;
-		const { agency, address, phone, name, email, license } = values;
+		const {
+			editable,
+			btnname,
+			btnicon,
+			showResetPassform,
+			isInValidPassword,
+			password,
+			oldPassword,
+			confirmPassword,
+			addressInvalid,
+		} = this.state;
+		const { userLicenses: license, user, companyInfo, getCompanyInfo } = this.props;
+		const {
+			first_name: firstName,
+			last_name: lastName,
+			phone,
+			email,
+			addressObj: address,
+		} = user;
+		if (isEmpty(companyInfo)) {
+			getCompanyInfo({ id: this.getIdFromUrl(user.company)});
+		}
+
 		return (
 			<div id="main">
 				<div className="bg-body-light">
 					<div className="content content-full">
 						<div className="d-flex flex-column flex-sm-row justify-content-sm-between align-items-sm-center">
 							<h1 className="flex-sm-fill font-size-h2 font-w400 mt-2 mb-0 mb-sm-2">
-								Agent settings
+								Agent Profile and Settings
 							</h1>
+							<button
+								type="button"
+								className="btn btn-success"
+								onClick={this.onAddLicense}
+							>
+								+ Add New License
+							</button>
 						</div>
 					</div>
 				</div>
+
 				<div className="content settings">
-					<Table tableName="" tableStyle="table-striped table-bordered">
+					<div className="table-tool">
+						<button
+							type="button"
+							className="btn btn-sm btn-hero-dark mr-1 mb-3"
+							onClick={this.handleClickEdit}
+						>
+							<i className={btnicon} /> {btnname}
+						</button>
+					</div>
+					<Table
+						tableName={companyInfo.name || ''}
+						onComapnyNameChanged={value => this.onUpdateCompanyDetails('name', value)}
+						tableStyle="table-striped table-bordered"
+						editable={editable}
+					>
 						<tbody>
-							<tr>
-								<td className="font-w600 text-info">Agency name</td>
-								<td className="table-width-100 wrap">
-									<input
-										type="text"
-										name="agency"
-										value={agency[0]}
-										disabled={agency[1]}
-										onChange={this.handleChange}
-										ref={this.textInput}
-									/>
-
-									<div className="btn-group">
-										<button
-											type="button"
-											className="btn btn-sm btn-primary js-tooltip-enabled"
-											data-toggle="tooltip"
-											data-original-title="Edit"
-											onClick={() => {
-												this.onEnableEditMember('agency');
-											}}
-										>
-											<i className="fa fa-pencil-alt" />
-										</button>
-									</div>
+							<tr className="text-left">
+								<td className="table-width-20">
+									<p className="text-info">Contact name</p>
 								</td>
-							</tr>
-							<tr>
-								<td className="font-w600 text-info">Address</td>
-								<td className="table-width-100 wrap">
-									<input
-										type="text"
-										name="address"
-										value={address[0]}
-										disabled={address[1]}
-										onChange={this.handleChange}
-									/>
-
-									<div className="btn-group">
-										<button
-											type="button"
-											className="btn btn-sm btn-primary js-tooltip-enabled"
-											data-toggle="tooltip"
-											data-original-title="Edit"
-											onClick={() => this.onEnableEditMember('address')}
-										>
-											<i className="fa fa-pencil-alt" />
-										</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td className="font-w600 text-info">Phone number</td>
-								<td className="table-width-100 wrap">
-									<input
-										type="text"
-										name="phone"
-										value={phone[0]}
-										disabled={phone[1]}
-										onChange={this.handleChange}
-									/>
-
-									<div className="btn-group">
-										<button
-											type="button"
-											className="btn btn-sm btn-primary js-tooltip-enabled"
-											data-toggle="tooltip"
-											data-original-title="Edit"
-											onClick={() => this.onEnableEditMember('phone')}
-										>
-											<i className="fa fa-pencil-alt" />
-										</button>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td className="font-w600 text-info">Agent name</td>
-								<td className="table-width-100 wrap">
+								<td className="table-width-80" colSpan="4">
 									<input
 										type="text"
 										name="name"
-										value={name[0]}
-										disabled={name[1]}
-										onChange={this.handleChange}
+										value={`${firstName} ${lastName}`}
+										onChange={e => this.onNameEditHandler(e.target.value)}
+										disabled={editable}
 									/>
-
-									<div className="btn-group">
-										<button
-											type="button"
-											className="btn btn-sm btn-primary js-tooltip-enabled"
-											data-toggle="tooltip"
-											data-original-title="Edit"
-											onClick={() => this.onEnableEditMember('name')}
-										>
-											<i className="fa fa-pencil-alt" />
-										</button>
-									</div>
 								</td>
 							</tr>
-							<tr>
-								<td className="font-w600 text-info">Agent email</td>
-								<td className="table-width-100 wrap">
+							<tr className="text-left">
+								<td className="table-width-20">
+									<p className="text-info">Email</p>
+								</td>
+								<td className="table-width-80" colSpan="4">
 									<input
 										type="text"
 										name="email"
-										value={email[0]}
-										disabled={email[1]}
-										onChange={this.handleChange}
+										value={email}
+										style={{ textTransform: 'inherit' }}
+										onChange={e => this.onUserEditHandler('email', e.target.value)}
+										disabled={editable}
 									/>
-
-									<div className="btn-group">
-										<button
-											type="button"
-											className="btn btn-sm btn-primary js-tooltip-enabled"
-											data-toggle="tooltip"
-											data-original-title="Edit"
-											onClick={() => this.onEnableEditMember('email')}
-										>
-											<i className="fa fa-pencil-alt" />
-										</button>
-									</div>
 								</td>
 							</tr>
-							<tr>
-								<td className="font-w600 text-info">License number</td>
-								<td className="table-width-100 wrap">
-									<input
-										type="text"
-										name="license"
-										value={license[0]}
-										disabled={license[1]}
-										onChange={this.handleChange}
+							<tr className="text-left">
+								<td className="table-width-20">
+									<p className="text-info">Address</p>
+								</td>
+								<td className="table-width-80" colSpan="4">
+									{editable &&
+										<input
+											type="text"
+											value={this.getAddressStr(address) || ''}
+											disabled={editable}
+										/>
+									}
+									{!editable &&
+										<React.Fragment>
+											<div className="locationdetail-form">
+												<input 
+													value={address.line_1 || ''}
+													className={addressInvalid.line_1 && 'is-invalid form-control'}
+													name="line_1"
+													placeholder="Address 1"
+													onChange={this.changeAddress}
+												/>
+												<input 
+													value={address.line_2 || ''}
+													name="line_2"
+													placeholder="Address 2"
+													onChange={this.changeAddress}
+												/>
+												<input 
+													value={address.town || ''}
+													name="town"
+													className={addressInvalid.town && 'is-invalid form-control'}
+													placeholder="City"
+													onChange={this.changeAddress}
+												/>
+												<select
+													defaultValue={address.state}
+													name="state"
+													className={`form-control ${addressInvalid.state && 'is-invalid'}`}
+													placeholder="State"
+													onChange={this.changeAddress}
+												>
+													{stateList.map((state, index) =>
+														<option value={state.abbreviation} key={index}>{state.name}</option>	
+													)}
+												</select>
+												<input 
+													placeholder="USA"
+													name="state"
+													disabled
+												/>
+												<input 
+													value={address.zip_code || ''}
+													name="zip_code"
+													className={addressInvalid.zip_code && 'is-invalid form-control'}
+													placeholder="Zip code"
+													onChange={this.changeAddress}
+												/>
+											</div>
+										</React.Fragment>
+									}
+								</td>
+							</tr>
+							<tr className="text-left">
+								<td className="table-width-20">
+									<p className="text-info">Phone</p>
+								</td>
+								<td className="table-width-80" colSpan="4">
+									<PhoneInput
+										placeholder="Enter phone number"
+										value={ phone }
+										className="phoneinput"
+										country="US"
+										disabled={!!editable}
+										onChange={value => this.onUserEditHandler('phone', value)}
 									/>
-
-									<div className="btn-group">
+								</td>
+							</tr>
+							<tr className="text-left">
+								<td className="table-width-20">
+									<p className="text-info">EIN #</p>
+								</td>
+								<td className="table-width-80" colSpan="4">
+									{companyInfo.ein &&
+										<input
+											type="text"
+											name="ein"
+											value={companyInfo.ein || ''}
+											onChange={e => this.onUpdateCompanyDetails('ein', e.target.value)}
+											disabled={editable}
+										/>
+									}
+								</td>
+							</tr>
+							<tr className="text-left">
+								<td>
+									<p className="text-info">License number</p>
+								</td>
+								<td className="table-width-30">Type</td>
+								<td className="table-width-30">Number</td>
+								<td className="table-width-40" colSpan="2">
+									Expiredate
+								</td>
+							</tr>
+							{(license.length === 0) &&
+								<tr className="text-left">
+									<td>&nbsp;</td>
+									<td className="table-width-30">&nbsp;</td>
+									<td className="table-width-30">&nbsp;</td>
+									<td className="table-width-40" colSpan="2">
+										&nbsp;
+									</td>
+								</tr>
+							}
+							{license.map((item, id) => (
+								// eslint-disable-next-line
+								<tr className="text-left" key={id}>
+									<td />
+									<td className="table-width-30">
+										<input
+											type="text"
+											name="type"
+											value={item.type}
+											disabled={editable}
+											onChange={this.onChangeStateLicenseHandler(id)}
+										/>
+									</td>
+									<td className="table-width-30">
+										<input
+											type="text"
+											name="number"
+											value={item.number || ''}
+											disabled={editable}
+											onChange={this.onChangeStateLicenseHandler(id)}
+										/>
+									</td>
+									<td className="table-width-40">
+										{editable && 
+											<input
+												type="text"
+												value={moment(item.expire_date, 'YYYY-MM-DD', true).isValid() ? moment(item.expire_date).format('MM/DD/YYYY') : ''}
+												disabled={editable}
+											/>
+										}
+										{!editable &&
+											<input
+												type="text"
+												// eslint-disable-next-line react/no-string-refs
+												ref="endDateEleRef"
+												className="js-datepicker form-control"
+												name="expire_date"
+												data-week-start="1"
+												data-autoclose="true"
+												data-today-highlight="true"
+												data-date-format="mm/dd/yyyy"
+												value={moment(item.expire_date, 'YYYY-MM-DD', true).isValid() ? moment(item.expire_date).format('MM/DD/YYYY') : ''}
+												onBlur={e => this.datepickerChanged(id, e)}
+												placeholder="MM/DD/YYYY"
+											/>
+										}
+									</td>
+									<td className="text-left">
+										<div className="btn-group">	
+											<button
+												type="button"
+												disabled={editable}
+												className="btn btn-sm btn-primary js-tooltip-enabled"
+												data-toggle="tooltip"
+												data-original-title="Delete"
+												onClick={() => this.onDeleteLicense(id)}
+											>
+												<i className="far fa-trash-alt" />
+											</button>
+										</div>
+									</td>
+								</tr>
+							))}
+							<tr className="text-left">
+								<td className="table-width-20">
+									<p className="text-info">Password</p>
+								</td>
+								<td className="table-width-80" colSpan="4">
+									{showResetPassform && 
+										<React.Fragment>
+											<div className="password" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+												<div>
+													<input
+														type="password"
+														name="oldPassword"
+														value={oldPassword}
+														className={isInValidPassword.oldPassword && 'is-invalid'}
+														placeholder="Old Password"
+														onChange={this.onChangeHandler}
+													/>
+													{isInValidPassword.oldPassword && (
+														<div id="login-password-error" className="invalid-feedback animated fadeIn">
+															{'Required'}
+														</div>
+													)}
+												</div>
+												<div>
+													<input
+														type="password"
+														name="password"
+														value={password}
+														className={isInValidPassword.password && 'is-invalid'}
+														placeholder="New Password"
+														onChange={this.onChangeHandler}
+													/>
+													{isInValidPassword.password && (
+														<div id="login-password-error" className="invalid-feedback animated fadeIn">
+															{'Required'}
+														</div>
+													)}
+												</div>
+												<div>
+													<input
+														type="password"
+														name="confirmPassword"
+														className={isInValidPassword.confirmPassword && 'is-invalid'}
+														value={confirmPassword}
+														placeholder="Confirm Password"
+														onChange={this.onChangeHandler}
+													/>
+													{isInValidPassword.password && (
+														<div id="login-password-error" className="invalid-feedback animated fadeIn">
+															{'Required'}
+														</div>
+													)}
+												</div>
+												<button
+													type="button"
+													className="btn btn-primary"
+													style={{ height: 'max-content' }}
+													onClick={this.onResetPassword}
+												>
+													Reset Password
+												</button>
+											</div>
+											{isInValidPassword.notequal && (
+												<div id="login-password-error" className="invalid-feedback animated fadeIn">
+													{'Confirm Password doesn\'t match with password'}
+												</div>
+											)}
+										</React.Fragment>
+									}
+									{!showResetPassform &&
 										<button
 											type="button"
-											className="btn btn-sm btn-primary js-tooltip-enabled"
-											data-toggle="tooltip"
-											onClick={this.uploadLicense}
+											className="btn btn-primary"
+											onClick={this.onResetPasswordHandler}
 										>
-											<i className="si si-cloud-upload" />
-											Upload license document
+											Reset here
 										</button>
-										<button
-											type="button"
-											className="btn btn-sm btn-primary js-tooltip-enabled"
-											data-toggle="tooltip"
-											data-original-title="Edit"
-											onClick={() => this.onEnableEditMember('license')}
-										>
-											<i className="fa fa-pencil-alt" />
-										</button>
-									</div>
+									}
 								</td>
 							</tr>
 						</tbody>
 					</Table>
-					<div className="column">
-						<button
-							type="button"
-							className="btn btn-sm btn-hero-dark mr-1 mb-3"
-							onClick={this.Save}
-						>
-							<i className="far fa-save" />
-							Save
-						</button>
-					</div>
 				</div>
 			</div>
 		);
 	}
 }
-export default Settings;
+
+const mapStateToProps = state => ({
+	userLicenses: getLicensesSelector(state),
+	user: getUserSelector(state),
+	companyInfo: getCompanySelector(state),
+});
+
+const mapDispatchToProps = dispatch => ({
+	addLicense: params => dispatch(licenseActions.add_license(params)),
+	listUserLicenses: () => dispatch(licenseActions.get_licenses()),
+	deleteLicense: params => dispatch(licenseActions.delete_license(params)),
+	updateLicenses: () => dispatch(licenseActions.update_licenses()),
+	updateLicenseState: params => dispatch(licenseActions.update_license_state(params)),
+	getUserInfo: () => dispatch(userActions.get_user()),
+	updateUserInfo: params => dispatch(userActions.update_user(params)),
+	shallowUpdateUser: params => dispatch(userActions.update_user_state(params)),
+	getCompanyInfo: params => dispatch(companyActions.get_company(params)),
+	updateCompanyInfo: params => dispatch(companyActions.update_company(params)),
+	updateCompanyPartialInfo: params => dispatch(companyActions.update_company_partial(params)),
+})
+
+Settings.propTypes = {
+	userLicenses: PropTypes.array.isRequired,
+	addLicense: PropTypes.func.isRequired,
+	listUserLicenses: PropTypes.func.isRequired,
+	updateLicenses: PropTypes.func.isRequired,
+	deleteLicense: PropTypes.func.isRequired,
+	updateLicenseState: PropTypes.func.isRequired,
+	user: PropTypes.object.isRequired,
+	getUserInfo: PropTypes.func.isRequired,
+	shallowUpdateUser: PropTypes.func.isRequired,
+	updateUserInfo: PropTypes.func.isRequired,
+	getCompanyInfo: PropTypes.func.isRequired,
+	updateCompanyPartialInfo: PropTypes.func.isRequired,
+	updateCompanyInfo: PropTypes.func.isRequired,
+	companyInfo: PropTypes.object.isRequired,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Settings);

@@ -229,13 +229,18 @@ class Detail extends React.Component {
 
 	updateBidStatus = (bidId, status) => {
 		const { updateBidInfo } = this.props;
-		console.log('pdate bid status:', status, bidId);
 		updateBidInfo({ id: bidId, params: { status } });
 	}
 
+	getComplianceClassName = status => {
+		if (status === 'ok') return 'badge-success';
+		if (status === 'warning') return 'badge-warning';
+		return 'badge-danger';
+	}
+
 	render() {
-        const { jobs, bids, clicked, modalIsOpen, isInValid, newJob, } = this.state;
-        const { friends } = this.props;
+		const { jobs, bids, clicked, modalIsOpen, isInValid, newJob, } = this.state;
+		const { friends } = this.props;
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -444,10 +449,26 @@ class Detail extends React.Component {
 													<td>
 														<p>{item.expected_end_date}</p>
 													</td>
-													<td className="text-center wrap">
-														<span className="badge badge-success">GL</span>
-														<span className="badge badge-danger">WC</span>
-														<span className="badge badge-warning">DB</span>
+													<td className="text-center">
+														&nbsp;
+														<span
+															className={`badge ${bids[item.id].find(b => b.url === item.active_bid)
+																&& this.getComplianceClassName(bids[item.id].find(b => b.url === item.active_bid).compliance_GL)}`}
+														>
+															GL
+														</span>&nbsp;&nbsp;
+														<span
+															className={`badge ${bids[item.id].find(b => b.url === item.active_bid) &&
+																this.getComplianceClassName(bids[item.id].find(b => b.url === item.active_bid).compliance_WC)}`}
+														>
+															WC
+														</span>&nbsp;&nbsp;
+														<span
+															className={`badge ${bids[item.id].find(b => b.url === item.active_bid) &&
+																this.getComplianceClassName(bids[item.id].find(b => b.url === item.active_bid).compliance_DB)}`}
+														>
+															DB
+														</span>&nbsp;
 													</td>
 													<td className="text-right">
 														{(bids[jobs[id].id].length > 0 &&

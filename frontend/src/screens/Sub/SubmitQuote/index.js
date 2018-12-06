@@ -40,7 +40,7 @@ class SubmitQuote extends React.Component {
 
 	componentDidMount() {
 		const { listRFQJobs } = this.props;
-		listRFQJobs();
+		listRFQJobs({ id: this.projectId });
 	}
 
 	submitBid = () => {
@@ -299,7 +299,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
 	createBidInfo: params => dispatch(bidActions.create_bid(params)),
-	listRFQJobs: () => dispatch(jobActions.get_rfq_jobs()),
+	listRFQJobs: params => dispatch(jobActions.get_rfq_jobs(params)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(SubmitQuote);

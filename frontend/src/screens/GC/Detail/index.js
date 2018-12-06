@@ -378,7 +378,7 @@ class Detail extends React.Component {
 																<option value='' disabled selected> --- </option>
 																{friends.subs.map((sub, index) =>
 																	<option value={sub.url} key={index} disabled={includes(item.rfq_subs, sub.url)}>
-																		{ sub.company_name } { includes(item.rfq_subs, sub.url) ? '- (invited)' : '' }
+																		{ sub.company && sub.company.name } { includes(item.rfq_subs, sub.url) ? '- (invited)' : '' }
 																	</option>
 																)}
 															</select>

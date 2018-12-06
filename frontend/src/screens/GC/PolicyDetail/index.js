@@ -336,7 +336,7 @@ class PolicyDetail extends React.PureComponent {
 											<p className="text-info">Company Name</p>
 										</td>
 										<td className="table-width-80" colSpan="4">
-											<p>{agent.company_name}</p>
+											<p>{agent.company && agent.company.name}</p>
 										</td>
 									</tr>
 									<tr className="text-left">

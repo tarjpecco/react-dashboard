@@ -81,7 +81,7 @@ class Proposal extends React.Component {
 			<div className="block block-rounded block-bordered">
 				{subUserInfo && (
 					<div className="block-header block-header-default">
-						<h3 className="block-title">{subUserInfo.company_name || ''}</h3>
+						<h3 className="block-title">{subUserInfo.company && subUserInfo.company.name || ''}</h3>
 					</div>
 				)}
 				<div className="block-content" style={{ display: 'flex' }}>
@@ -121,8 +121,18 @@ class Proposal extends React.Component {
 										Phone
 									</p>
 								</td>
-								<td>
+								<td colSpan="3">
 									<p>{subUserInfo.phone || ''}</p>
+								</td>
+							</tr>
+							<tr className="text-left">
+								<td className="table-width-20">
+									<p className="text-info">
+										Email
+									</p>
+								</td>
+								<td colSpan="3">
+									<p>{subUserInfo.email || ''}</p>
 								</td>
 							</tr>
 							<tr className="text-left">
@@ -131,8 +141,8 @@ class Proposal extends React.Component {
 										EIN #
 									</p>
 								</td>
-								<td>
-									<p>{subUserInfo.ein || ''}</p>
+								<td colSpan="3">
+									<p>{subUserInfo.company && subUserInfo.company.ein || ''}</p>
 								</td>
 							</tr>
 							<tr className="text-left">

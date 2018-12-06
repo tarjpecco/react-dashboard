@@ -47,7 +47,8 @@ class PolicyDetail extends React.PureComponent {
 			this.setState({ btnname: 'Edit' });
 			this.setState({ btnicon: 'si si-pencil' });
 			mapValues(policy, (value, key) => {
-				formData.append(key, value);
+				if (key !== 'agent')
+					formData.append(key, value);
 			});
 
 			updatePolicyForUser(this.policyId, formData)

@@ -4,7 +4,7 @@ import * as moment from 'moment';
 import { cloneDeep, mapValues } from 'lodash';
 import 'react-phone-number-input/style.css'
 
-import { getPolicyForUser, updatePolicyForUser, getAddressById } from '../../../api';
+import { getPolicyForUser, updatePolicyForUser, getAddressById, updatePolicyJSONForUser } from '../../../api';
 import Table from '../../../components/Table';
 import './index.scss';
 
@@ -47,7 +47,8 @@ class PolicyDetail extends React.PureComponent {
 			this.setState({ btnname: 'Edit' });
 			this.setState({ btnicon: 'si si-pencil' });
 			mapValues(policy, (value, key) => {
-				formData.append(key, value);
+				if (key !== 'agent')
+					formData.append(key, value);
 			});
 
 			updatePolicyForUser(this.policyId, formData)
@@ -60,7 +61,7 @@ class PolicyDetail extends React.PureComponent {
 						company: res.company,
 						agent: res.agent,
 					};
-					return this.setState({ policy: newPolicy })
+					return this.setState({ policy: newPolicy, formData: new FormData() })
 				});
 		}
 	};
@@ -100,10 +101,18 @@ class PolicyDetail extends React.PureComponent {
 	}
 
 	unlinkAgent = () => {
-		const { policy } = this.state;
-		const newPolicy = cloneDeep(policy);
-		newPolicy.agent = [];
-		this.setState({ policy: newPolicy });
+		updatePolicyJSONForUser(this.policyId, {'agent': []})
+			.then(res => {
+				const newPolicy = {
+					type: res.type,
+					number: res.number,
+					renewal_date: res.renewal_date,
+					file_url: res.file,
+					company: res.company,
+					agent: res.agent,
+				};
+				return this.setState({ policy: newPolicy })
+			});
 	}
 
 	getIdFromUrl = url => (url && url !== null && url !== undefined) ? url.slice(0, -1).split('/').pop() : '';

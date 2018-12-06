@@ -20,6 +20,7 @@ export const actions = createActions(bidsDuck,
   ...actionNames('CREATE_BID'),
   ...actionNames('GET_BID'),
   'UPDATE_BID_PARTIAL',
+  'RESET',
 )
 
 // Selectors
@@ -97,7 +98,10 @@ const bidListReducer = bidsDuck.createReducer({
   [actions.CREATE_BID_ERROR]: (state, { payload }) =>
     state
       .set('loading', false)
+      .set('success', false)
       .set('error', payload.error),
+  [actions.RESET]: () =>
+    initialState
 }, initialState);
 
 export default bidListReducer;

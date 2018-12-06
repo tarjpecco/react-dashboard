@@ -25,13 +25,14 @@ class SubmitQuote extends React.Component {
 		error: PropTypes.string.isRequired,
 		success: PropTypes.bool.isRequired,
 		history: PropTypes.object.isRequired,
+		reset: PropTypes.func.isRequired,
 	}
 
 	constructor(props) {
 		super(props);
 		this.projectId = props.match.params.id;
 		this.state = {
-			bid: {},
+			bids: [],
 			formData: new FormData(),
 			showError: true,
 			inValid: {},
@@ -41,14 +42,18 @@ class SubmitQuote extends React.Component {
 	componentDidMount() {
 		const { listRFQJobs } = this.props;
 		listRFQJobs({ id: this.projectId });
+		const inValid = { bids: new Array(listRFQJobs.length).fill(false) };
+		this.setState({ inValid });
 	}
 
-	submitBid = () => {
-		const { bid, formData } = this.state;
+	submitBid = (index) => {
+		const { bids, formData } = this.state;
 		const { createBidInfo, rfqJobList } = this.props;
-		const job = rfqJobList[0];
-		if (isUndefined(bid.bid) || bid.bid === 0) {
-			const inValid = { bid: true };
+		const job = rfqJobList[index];
+		if (isUndefined(bids[index] && bids[index].bid) || bids[index] && bids[index].bid === 0) {
+			const inValidBids = cloneDeep(bids);
+			inValidBids[index] = true;
+			const inValid = { bids: inValidBids };
 			this.setState({ inValid });
 			return;
 		}
@@ -60,9 +65,9 @@ class SubmitQuote extends React.Component {
 		formData.append('sub', job.user.url);
 		formData.append('job', job.url);
 		formData.append('status', 'reviewing_compliance');
-		formData.append('bid', bid.bid);
+		formData.append('bid', bids[index].bid);
 		createBidInfo(formData);
-		this.setState({ showError: true, formData: new FormData(), bid: {} });
+		this.setState({ showError: true, formData: new FormData(), bids: {} });
 	}
 
 	onFileChange = (fileType) => {
@@ -73,15 +78,16 @@ class SubmitQuote extends React.Component {
 		this.setState({ formData });
 	}
 
-	onBidEditHandler = e => {
+	onBidEditHandler = (index, e) => {
 		const prop = e.target.name;
 		const value = e.target.value;
-		const { bid } =  this.state;
-		const newbid = cloneDeep(bid);
+		const { bids } =  this.state;
+		const newbids = cloneDeep(bids);
 		const reg = /^\d+$/;
 		if (value === '' || reg.test(value)) {
-			newbid[prop] = value;
-			this.setState({ bid: newbid });
+			newbids[index] = {};
+			newbids[index][prop] = value;
+			this.setState({ bids: newbids });
 		}
 	}
 
@@ -102,20 +108,20 @@ class SubmitQuote extends React.Component {
 			address: {},
 		};
 		if (jobs.length > 0) {
-			const job = jobs.pop();
+			const job = jobs[0];
 			project = job.project;
 		}
 		return project;
 	}
 
 	render() {
-		const { bid, showError, inValid } = this.state;
-		const { rfqJobList, error, success, history } = this.props;
+		const { bids, showError, inValid } = this.state;
+		const { rfqJobList, error, success, history, reset } = this.props;
 		if (success) {
+			reset();
 			setTimeout(() => history.push('/dashboard'), 500);
 		}
 		const projectInfo = this.getProjectInfo(rfqJobList);
-		const job = rfqJobList[0];
 		return (
 			<div id="main">
 				{error && showError &&
@@ -166,125 +172,127 @@ class SubmitQuote extends React.Component {
 					</Table>
 				</div>
 				<div className="content settings">
-					<React.Fragment>
-						<div className="wrap align-items-start">
-							<div style={{ flex: 1 }}>
-								<Table
-									tableName="Job Info"
-									onComapnyNameChanged={value => this.onUpdateCompanyDetails('name', value)}
-									tableStyle="table-striped table-bordered flex-fill"
-								>
-									<tbody>
-										<tr className="text-left">
-											<td className="table-width-30">
-												<p className="text-info">Trade Type</p>
-											</td>
-											<td className="table-width-70" colSpan="4">
-												<div>{job && job.trade_type}</div>
-											</td>
-										</tr>
-										<tr className="text-left">
-											<td className="table-width-30">
-												<p className="text-info">Expected Start Date</p>
-											</td>
-											<td className="table-width-70" colSpan="4">
-												<div>{moment(job && job.expected_start_date, 'YYYY-MM-DD', true).isValid() ? moment(job && job.expected_start_date).format('MM/DD/YYYY') : ''}</div>
-											</td>
-										</tr>
-										<tr className="text-left">
-											<td className="table-width-30">
-												<p className="text-info">Expected End Date</p>
-											</td>
-											<td className="table-width-70" colSpan="4">
-												<div>{moment(job && job.expected_end_date, 'YYYY-MM-DD', true).isValid() ? moment(job && job.expected_end_date).format('MM/DD/YYYY') : ''}</div>
-											</td>
-										</tr>
-										<tr className="text-left">
-											<td className="table-width-30">
-												<p className="text-info">RFQ Document</p>
-											</td>
-											<td className="table-width-70" colSpan="4">
-												<a
-													target="_blank"
-													rel="noopener noreferrer"
-													href={job && job.file}
-													className="btn btn-primary"
-												> Download RFQ</a>
-											</td>
-										</tr>
-									</tbody>
-								</Table>
-							</div>
-							<div style={{ width: 400, marginLeft: 30 }}>
-								<Table
-									tableName="Bid Info"
-									onComapnyNameChanged={value => this.onUpdateCompanyDetails('name', value)}
-									tableStyle="table-striped table-bordered"
-								>
-									<tbody>
-										<tr className="text-left">
-											<td className="table-width-40">
-												<p className="text-info">Bid Price</p>
-											</td>
-											<td className="table-width-60" colSpan="4">
-												<div className="input-group" style={{ maxWidth: 300 }}>
-													<div className="input-group-prepend">
-														<span className="input-group-text">$</span>
-													</div>
-													<input
-														type="text"
-														className={`form-control text-center ${inValid.bid ? 'is-invalid' : ''}`}
-														id="price_form_input"
-														name="bid"
-														placeholder="0"
-														value={bid && bid.bid || 0}
-														onChange={this.onBidEditHandler}
-													/>
-													<div className="input-group-append">
-														<span className="input-group-text">,00</span>
-													</div>
-												</div>
-												{inValid.bid &&
-													<div className="invalid-feedback animated fadeIn d-block" >Required</div>
-												}
-											</td>
-										</tr>
-										<tr className="text-left">
-											<td className="table-width-20">
-												<p className="text-info">Proposal</p>
-											</td>
-											<td className="table-width-80" colSpan="4">
-												<div>
-													<input
-														type="file"
-														name="proposal_file"
-														ref={(ref) => { this.proposalFile = ref; }}
-														onChange={() => this.onFileChange('proposal')}
-														style={{ display: 'none' }}
-													/>
-													<button
-														type="button"
-														className="btn btn-success"
-														onClick={() => this.proposalFile && this.proposalFile.click()}
-													>
-														Upload Proposal
-													</button>
-												</div>
-											</td>
-										</tr>
-									</tbody>
-								</Table>
-								<div className="input-group" style={{ justifyContent: 'flex-end', marginRight: 0 }}>
-									<button
-										type="button" className="btn btn-primary"
-										onClick={this.submitBid}
+					{rfqJobList && rfqJobList.map((job, index) =>
+						<React.Fragment key={index}>
+							<div className="wrap align-items-start">
+								<div style={{ flex: 1 }}>
+									<Table
+										tableName="Job Info"
+										onComapnyNameChanged={value => this.onUpdateCompanyDetails('name', value)}
+										tableStyle="table-striped table-bordered flex-fill"
 									>
-										Submit Bid
-									</button>
+										<tbody>
+											<tr className="text-left">
+												<td className="table-width-30">
+													<p className="text-info">Trade Type</p>
+												</td>
+												<td className="table-width-70" colSpan="4">
+													<div>{job && job.trade_type}</div>
+												</td>
+											</tr>
+											<tr className="text-left">
+												<td className="table-width-30">
+													<p className="text-info">Expected Start Date</p>
+												</td>
+												<td className="table-width-70" colSpan="4">
+													<div>{moment(job && job.expected_start_date, 'YYYY-MM-DD', true).isValid() ? moment(job && job.expected_start_date).format('MM/DD/YYYY') : ''}</div>
+												</td>
+											</tr>
+											<tr className="text-left">
+												<td className="table-width-30">
+													<p className="text-info">Expected End Date</p>
+												</td>
+												<td className="table-width-70" colSpan="4">
+													<div>{moment(job && job.expected_end_date, 'YYYY-MM-DD', true).isValid() ? moment(job && job.expected_end_date).format('MM/DD/YYYY') : ''}</div>
+												</td>
+											</tr>
+											<tr className="text-left">
+												<td className="table-width-30">
+													<p className="text-info">RFQ Document</p>
+												</td>
+												<td className="table-width-70" colSpan="4">
+													<a
+														target="_blank"
+														rel="noopener noreferrer"
+														href={job && job.file}
+														className="btn btn-primary"
+													> Download RFQ</a>
+												</td>
+											</tr>
+										</tbody>
+									</Table>
+								</div>
+								<div style={{ width: 400, marginLeft: 30 }}>
+									<Table
+										tableName="Bid Info"
+										onComapnyNameChanged={value => this.onUpdateCompanyDetails('name', value)}
+										tableStyle="table-striped table-bordered"
+									>
+										<tbody>
+											<tr className="text-left">
+												<td className="table-width-40">
+													<p className="text-info">Bid Price</p>
+												</td>
+												<td className="table-width-60" colSpan="4">
+													<div className="input-group" style={{ maxWidth: 300 }}>
+														<div className="input-group-prepend">
+															<span className="input-group-text">$</span>
+														</div>
+														<input
+															type="text"
+															className={`form-control text-center ${inValid.bids && inValid.bids[index] ? 'is-invalid' : ''}`}
+															id="price_form_input"
+															name="bid"
+															placeholder="0"
+															value={bids[index] && bids[index].bid || 0}
+															onChange={e => this.onBidEditHandler(index, e)}
+														/>
+														<div className="input-group-append">
+															<span className="input-group-text">,00</span>
+														</div>
+													</div>
+													{inValid.bids && inValid.bids[index] &&
+														<div className="invalid-feedback animated fadeIn d-block" >Required</div>
+													}
+												</td>
+											</tr>
+											<tr className="text-left">
+												<td className="table-width-20">
+													<p className="text-info">Proposal</p>
+												</td>
+												<td className="table-width-80" colSpan="4">
+													<div>
+														<input
+															type="file"
+															name="proposal_file"
+															ref={(ref) => { this.proposalFile = ref; }}
+															onChange={() => this.onFileChange('proposal')}
+															style={{ display: 'none' }}
+														/>
+														<button
+															type="button"
+															className="btn btn-success"
+															onClick={() => this.proposalFile && this.proposalFile.click()}
+														>
+															Upload Proposal
+														</button>
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</Table>
+									<div className="input-group" style={{ justifyContent: 'flex-end', marginRight: 0 }}>
+										<button
+											type="button" className="btn btn-primary"
+											onClick={() => this.submitBid(index)}
+										>
+											Submit Bid
+										</button>
+									</div>
 								</div>
 							</div>
-						</div>
-					</React.Fragment>
+						</React.Fragment>
+					)}
 				</div>
 			</div>
 		);
@@ -300,6 +308,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
 	createBidInfo: params => dispatch(bidActions.create_bid(params)),
 	listRFQJobs: params => dispatch(jobActions.get_rfq_jobs(params)),
+	reset: () => dispatch(bidActions.reset()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(SubmitQuote);

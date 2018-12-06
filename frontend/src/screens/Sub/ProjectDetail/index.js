@@ -253,7 +253,7 @@ class Detail extends React.Component {
 															style={{ border: 'solid 1px #cecacaee' }}
 															name="bid"
 															placeholder="00"
-															value={bids[index] && (editable === 'editable' ? bids[index].bid : numberWithCommas(bids[index].bid)) || 0}
+															value={(bids[index] && editable === 'editable' ? bids[index].bid : numberWithCommas(bids[index].bid)) || 0}
 															disabled={editable}
 															onChange={e => this.onBidEditHandler(index, 'bid', e.target.value)}
 														/>

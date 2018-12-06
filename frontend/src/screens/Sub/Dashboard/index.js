@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { isEmpty, groupBy, mapValues } from 'lodash';
+import { groupBy, mapValues } from 'lodash';
 import { Link } from 'react-router-dom';
 
 import Table from '../../../components/Table';

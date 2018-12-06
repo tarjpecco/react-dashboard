@@ -50,7 +50,7 @@ class SubmitQuote extends React.Component {
 		const { bids, formData } = this.state;
 		const { createBidInfo, rfqJobList } = this.props;
 		const job = rfqJobList[index];
-		if (isUndefined(bids[index] && bids[index].bid) || bids[index] && bids[index].bid === 0) {
+		if (isUndefined(bids[index] && bids[index].bid) || (bids[index] && bids[index].bid === 0)) {
 			const inValidBids = cloneDeep(bids);
 			inValidBids[index] = true;
 			const inValid = { bids: inValidBids };
@@ -244,7 +244,7 @@ class SubmitQuote extends React.Component {
 															id="price_form_input"
 															name="bid"
 															placeholder="0"
-															value={bids[index] && bids[index].bid || 0}
+															value={(bids[index] && bids[index].bid) || 0}
 															onChange={e => this.onBidEditHandler(index, e)}
 														/>
 														<div className="input-group-append">

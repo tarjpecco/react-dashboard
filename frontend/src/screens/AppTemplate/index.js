@@ -52,7 +52,7 @@ class AppTemplate extends React.Component {
 			>
 				<Sidebar location={location} userRole={userRole} />
 
-				<Header history={history} username={user && user.username || ''} />
+				<Header history={history} username={(user && user.username) || ''} />
 				{userRole === 'gc' && (
 					<Switch>
 						<Route exact path="/dashboard" component={GCDashboard} />

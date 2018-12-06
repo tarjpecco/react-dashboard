@@ -1,3 +1,5 @@
+/* eslint-disable consistent-return */
+/* eslint-disable array-callback-return */
 import { createDuck } from 'redux-duck';
 import { List, fromJS } from 'immutable';
 import { takeLatest, call, put, all, select } from 'redux-saga/effects';
@@ -118,6 +120,7 @@ function* updateLicensesSaga() {
       return call(removeUserLicenseForUser, 'me', licenseId);
     }));
     const exLicensesUrls = exLicenses.map(license => license.url);
+    // eslint-disable array-callback-return
     yield all(userLicenses.map(license => {
       const index = exLicensesUrls.findIndex(url => url === license.url);
       if (index < 0 || userLicenses.length === 0) {

@@ -57,14 +57,14 @@ class Proposal extends React.Component {
 	}
 
 	changeBidStatus = status => {
-		const { data } = this.props;
+		const { data, updateBidStatus } = this.props;
 		const { contingencyDescription } = this.state;
 		const bidId = getIdFromUrl(data.url);
 		const params = {
 			status,
 			contingency_description: status === 'contingent_accept' ? contingencyDescription : '',
 		};
-		updateBid(bidId, params);
+		updateBidStatus(bidId, params);
 		this.setState({ showContingentBox: false });
 	}
 
@@ -73,7 +73,7 @@ class Proposal extends React.Component {
 	}
 	
 	render() {
-		const { subUserInfo, address, userLicenses, userPolicies, showContingentBox, contingencyDescription } = this.state;
+		const { subUserInfo, address, userLicenses, userPolicies, showContingentBox, contingencyDescription, status } = this.state;
 		const { data, jobInProgress } = this.props;
 		const classname = `table table-vcenter table-bordered`;
 
@@ -233,7 +233,7 @@ class Proposal extends React.Component {
 							<span className={`badge ${this.getComplianceClassName(data.compliance_WC)}`}>WC</span>&nbsp;
 							<span className={`badge ${this.getComplianceClassName(data.compliance_DB)}`}>DB</span>&nbsp;
 						</div>
-						<div style={{ display: 'flex', flexDirection: 'row' }} hidden={data.status !== 'pending' && data.status !== 'reviewing_compliance'}>
+						<div style={{ display: 'flex', flexDirection: 'row' }} hidden={jobInProgress}>
 							<button type="button" className="btn btn-primary" onClick={() => this.changeBidStatus('accepted')}>
 								Accept
 							</button>
@@ -261,7 +261,7 @@ class Proposal extends React.Component {
 						{!showContingentBox &&
 							<div style={{ height: 38 }} />
 						}
-						<div hidden={data.status === 'pending' || data.status === 'reviewing_compliance'} style={{ height: 50 }} />
+						<div hidden={!jobInProgress} style={{ height: 50 }} />
 					</div>
 				</div>
 				{jobInProgress &&
@@ -311,11 +311,13 @@ class Proposal extends React.Component {
 Proposal.propTypes = {
 	data: PropTypes.object,
 	jobInProgress: PropTypes.bool,
+	updateBidStatus: PropTypes.func,
 };
 
 Proposal.defaultProps = {
 	data: {},
 	jobInProgress: false,
+	updateBidStatus: () => {},
 }
 
 export default Proposal;

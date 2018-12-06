@@ -227,9 +227,11 @@ class Detail extends React.Component {
 		}
 	}
 
-	updateBidStatus = (bidId, status) => {
-		const { updateBidInfo } = this.props;
-		updateBidInfo({ id: bidId, params: { status } });
+	updateBidStatus = (bidId, params) => {
+		const { updateBidInfo, listJobs } = this.props;
+		const { clicked } = this.state;
+		updateBidInfo({ id: bidId, params });
+		listJobs({ id: this.projectId, status: clicked });
 	}
 
 	getComplianceClassName = status => {

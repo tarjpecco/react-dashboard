@@ -156,7 +156,7 @@ class MyInsurance extends React.Component {
 			sub.push(user.url);
 			formData.append('sub', sub);
 			formData.append('status', 'add_new');
-			formData.append('company', user.company);
+			formData.append('company', user.company.url);
 			createPolicy(formData);
 		}
 	}

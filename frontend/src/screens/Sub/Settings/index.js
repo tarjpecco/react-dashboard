@@ -240,7 +240,7 @@ class Settings extends React.PureComponent {
 			addressObj: address,
 		} = user;
 		if (isEmpty(companyInfo)) {
-			getCompanyInfo({ id: user.company && this.getIdFromUrl(user.company)});
+			getCompanyInfo({ id: user.company && this.getIdFromUrl(user.company.url)});
 		}
 	
 		return (

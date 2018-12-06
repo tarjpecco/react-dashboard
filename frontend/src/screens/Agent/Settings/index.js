@@ -238,7 +238,7 @@ class Settings extends React.PureComponent {
 			addressObj: address,
 		} = user;
 		if (isEmpty(companyInfo)) {
-			getCompanyInfo({ id: this.getIdFromUrl(user.company)});
+			getCompanyInfo({ id: this.getIdFromUrl(user.company.url)});
 		}
 
 		return (

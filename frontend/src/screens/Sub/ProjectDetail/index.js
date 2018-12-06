@@ -216,30 +216,6 @@ class Detail extends React.Component {
 											</tr>
 											<tr className="text-left">
 												<td className="table-width-30">
-													<p className="text-info">Estimated Completion Date</p>
-												</td>
-												<td className="table-width-70" colSpan="4">
-													<div>{moment(job.estimated_end_date, 'YYYY-MM-DD', true).isValid() ? moment(job.estimated_end_date).format('MM/DD/YYYY') : ''}</div>
-												</td>
-											</tr>
-											<tr className="text-left">
-												<td className="table-width-30">
-													<p className="text-info">Start Date</p>
-												</td>
-												<td className="table-width-70" colSpan="4">
-													<div>{moment(job.start_date, 'YYYY-MM-DD', true).isValid() ? moment(job.start_date).format('MM/DD/YYYY') : ''}</div>
-												</td>
-											</tr>
-											<tr className="text-left">
-												<td className="table-width-30">
-													<p className="text-info">End Date</p>
-												</td>
-												<td className="table-width-70" colSpan="4">
-													<div>{moment(job.end_date, 'YYYY-MM-DD', true).isValid() ? moment(job.end_date).format('MM/DD/YYYY') : ''}</div>
-												</td>
-											</tr>
-											<tr className="text-left">
-												<td className="table-width-30">
 													<p className="text-info">RFQ Document</p>
 												</td>
 												<td className="table-width-70" colSpan="4">

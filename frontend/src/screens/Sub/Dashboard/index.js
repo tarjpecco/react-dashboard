@@ -14,13 +14,9 @@ import { getIdFromUrl } from '../../../utils';
 
 class Dashboard extends React.Component {
 	componentDidMount () {
-		const { rfqJobList, progressJobList, listRFQJobs, listProgressJobs } = this.props;
-		if (isEmpty(rfqJobList)) {
-			listRFQJobs();
-		}
-		if (isEmpty(progressJobList)) {
-			listProgressJobs();
-		}
+		const { listRFQJobs, listProgressJobs } = this.props;
+		listRFQJobs();
+		listProgressJobs();
 	}
 
 	getAddressStr = (address) => {

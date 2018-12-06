@@ -1,13 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
-import { cloneDeep, isNull } from 'lodash';
+import { cloneDeep, isUndefined } from 'lodash';
 import * as moment from 'moment';
 
 import Table from '../../../components/Table';
 import {
 	actions as bidActions,
 	getBidErrorSelector,
+	getBidSuccessSelector,
 } from '../../../redux/ducks/bids';
 import {
 	actions as jobActions,
@@ -22,6 +23,8 @@ class SubmitQuote extends React.Component {
 		rfqJobList: PropTypes.array.isRequired,
 		createBidInfo: PropTypes.func.isRequired,
 		error: PropTypes.string.isRequired,
+		success: PropTypes.bool.isRequired,
+		history: PropTypes.object.isRequired,
 	}
 
 	constructor(props) {
@@ -31,6 +34,7 @@ class SubmitQuote extends React.Component {
 			bid: {},
 			formData: new FormData(),
 			showError: true,
+			inValid: {},
 		};
 	}
 
@@ -43,6 +47,11 @@ class SubmitQuote extends React.Component {
 		const { bid, formData } = this.state;
 		const { createBidInfo, rfqJobList } = this.props;
 		const job = rfqJobList[0];
+		if (isUndefined(bid.bid) || bid.bid === 0) {
+			const inValid = { bid: true };
+			this.setState({ inValid });
+			return;
+		}
 		if (this.proposalFile.files.length === 0 || formData.get('proposal_file') === null) {
 			// eslint-disable-next-line no-alert
 			window.alert('Proposal File is Required!');
@@ -53,7 +62,7 @@ class SubmitQuote extends React.Component {
 		formData.append('status', 'reviewing_compliance');
 		formData.append('bid', bid.bid);
 		createBidInfo(formData);
-		this.setState({ showError: true, formData: new FormData() });
+		this.setState({ showError: true, formData: new FormData(), bid: {} });
 	}
 
 	onFileChange = (fileType) => {
@@ -64,11 +73,16 @@ class SubmitQuote extends React.Component {
 		this.setState({ formData });
 	}
 
-	onBidEditHandler = (prop, value) => {
+	onBidEditHandler = e => {
+		const prop = e.target.name;
+		const value = e.target.value;
 		const { bid } =  this.state;
 		const newbid = cloneDeep(bid);
-		newbid[prop] = value;
-		this.setState({ bid: newbid });
+		const reg = /^\d+$/;
+		if (value === '' || reg.test(value)) {
+			newbid[prop] = value;
+			this.setState({ bid: newbid });
+		}
 	}
 
 	getComplianceClassName = status => {
@@ -95,8 +109,11 @@ class SubmitQuote extends React.Component {
 	}
 
 	render() {
-		const { bid, showError } = this.state;
-		const { rfqJobList, error } = this.props;
+		const { bid, showError, inValid } = this.state;
+		const { rfqJobList, error, success, history } = this.props;
+		if (success) {
+			setTimeout(() => history.push('/dashboard'), 500);
+		}
 		const projectInfo = this.getProjectInfo(rfqJobList);
 		const job = rfqJobList[0];
 		return (
@@ -224,18 +241,20 @@ class SubmitQuote extends React.Component {
 													</div>
 													<input
 														type="text"
-														className="form-control text-center"
-														id="example-group1-input3"
-														style={{ border: 'solid 1px #cecacaee' }}
+														className={`form-control text-center ${inValid.bid ? 'is-invalid' : ''}`}
+														id="price_form_input"
 														name="bid"
-														placeholder="00"
+														placeholder="0"
 														value={bid && bid.bid || 0}
-														onChange={e => this.onBidEditHandler('bid', e.target.value)}
+														onChange={this.onBidEditHandler}
 													/>
 													<div className="input-group-append">
 														<span className="input-group-text">,00</span>
 													</div>
 												</div>
+												{inValid.bid &&
+													<div className="invalid-feedback animated fadeIn d-block" >Required</div>
+												}
 											</td>
 										</tr>
 										<tr className="text-left">
@@ -283,6 +302,7 @@ class SubmitQuote extends React.Component {
 const mapStateToProps = state => ({
 	rfqJobList: getRFQJobsSelector(state),
 	error: getBidErrorSelector(state),
+	success: getBidSuccessSelector(state),
 });
 
 const mapDispatchToProps = dispatch => ({

@@ -55,6 +55,14 @@ const jobListReducer = jobsDuck.createReducer({
     state
       .update('rfqJobs', () => List(payload.jobList))
       .set('loading', false),
+  [actions.GET_RFQ_JOBS]: (state) =>
+    state
+      .update('rfqJobs', () => List([]))
+      .set('loading', true),
+  [actions.GET_PROGRESS_JOBS]: (state) =>
+    state
+      .update('progressJobs', () => List([]))
+      .set('loading', true),
   [actions.GET_PROGRESS_JOBS_SUCCESS]: (state, { payload }) =>
     state
       .update('progressJobs', () => List(payload.jobList))

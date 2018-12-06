@@ -47,6 +47,7 @@ class MyInsurance extends React.Component {
 			showInvitationForm: false,
 			invitation: {
 				email: '',
+				type: '',
 			},
 			newPolicy: {
 				type: 'GL',
@@ -110,20 +111,23 @@ class MyInsurance extends React.Component {
 		const {
 			invitation,
 			inValid,
+			newPolicy,
 		} = this.state;
 
 		let isInvalid = false;
-		if (!this.validateEmail(invitation.email)) {
+		const newInvitation = cloneDeep(invitation);
+		if (!this.validateEmail(newInvitation.email)) {
 			inValid.email = true;
 			inValid.errorMessage = 'Invalid Email';
 			isInvalid = true;
 		}
+		newInvitation.type = newPolicy.type;
 		if (isInvalid) {
 			this.setState({ inValid });
 		} else {
 			this.closeModal();
 			const formData = new FormData();
-			mapValues(invitation, (value, key) => {
+			mapValues(newInvitation, (value, key) => {
 				formData.append(key, value);
 			});
 			formData.append('user_type', 'agent');

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 
 import './index.scss';
-import { getDataFromUrl, getUserLicensesForUser, getPoliciesForUser, updateBid } from '../../api';
+import { getDataFromUrl, getUserLicensesForUser, getPoliciesForUser } from '../../api';
 import { getIdFromUrl, numberWithCommas } from '../../utils';
 
 class Proposal extends React.Component {
@@ -73,7 +73,7 @@ class Proposal extends React.Component {
 	}
 	
 	render() {
-		const { subUserInfo, address, userLicenses, userPolicies, showContingentBox, contingencyDescription, status } = this.state;
+		const { subUserInfo, address, userLicenses, userPolicies, showContingentBox, contingencyDescription } = this.state;
 		const { data, jobInProgress } = this.props;
 		const classname = `table table-vcenter table-bordered`;
 
@@ -81,7 +81,7 @@ class Proposal extends React.Component {
 			<div className="block block-rounded block-bordered">
 				{subUserInfo && (
 					<div className="block-header block-header-default">
-						<h3 className="block-title">{subUserInfo.company && subUserInfo.company.name || ''}</h3>
+						<h3 className="block-title">{(subUserInfo.company && subUserInfo.company.name) || ''}</h3>
 					</div>
 				)}
 				<div className="block-content" style={{ display: 'flex' }}>
@@ -142,7 +142,7 @@ class Proposal extends React.Component {
 									</p>
 								</td>
 								<td colSpan="3">
-									<p>{subUserInfo.company && subUserInfo.company.ein || ''}</p>
+									<p>{(subUserInfo.company && subUserInfo.company.ein) || ''}</p>
 								</td>
 							</tr>
 							<tr className="text-left">

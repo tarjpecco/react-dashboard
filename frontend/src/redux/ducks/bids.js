@@ -33,6 +33,9 @@ export const getBidSelector = createSelector([stateSelector], state => {
 export const getBidErrorSelector = createSelector([stateSelector], state => {
   return state.get('error');
 });
+export const getBidSuccessSelector = createSelector([stateSelector], state => {
+  return state.get('success');
+});
 
 // Reducer Intial State
 const initialState = fromJS({
@@ -40,6 +43,7 @@ const initialState = fromJS({
   bidInfo: {},
   loading: false,
   error: '',
+  success: false,
   updateError: null,
 });
 
@@ -84,10 +88,12 @@ const bidListReducer = bidsDuck.createReducer({
       .set('loading', true),
   [actions.CREATE_BID]: (state) =>
     state
+      .set('success', false)
       .set('error', ''),
   [actions.CREATE_BID_SUCCESS]: (state) =>
     state
-      .set('loading', false),
+      .set('loading', false)
+      .set('success', true),
   [actions.CREATE_BID_ERROR]: (state, { payload }) =>
     state
       .set('loading', false)

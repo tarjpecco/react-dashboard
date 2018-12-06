@@ -112,7 +112,7 @@ class Detail extends React.Component {
 	changeBidStatus = (index, status) => {
 		const { updateBidInfo } = this.props;
 		const { bids } = this.state;
-		const bidId = getIdFromUrl(bids[index].url);
+		const bidId = getIdFromUrl(bids[index] && bids[index].url);
 		const params = {
 			status,
 		};
@@ -253,7 +253,7 @@ class Detail extends React.Component {
 															style={{ border: 'solid 1px #cecacaee' }}
 															name="bid"
 															placeholder="00"
-															value={(bids[index] && editable === 'editable' ? bids[index].bid : numberWithCommas(bids[index].bid)) || 0}
+															value={ editable === 'editable' ?  bids[index] && bids[index].bid :  bids[index] && numberWithCommas(bids[index].bid) || 0}
 															disabled={editable}
 															onChange={e => this.onBidEditHandler(index, 'bid', e.target.value)}
 														/>

@@ -86,8 +86,9 @@ class Dashboard extends React.Component {
 						<thead className="thead-light">
 							<tr>
 								<th className="text-center table-width-20">Project Name</th>
-								<th className="text-center table-width-20">Project Address</th>
-								<th className="text-center table-width-30">Status</th>
+                                <th className="text-center table-width-20">Trade Type</th>
+                                <th className="text-center table-width-20">Project Address</th>
+								<th className="text-center table-width-10">Status</th>
 								<th className="text-center table-width-30">Respond</th>
 							</tr>
 						</thead>
@@ -98,17 +99,24 @@ class Dashboard extends React.Component {
 										<p className="text-info">{job.project.name}</p>
 									</td>
 									<td className="font-w600 text-center">
+										<p className="text-info">{job.trade_type}</p>
+									</td>
+									<td className="font-w600 text-center">
 										<p className="text-info">{this.getAddressStr(job.project.address)}</p>
 									</td>
 									<td className="font-w600 text-center">
 										<p className="text-info">{job.project.status}</p>
 									</td>
 									<td className="font-w600 text-center">
+                                      { job.sub_bid ?
+                                        <Link to={`/projects/${getIdFromUrl(job.project.url)}`}>
+                                          <button type="button" className="btn btn-primary">View/Edit Quote</button>
+                                        </Link>
+                                          :
 										<Link to={`/submitquote/${getIdFromUrl(job.project.url)}`}>
-											<button type="button" className="btn btn-primary">
-												Submit Quote
-											</button>
-										</Link>
+                                          <button type="button" className="btn btn-primary">Submit Quote</button>
+                                        </Link>
+                                      }
 									</td>
 								</tr>
 							))}

@@ -108,7 +108,7 @@ class Dashboard extends React.Component {
 										<p className="text-info">{job.project.status}</p>
 									</td>
 									<td className="font-w600 text-center">
-										{ job.sub_bid ?
+										{ (job && job.sub_bid  && job.sub_bid.id) ?
 											<Link to={`/rfq-projects/${getIdFromUrl(job.project.url)}`}>
 												<button type="button" className="btn btn-primary">View/Edit Quote</button>
 											</Link>

@@ -25,7 +25,7 @@ class Detail extends React.Component {
 		listProgressJobs: PropTypes.func.isRequired,
 		progressJobList: PropTypes.array.isRequired,
 		updateBidInfo: PropTypes.func.isRequired,
-		rfqJobList: PropTypes.array.isRequired, 
+		rfqJobList: PropTypes.array.isRequired,
 	}
 
 	static defaultProps = {

@@ -26,9 +26,9 @@ class SignUp extends React.PureComponent {
 	}
 
 	componentWillMount() {
-		const { invite_id } = queryString.parse(this.props.location.search);
-		if (invite_id) {
-			this.setState({ invite_id });
+		const { key } = queryString.parse(this.props.location.search);
+		if (key) {
+			this.setState({ invite_id: key });
 		}
 	}
 
@@ -155,7 +155,7 @@ class SignUp extends React.PureComponent {
 
 	handleInviteInputChange = (input_invite_id) => this.setState({ input_invite_id });
 	onInviteIdButtonClick = () => {
-		this.props.history.replace(`/signup/?invite_id=${ this.state.input_invite_id }`);
+		this.props.history.replace(`/signup/?key=${ this.state.input_invite_id }`);
 		this.setState({ invite_id: this.state.input_invite_id });
 	};
 

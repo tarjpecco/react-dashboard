@@ -71,11 +71,12 @@ class Proposal extends React.Component {
 	changeContingencyDesc = (e) => {
 		this.setState({ contingencyDescription: e.target.value });
 	}
-	
+
 	render() {
 		const { subUserInfo, address, userLicenses, userPolicies, showContingentBox, contingencyDescription } = this.state;
 		const { data, jobInProgress } = this.props;
-		const classname = `table table-vcenter table-bordered`;
+        const classname = `table table-vcenter table-bordered`;
+
 
 		return (
 			<div className="block block-rounded block-bordered">
@@ -214,12 +215,13 @@ class Proposal extends React.Component {
 							<p>&nbsp;${numberWithCommas(data.bid)} </p>
 						</div>
 						<div style={{ display: 'flex', flexDirection: 'row' }}>
-							<a
+                          {data.COI_file ? (<a
 								target="_blank"
 								rel="noopener noreferrer"
 								href={data.COI_file}
 								className="btn btn-primary"
-							> Download COI</a>
+                              >Download COI</a>) : <button className="btn btn-primary" disabled>COI generating</button>}
+
 
 							<a
 								target="_blank"

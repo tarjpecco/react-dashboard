@@ -52,7 +52,7 @@ class Detail extends React.Component {
 
 	componentWillReceiveProps(nextProps) {
 		const { progressJobList, rfqJobList, rfq } = nextProps;
-		const jobs = rfq ? rfqJobList : progressJobList
+		const jobs = this.filterJobs(rfq ? rfqJobList : progressJobList);
 		if (jobs.length > 0) {
 			const editables = new Array(jobs.length).fill('disable');
 			this.setState({ editables });
@@ -133,10 +133,12 @@ class Detail extends React.Component {
 		updateBidInfo({ id: bidId, params});
 	}
 
+    filterJobs = (jobs) => jobs.filter(j => j.sub_bid.id)
+
 	render() {
 		const { editables, bids } = this.state;
 		const { progressJobList, rfqJobList, rfq } = this.props;
-		const jobs = rfq ? rfqJobList : progressJobList;
+        const jobs = this.filterJobs(rfq ? rfqJobList : progressJobList);
 		const projectInfo = this.getProjectInfo(jobs);
 		return (
 			<div id="main">

@@ -36,7 +36,7 @@ class Dashboard extends React.Component {
 	render() {
 		const { rfqJobList, progressJobList } = this.props;
 		const projectList = this.groupByProject(progressJobList);
-		const jobList = this.groupByProject(rfqJobList);
+		const jobList = rfqJobList;
 
 		return (
 			<div id="main">

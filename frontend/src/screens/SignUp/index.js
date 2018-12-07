@@ -1,15 +1,43 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
+import queryString from 'query-string';
+import { actions as authActions, getAuthError, getAuthLoading } from '../../redux/ducks/auth';
 
 import logoImg from '../../assets/media/logo-frontpage.png';
 
 class SignUp extends React.PureComponent {
 	constructor(props) {
 		super(props);
-		this.state = {};
+		this.state = {
+			invite_id: null,
+			input_invite_id: '',
+			username: '',
+			first_name: '',
+			last_name: '',
+			password: '',
+			confirm_password: '',
+			email: '',
+			phone: '',
+			role: 'sub',
+			agreed: false,
+			agreeError: false,
+		};
 	}
 
-	render() {
+	componentWillMount() {
+		const { invite_id } = queryString.parse(this.props.location.search);
+		if (invite_id) {
+			this.setState({ invite_id });
+		}
+	}
+
+	componentDidUpdate(prevProps) {
+		const { authLoading, error, history } = this.props;
+		if (!error && !authLoading && prevProps.authLoading) history.push('/dashboard')
+	}
+
+	wrapper = (element) => {
 		return (
 			<div>
 				<div id="page-container">
@@ -33,97 +61,7 @@ class SignUp extends React.PureComponent {
 
 										<div className="row no-gutters justify-content-center">
 											<div className="col-sm-8 col-xl-6">
-												<form
-													className="js-validation-signup"
-													action="be_pages_auth_all.html"
-													method="post"
-												>
-													<div className="py-3">
-														<div className="form-group">
-															<input
-																type="text"
-																className="form-control form-control-lg form-control-alt"
-																id="signup-username"
-																name="signup-username"
-																placeholder="Username"
-															/>
-														</div>
-														<div className="form-group">
-															<input
-																type="email"
-																className="form-control form-control-lg form-control-alt"
-																id="signup-email"
-																name="signup-email"
-																placeholder="Email"
-															/>
-														</div>
-														<div className="form-group">
-															<input
-																type="password"
-																className="form-control form-control-lg form-control-alt"
-																id="signup-password"
-																name="signup-password"
-																placeholder="Password"
-															/>
-														</div>
-														<div className="form-group">
-															<input
-																type="password"
-																className="form-control form-control-lg form-control-alt"
-																id="signup-password-confirm"
-																name="signup-password-confirm"
-																placeholder="Password Confirm"
-															/>
-														</div>
-														<div className="form-group">
-															<div className="custom-control custom-checkbox custom-control-primary">
-																<label
-																	className="custom-control-label"
-																	htmlFor="signup-terms"
-																>
-																	<input
-																		type="checkbox"
-																		className="custom-control-input"
-																		id="signup-terms"
-																		name="signup-terms"
-																	/>
-																	I agree to Terms &amp;
-																	Conditions
-																</label>
-															</div>
-														</div>
-													</div>
-													<div className="form-group">
-														<Link to="/dashboard">
-															<button
-																type="button"
-																className="btn btn-block btn-hero-lg btn-hero-success"
-															>
-																<i className="fa fa-fw fa-plus mr-1" />{' '}
-																Sign Up
-															</button>
-														</Link>
-														<p className="mt-3 mb-0 d-lg-flex justify-content-lg-between">
-															<Link
-																className="btn btn-sm btn-light d-block d-lg-inline-block mb-1"
-																to="/"
-															>
-																<i className="fa fa-sign-in-alt text-muted mr-1" />{' '}
-																Sign In
-															</Link>
-															{/* eslint-disable-next-line */}
-															<Link
-																className="btn btn-sm btn-light d-block d-lg-inline-block mb-1"
-																to="#"
-																data-toggle="modal"
-																data-target="#modal-terms"
-															>
-																<i className="fa fa-book text-muted mr-1" />{' '}
-																Read Terms
-															</Link>
-														</p>
-													</div>
-												</form>
+												{element}
 											</div>
 										</div>
 									</div>
@@ -152,7 +90,7 @@ class SignUp extends React.PureComponent {
 											data-dismiss="modal"
 											aria-label="Close"
 										>
-											<i className="fa fa-fw fa-times" />
+											<i className="fa fa-fw fa-times"/>
 										</button>
 									</div>
 								</div>
@@ -213,7 +151,253 @@ class SignUp extends React.PureComponent {
 				</div>
 			</div>
 		);
+	};
+
+	handleInviteInputChange = (input_invite_id) => this.setState({ input_invite_id });
+	onInviteIdButtonClick = () => {
+		this.props.history.replace(`/signup/?invite_id=${ this.state.input_invite_id }`);
+		this.setState({ invite_id: this.state.input_invite_id });
+	};
+
+	renderNoInvite = () => {
+		const error = (
+			<div>
+				<div className="alert alert-danger">
+					<h3 className="alert-heading font-size-h4 my-2">Error</h3>
+					<p className="mb-0">couldn't get invite id</p>
+				</div>
+				<div className="form-group">
+					<div className="input-group">
+						<div className="input-group-prepend">
+							<span className="input-group-text">invite ID</span>
+						</div>
+						<input
+							type="text"
+							className="form-control"
+							value={this.state.input_invite_id}
+							onChange={(e) => this.handleInviteInputChange(e.target.value)}
+						/>
+						<div className="input-group-append">
+							<button className="btn btn-primary ml-0 mr-0" onClick={() => this.onInviteIdButtonClick()}>
+								Go
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		);
+		return this.wrapper(error);
+	};
+
+	get signUpData() {
+		const { error } = this.props;
+		return [
+			{
+				property: 'username',
+				type: 'text',
+				value: this.state.username,
+				placeholder: 'Username',
+				error: error && error['username'] ? error['username'] : null
+			},
+			{
+				property: 'first_name',
+				type: 'text',
+				value: this.state.first_name,
+				placeholder: 'First name',
+				error: error && error['first_name'] ? error['first_name'] : null
+			},
+			{
+				property: 'last_name',
+				type: 'text',
+				value: this.state.last_name,
+				placeholder: 'Last name',
+				error: error && error['last_name'] ? error['last_name'] : null
+			},
+			{
+				property: 'password',
+				type: 'password',
+				value: this.state.password,
+				placeholder: 'Password',
+				error: error && error['password'] ? error['password'] : null
+			},
+			{
+				property: 'confirm_password',
+				type: 'password',
+				value: this.state.confirm_password,
+				placeholder: 'Confirm password',
+				error: error && error['confirm_password'] ? error['confirm_password'] : null
+			},
+			{
+				property: 'email',
+				type: 'text',
+				value: this.state.email,
+				placeholder: 'Email',
+				error: error && error['email'] ? error['email'] : null
+			},
+			{
+				property: 'phone',
+				type: 'text',
+				value: this.state.phone,
+				placeholder: 'Phone',
+				error: error && error['phone'] ? error['phone'] : null
+			},
+		]
+	}
+
+	get properties() {
+		const data = this.signUpData;
+		return data.map((item) => item.property);
+	}
+
+	onAgreeClick = () => this.setState({
+		agreed: !this.state.agreed,
+		agreeError: (!this.state.agreed && this.state.agreeError) ? false : this.state.agreeError,
+	});
+
+	onFormSubmit = (e) => {
+		e.preventDefault();
+		const {
+			invite_id,
+			username,
+			first_name,
+			last_name,
+			password,
+			confirm_password,
+			email,
+			phone,
+			role,
+		} = this.state;
+
+		const newUserData = {
+			invite_id,
+			username,
+			first_name,
+			last_name,
+			password,
+			confirm_password,
+			email,
+			phone,
+			role,
+		};
+
+		if (this.state.agreed) {
+			this.props.signUp(newUserData);
+		}
+		else {
+			this.setState({ agreeError: true });
+		}
+	};
+
+	handleInputChange = (property, value) => this.setState({ [property]: value });
+
+	renderInput = (item, index) => (
+		<div className="form-group" key={index}>
+			{
+				item.error &&
+				<span className="text-danger float-right">{item.error[0]}</span>
+			}
+			<input
+				type={item.type}
+				className={`form-control form-control-lg form-control-alt ${ item.error && 'is-invalid' }`}
+				placeholder={item.placeholder}
+				value={item.value}
+				onChange={(e) => this.handleInputChange(item.property, e.target.value)}
+			/>
+		</div>
+	);
+
+	renderSignUp = () => {
+		const properties = this.properties;
+		const { error } = this.props;
+		const showError = error && Object.keys(error).some((key) => !properties.includes(key));
+		const table = (
+			<form
+				className="js-validation-signup"
+				onSubmit={(e) => this.onFormSubmit(e)}
+			>
+				<div className="py-3">
+					{
+						this.signUpData.map((item, index) => this.renderInput(item, index))
+					}
+					<div className="form-group">
+						<div className="custom-control custom-checkbox custom-control-primary">
+							<input
+								type="checkbox"
+								className={`custom-control-input ${ this.state.agreeError && 'is-invalid' }`}
+								checked={this.state.agreed}
+								onChange={() => null}
+							/>
+							<label
+								className="custom-control-label"
+								htmlFor="signup-terms"
+								onClick={() => this.onAgreeClick()}
+							>
+								I agree to Terms &amp; Conditions
+							</label>
+						</div>
+						{
+							showError &&
+							<div className="alert alert-danger mt-2">
+								{
+									Object.keys(error).map((err, index) => {
+										if (properties.includes(err)) return null;
+										return (
+											<span key={index}>{error[err][0]}<br/></span>
+										);
+									})
+								}
+							</div>
+						}
+					</div>
+				</div>
+				<div className="form-group">
+					<button
+						type="submit"
+						className="btn btn-block btn-hero-lg btn-hero-success ml-0"
+					>
+						<i className="fa fa-fw fa-plus mr-1"/>{' '}
+						Sign Up
+					</button>
+					<p className="mt-3 mb-0 d-lg-flex justify-content-lg-between">
+						<Link
+							className="btn btn-sm btn-light d-block d-lg-inline-block mb-1"
+							to="/"
+						>
+							<i className="fa fa-sign-in-alt text-muted mr-1"/>{' '}
+							Sign In
+						</Link>
+						{/* eslint-disable-next-line */}
+						<Link
+							className="btn btn-sm btn-light d-block d-lg-inline-block mb-1"
+							to="#"
+							data-toggle="modal"
+							data-target="#modal-terms"
+						>
+							<i className="fa fa-book text-muted mr-1"/>{' '}
+							Read Terms
+						</Link>
+					</p>
+				</div>
+			</form>
+		);
+		return this.wrapper(table);
+	};
+
+	render() {
+		if (!this.state.invite_id) return this.renderNoInvite();
+
+		return this.renderSignUp();
 	}
 }
 
-export default SignUp;
+const mapStateToProps = (state) => ({
+	error: getAuthError(state),
+	authLoading: getAuthLoading(state),
+});
+const mapActionToProps = (dispatch) => ({
+	signUp: (payload) => {
+		dispatch(authActions.signup_request(payload));
+	},
+});
+
+export default connect(mapStateToProps, mapActionToProps)(SignUp);

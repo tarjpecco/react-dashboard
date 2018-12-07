@@ -3,6 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"dependencies": {
+		"@axetroy/react-download": "^1.1.1",
 		"antd": "^3.10.7",
 		"axios": "^0.18.0",
 		"classnames": "^2.2.6",
@@ -15,6 +16,7 @@
 		"moment": "^2.22.2",
 		"node-sass": "^4.10.0",
 		"prop-types": "^15.6.2",
+		"query-string": "^6.2.0",
 		"react": "^16.5.2",
 		"react-dom": "^16.5.2",
 		"react-modal": "^3.6.1",
@@ -27,8 +29,7 @@
 		"redux-actions": "^2.6.1",
 		"redux-duck": "^1.0.2",
 		"redux-saga": "^0.16.2",
-		"reselect": "^4.0.0",
-		"@axetroy/react-download": "^1.1.1"
+		"reselect": "^4.0.0"
 	},
 	"scripts": {
 		"start": "react-scripts start",

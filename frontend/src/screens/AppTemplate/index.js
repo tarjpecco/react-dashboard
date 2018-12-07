@@ -38,7 +38,7 @@ class AppTemplate extends React.Component {
 		const { getUserInfo } = this.props;
 		getUserInfo();
 	}
-	
+
 	render() {
 		const { showSideBar, location, history, user } = this.props;
 		const userRole = user && user.role ? user.role.toLowerCase() : '';
@@ -67,7 +67,8 @@ class AppTemplate extends React.Component {
 				)}
 				{userRole === 'sub' && (
 					<Switch>
-						<Route exact path="/dashboard" component={SubDashboard} />
+                        <Route exact path="/dashboard" component={SubDashboard} />
+                        <Route exact path="/rfq-projects/:id" render={(props) => <ProjectDetail {...props} rfq />} />
 						<Route exact path="/projects/:id" component={ProjectDetail} />
 						<Route exact path="/insurance" component={SubInsurance} />
 						<Route exact path="/insurance/:id" component={SubInsuranceDetail} />

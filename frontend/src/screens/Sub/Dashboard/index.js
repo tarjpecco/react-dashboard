@@ -15,7 +15,7 @@ import { getIdFromUrl } from '../../../utils';
 class Dashboard extends React.Component {
 	componentDidMount () {
 		const { listRFQJobs, listProgressJobs } = this.props;
-		listRFQJobs();
+        listRFQJobs();
 		listProgressJobs();
 	}
 
@@ -109,7 +109,7 @@ class Dashboard extends React.Component {
 									</td>
 									<td className="font-w600 text-center">
                                       { job.sub_bid ?
-                                        <Link to={`/projects/${getIdFromUrl(job.project.url)}`}>
+                                        <Link to={`/rfq-projects/${getIdFromUrl(job.project.url)}`}>
                                           <button type="button" className="btn btn-primary">View/Edit Quote</button>
                                         </Link>
                                           :

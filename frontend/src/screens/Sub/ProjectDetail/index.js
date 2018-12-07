@@ -10,6 +10,7 @@ import {
 } from '../../../redux/ducks/bids';
 import {
 	actions as jobActions,
+	getRFQJobsSelector,
 	getProgressJobsSelector,
 } from '../../../redux/ducks/jobs';
 import './index.scss';
@@ -17,11 +18,13 @@ import { getBid } from '../../../api';
 import { getIdFromUrl, numberWithCommas } from '../../../utils';
 
 class Detail extends React.Component {
-	static propTypes = {
-		match: PropTypes.object.isRequired,
-		listProgressJobs: PropTypes.func.isRequired,
-		progressJobList: PropTypes.array.isRequired,
-		updateBidInfo: PropTypes.func.isRequired,
+    static propTypes = {
+      rfq: PropTypes.bool,
+      match: PropTypes.object.isRequired,
+      listRFQJobs: PropTypes.func.isRequired,
+      listProgressJobs: PropTypes.func.isRequired,
+      progressJobList: PropTypes.array.isRequired,
+      updateBidInfo: PropTypes.func.isRequired,
 	}
 
 	constructor(props) {
@@ -36,20 +39,26 @@ class Detail extends React.Component {
 	}
 
 	componentDidMount() {
-		const { listProgressJobs } = this.props;
-		listProgressJobs({ id: this.projectId });
+      const { listProgressJobs, listRFQJobs, rfq } = this.props;
+      if (!rfq) {
+        listProgressJobs({ id: this.projectId });
+        return;
+      }
+      listRFQJobs({ id: this.projectId });
 	}
 
 	componentWillReceiveProps(nextProps) {
-		const { progressJobList } = nextProps;
-		if (progressJobList.length > 0) {
-			this.getBidList(progressJobList);
+		const { progressJobList, rfqJobList, rfq } = nextProps;
+        const jobs = rfq ? rfqJobList : progressJobList
+		if (jobs.length > 0) {
+			this.getBidList(jobs);
 		}
 	}
 
 	getBidList = (progressJobList) => {
+        console.log(progressJobList)
 		const bids = [];
-		progressJobList.forEach((job, index) => getBid(getIdFromUrl(job.active_bid))
+		progressJobList.forEach((job, index) => getBid(job.sub_bid.id)
 			.then(res => {
 				bids[index] = res;
 				if (bids.length === progressJobList.length) {
@@ -122,9 +131,9 @@ class Detail extends React.Component {
 
 	render() {
 		const { editable, btnname, btnicon, bids } = this.state;
-		const { progressJobList } = this.props;
-		const projectInfo = this.getProjectInfo(progressJobList);
-        console.log(bids)
+        const { progressJobList, rfqJobList, rfq } = this.props;
+        const jobs = rfq ? rfqJobList : progressJobList;
+		const projectInfo = this.getProjectInfo(jobs);
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -171,7 +180,7 @@ class Detail extends React.Component {
 					</Table>
 				</div>
 				<div className="content settings">
-					{progressJobList && progressJobList.map((job, index) =>
+					{jobs && jobs.map((job, index) =>
 						<React.Fragment key={index}>
 							<div className="table-tool">
 								{(job && job.status !== 'in_progress') &&
@@ -358,12 +367,16 @@ class Detail extends React.Component {
 	}
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => {
+  return {
+	rfqJobList: getRFQJobsSelector(state),
 	progressJobList: getProgressJobsSelector(state),
-});
+  };
+};
 
 const mapDispatchToProps = dispatch => ({
 	updateBidInfo: params => dispatch(bidActions.update_bid(params)),
+	listRFQJobs: () => dispatch(jobActions.get_rfq_jobs()),
 	listProgressJobs: params => dispatch(jobActions.get_progress_jobs(params)),
 })
 

@@ -79,6 +79,7 @@ class Proposal extends React.Component {
         const hideDeclineAccept = data.status !== 'pending'
         const classname = `table table-vcenter table-bordered`;
         const showStatus = !includes(['pending', 'accepted'], data.status);
+        const showCompliences = includes(['pending', 'accepted', 'contingent_accept'], data.status)
         const status = capitalize(data.status.split('_').join(' '));
 
 		return (
@@ -233,7 +234,7 @@ class Proposal extends React.Component {
 								className="btn btn-primary"
 							> Download Proposal</a>
 						</div>
-						<div style={{ display: 'flex', flexDirection: 'row' }}>
+						<div style={{ display: 'flex', flexDirection: 'row' }} hidden={!showCompliences}>
 							<span className={`badge ${this.getComplianceClassName(data.compliance_GL)}`}>GL</span>&nbsp;
 							<span className={`badge ${this.getComplianceClassName(data.compliance_WC)}`}>WC</span>&nbsp;
 							<span className={`badge ${this.getComplianceClassName(data.compliance_DB)}`}>DB</span>&nbsp;

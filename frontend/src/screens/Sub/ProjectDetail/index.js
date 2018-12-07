@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, capitalize } from 'lodash';
 import * as moment from 'moment';
 
 import Table from '../../../components/Table';
@@ -91,9 +91,10 @@ class Detail extends React.Component {
 		return 'badge-danger';
 	}
 
-	getAddressStr = address =>
-	`${address.line_1 || ''} ${address.line_2 || ''} ${address.town || ''}, ${address.state || ''} ${address.zip_code || ''}`;
-	
+    getAddressStr = address => {
+      return `${address.line_1 || ''} ${address.line_2 || ''} ${address.town || ''}, ${address.state || ''} ${address.zip_code || ''}`;
+    }
+
 	getProjectInfo = jobList => {
 		const jobs = cloneDeep(jobList);
 		let project = {
@@ -123,6 +124,7 @@ class Detail extends React.Component {
 		const { editable, btnname, btnicon, bids } = this.state;
 		const { progressJobList } = this.props;
 		const projectInfo = this.getProjectInfo(progressJobList);
+        console.log(bids)
 		return (
 			<div id="main">
 				<div className="bg-body-light">
@@ -172,7 +174,7 @@ class Detail extends React.Component {
 					{progressJobList && progressJobList.map((job, index) =>
 						<React.Fragment key={index}>
 							<div className="table-tool">
-								{(projectInfo && projectInfo.status !== 'in_progress') &&
+								{(job && job.status !== 'in_progress') &&
 									<button
 										type="button"
 										className="btn btn-sm btn-hero-dark mr-1 mb-3"
@@ -286,6 +288,14 @@ class Detail extends React.Component {
 														href={bids[index] && bids[index].proposal_file}
 														className="btn btn-primary"
 													> Download</a>
+												</td>
+											</tr>
+											<tr className="text-left">
+												<td className="table-width-30">
+													<p className="text-info">Status</p>
+												</td>
+												<td className="table-width-70" colSpan="4">
+                                                  {bids[index] && capitalize(bids[index].status.split('_').join(' '))}
 												</td>
 											</tr>
 											{bids[index] && bids[index].status === 'contingent_accept' &&

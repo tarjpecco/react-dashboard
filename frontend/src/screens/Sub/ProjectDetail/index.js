@@ -18,22 +18,25 @@ import { getBid } from '../../../api';
 import { getIdFromUrl, numberWithCommas } from '../../../utils';
 
 class Detail extends React.Component {
-    static propTypes = {
-      rfq: PropTypes.bool,
-      match: PropTypes.object.isRequired,
-      listRFQJobs: PropTypes.func.isRequired,
-      listProgressJobs: PropTypes.func.isRequired,
-      progressJobList: PropTypes.array.isRequired,
-      updateBidInfo: PropTypes.func.isRequired,
+	static propTypes = {
+		rfq: PropTypes.bool,
+		match: PropTypes.object.isRequired,
+		listRFQJobs: PropTypes.func.isRequired,
+		listProgressJobs: PropTypes.func.isRequired,
+		progressJobList: PropTypes.array.isRequired,
+		updateBidInfo: PropTypes.func.isRequired,
+		rfqJobList: PropTypes.array.isRequired, 
+	}
+
+	static defaultProps = {
+		rfq: false,
 	}
 
 	constructor(props) {
 		super(props);
 		this.projectId = props.match.params.id;
 		this.state = {
-			editable: 'disable',
-			btnname: 'Edit',
-			btnicon: 'si si-pencil',
+			editables: [],
 			bids: [],
 		};
 	}
@@ -49,14 +52,15 @@ class Detail extends React.Component {
 
 	componentWillReceiveProps(nextProps) {
 		const { progressJobList, rfqJobList, rfq } = nextProps;
-        const jobs = rfq ? rfqJobList : progressJobList
+		const jobs = rfq ? rfqJobList : progressJobList
 		if (jobs.length > 0) {
+			const editables = new Array(jobs.length).fill('disable');
+			this.setState({ editables });
 			this.getBidList(jobs);
 		}
 	}
 
 	getBidList = (progressJobList) => {
-        console.log(progressJobList)
 		const bids = [];
 		progressJobList.forEach((job, index) => getBid(job.sub_bid.id)
 			.then(res => {
@@ -69,15 +73,15 @@ class Detail extends React.Component {
 	}
 
 	handleClickEdit = (index) => {
-		const { editable, bids } = this.state;
-		if (editable === 'disable') {
-			this.setState({ editable: '' });
-			this.setState({ btnname: 'Save' });
-			this.setState({ btnicon: 'far fa-save' });
+		const { editables, bids } = this.state;
+		if (editables[index] === 'disable') {
+			const newEditables = cloneDeep(editables);
+			newEditables[index] = '';
+			this.setState({ editables: newEditables });
 		} else {
-			this.setState({ editable: 'disable' });
-			this.setState({ btnname: 'Edit' });
-			this.setState({ btnicon: 'si si-pencil' });
+			const newEditables = cloneDeep(editables);
+			newEditables[index] = 'disable';
+			this.setState({ editables: newEditables });
 			const { updateBidInfo } = this.props;
 			const bidId = getIdFromUrl(bids[index].url);
 			const params = {
@@ -100,9 +104,9 @@ class Detail extends React.Component {
 		return 'badge-danger';
 	}
 
-    getAddressStr = address => {
-      return `${address.line_1 || ''} ${address.line_2 || ''} ${address.town || ''}, ${address.state || ''} ${address.zip_code || ''}`;
-    }
+	getAddressStr = address => {
+		return `${address.line_1 || ''} ${address.line_2 || ''} ${address.town || ''}, ${address.state || ''} ${address.zip_code || ''}`;
+	}
 
 	getProjectInfo = jobList => {
 		const jobs = cloneDeep(jobList);
@@ -130,9 +134,9 @@ class Detail extends React.Component {
 	}
 
 	render() {
-		const { editable, btnname, btnicon, bids } = this.state;
-        const { progressJobList, rfqJobList, rfq } = this.props;
-        const jobs = rfq ? rfqJobList : progressJobList;
+		const { editables, bids } = this.state;
+		const { progressJobList, rfqJobList, rfq } = this.props;
+		const jobs = rfq ? rfqJobList : progressJobList;
 		const projectInfo = this.getProjectInfo(jobs);
 		return (
 			<div id="main">
@@ -189,7 +193,7 @@ class Detail extends React.Component {
 										className="btn btn-sm btn-hero-dark mr-1 mb-3"
 										onClick={() => this.handleClickEdit(index)}
 									>
-										<i className={btnicon} /> {btnname}
+										<i className={editables[index] ? 'si si-pencil' : 'far fa-save'} /> {editables[index] ? 'Edit' : 'Save'}
 									</button>
 								}
 							</div>
@@ -264,8 +268,8 @@ class Detail extends React.Component {
 															style={{ border: 'solid 1px #cecacaee' }}
 															name="bid"
 															placeholder="00"
-															value={ editable === 'editable' ?  bids[index] && bids[index].bid :  bids[index] && numberWithCommas(bids[index].bid) || 0}
-															disabled={editable}
+															value={ editables[index] === 'editable' ?  bids[index] && bids[index].bid :  bids[index] && numberWithCommas(bids[index].bid) || 0}
+															disabled={editables[index]}
 															onChange={e => this.onBidEditHandler(index, 'bid', e.target.value)}
 														/>
 														<div className="input-group-append">
@@ -304,7 +308,7 @@ class Detail extends React.Component {
 													<p className="text-info">Status</p>
 												</td>
 												<td className="table-width-70" colSpan="4">
-                                                  {bids[index] && capitalize(bids[index].status.split('_').join(' '))}
+													{bids[index] && capitalize(bids[index].status.split('_').join(' '))}
 												</td>
 											</tr>
 											{bids[index] && bids[index].status === 'contingent_accept' &&
@@ -335,7 +339,7 @@ class Detail extends React.Component {
 												type="button"
 												className="btn btn-primary"
 												onClick={() => this.changeBidStatus(index, 'rejected_by_sub')}
-												disabled={editable}
+												disabled={editables[index]}
 											>
 												Reject
 											</button>
@@ -343,7 +347,7 @@ class Detail extends React.Component {
 												type="button"
 												className="btn btn-primary"
 												onClick={() => this.changeBidStatus(index, 'reviewing_compliance')}
-												disabled={editable}
+												disabled={editables[index]}
 											>
 												Verify Compliance Again
 											</button>
@@ -351,7 +355,7 @@ class Detail extends React.Component {
 												type="button"
 												className="btn btn-primary"
 												onClick={() => this.changeBidStatus(index, 'pending')}
-												disabled={editable}
+												disabled={editables[index]}
 											>
 												Proposal Updated
 											</button>
@@ -367,12 +371,10 @@ class Detail extends React.Component {
 	}
 }
 
-const mapStateToProps = (state) => {
-  return {
+const mapStateToProps = (state) => ({
 	rfqJobList: getRFQJobsSelector(state),
 	progressJobList: getProgressJobsSelector(state),
-  };
-};
+});
 
 const mapDispatchToProps = dispatch => ({
 	updateBidInfo: params => dispatch(bidActions.update_bid(params)),

@@ -35,14 +35,12 @@ class Proposal extends React.Component {
 				this.setState({ userLicenses: licenses });
 				if (jobInProgress) {
 					const id = getIdFromUrl(user.url);
-					console.log('sub user id:', id);
 					return getPoliciesForUser(id)
 				}
 				return { results: [] };
 			})
 			.then(res => res.results)
 			.then(policies => {
-				console.log('user policies:', policies);
 				this.setState({ userPolicies: policies })
 			})
 	}
@@ -90,143 +88,142 @@ class Proposal extends React.Component {
 					</div>
 				)}
 				<div className="block-content" style={{ display: 'flex' }}>
-					<table className={classname}>
-						<tbody>
-							<tr className="text-left">
-								<td className="table-width-20">
-									<p className="text-info">
-										Contact name
-									</p>
-								</td>
-								<td
-									className="table-width-80"
-									colSpan="3"
-								>
-									<p>{`${subUserInfo.first_name} ${subUserInfo.last_name}` || ''}</p>
-								</td>
-							</tr>
-							<tr className="text-left">
-								<td className="table-width-20">
-									<p className="text-info">
-										Address
-									</p>
-								</td>
-								<td
-									className="table-width-80"
-									colSpan="3"
-								>
-									<p>
-										{this.getAddressStr(address) || ''}
-									</p>
-								</td>
-							</tr>
-							<tr className="text-left">
-								<td className="table-width-20">
-									<p className="text-info">
-										Phone
-									</p>
-								</td>
-								<td colSpan="3">
-									<p>{subUserInfo.phone || ''}</p>
-								</td>
-							</tr>
-							<tr className="text-left">
-								<td className="table-width-20">
-									<p className="text-info">
-										Email
-									</p>
-								</td>
-								<td colSpan="3">
-									<p>{subUserInfo.email || ''}</p>
-								</td>
-							</tr>
-							<tr className="text-left">
-								<td className="table-width-20">
-									<p className="text-info">
-										EIN #
-									</p>
-								</td>
-								<td colSpan="3">
-									<p>{(subUserInfo.company && subUserInfo.company.ein) || ''}</p>
-								</td>
-                            </tr>
-							<tr className="text-left">
-								<td>
-									<p className="text-info">
-										License number
-									</p>
-								</td>
-								<td className="table-width-30">
-									Type
-								</td>
-								<td className="table-width-30">
-									Number
-								</td>
-								<td
-									className="table-width-40"
-									colSpan="2"
-								>
-									Expiredate
-								</td>
-							</tr>
-							{userLicenses && userLicenses.map((license, index) => (
-								<tr className="text-left" key={index}>
-									<td />
-									<td className="table-width-30">
-										{license.type || ''}
-									</td>
-									<td className="table-width-30">
-										{license.number || ''}
-									</td>
-									<td
-										className="table-width-40"
-										colSpan="2"
-									>
-										{moment(license.expire_date).format('MM/DD/YYYY')}
-									</td>
-								</tr>
-							))}
-							{userLicenses.length === 0 &&
+					<div style={{ flex: 1 }}>
+						<table className={classname} style={{ width: 'auto' }}>
+							<tbody>
 								<tr className="text-left">
-									<td />
-									<td className="table-width-30">
-										&nbsp;
+									<td className="table-width-20">
+										<p className="text-info">
+											Contact name
+										</p>
+									</td>
+									<td
+										className="table-width-80"
+										colSpan="3"
+									>
+										<p>{`${subUserInfo.first_name} ${subUserInfo.last_name}` || ''}</p>
+									</td>
+								</tr>
+								<tr className="text-left">
+									<td className="table-width-20">
+										<p className="text-info">
+											Address
+										</p>
+									</td>
+									<td
+										className="table-width-80"
+										colSpan="3"
+									>
+										<p>
+											{this.getAddressStr(address) || ''}
+										</p>
+									</td>
+								</tr>
+								<tr className="text-left">
+									<td className="table-width-20">
+										<p className="text-info">
+											Phone
+										</p>
+									</td>
+									<td colSpan="3">
+										<p>{subUserInfo.phone || ''}</p>
+									</td>
+								</tr>
+								<tr className="text-left">
+									<td className="table-width-20">
+										<p className="text-info">
+											Email
+										</p>
+									</td>
+									<td colSpan="3">
+										<p>{subUserInfo.email || ''}</p>
+									</td>
+								</tr>
+								<tr className="text-left">
+									<td className="table-width-20">
+										<p className="text-info">
+											EIN #
+										</p>
+									</td>
+									<td colSpan="3">
+										<p>{(subUserInfo.company && subUserInfo.company.ein) || ''}</p>
+									</td>
+								</tr>
+								<tr className="text-left">
+									<td>
+										<p className="text-info">
+											License number
+										</p>
 									</td>
 									<td className="table-width-30">
-										&nbsp;
+										Type
+									</td>
+									<td className="table-width-30">
+										Number
 									</td>
 									<td
 										className="table-width-40"
 										colSpan="2"
 									>
-										&nbsp;
+										Expiredate
 									</td>
 								</tr>
-							}
-						</tbody>
-					</table>
+								{userLicenses && userLicenses.map((license, index) => (
+									<tr className="text-left" key={index}>
+										<td />
+										<td className="table-width-30">
+											{license.type || ''}
+										</td>
+										<td className="table-width-30">
+											{license.number || ''}
+										</td>
+										<td
+											className="table-width-40"
+											colSpan="2"
+										>
+											{moment(license.expire_date).format('MM/DD/YYYY')}
+										</td>
+									</tr>
+								))}
+								{userLicenses.length === 0 &&
+									<tr className="text-left">
+										<td />
+										<td className="table-width-30">
+											&nbsp;
+										</td>
+										<td className="table-width-30">
+											&nbsp;
+										</td>
+										<td
+											className="table-width-40"
+											colSpan="2"
+										>
+											&nbsp;
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
 					<div
-						style={{
-							display: 'flex',
-							flexDirection: 'column',
-							alignItems: 'center',
-							justifyContent: 'space-around',
-							marginLeft: 20,
-						}}
+						className="d-flex flex-column justify-content-around align-items-center ml-2"
+						style={{ width: 400 }}
 					>
 						<div className="d-flex font-weight-bold mt-2 mb-2" style={{ fontSize: '1.2em' }}>
 							<p className="text-info mr-2">Bid price: </p>
 							<p>&nbsp;${numberWithCommas(data.bid)} </p>
 						</div>
 						<div style={{ display: 'flex', flexDirection: 'row' }}>
-                          {data.COI_file ? (<a
-								target="_blank"
-								rel="noopener noreferrer"
-								href={data.COI_file}
-								className="btn btn-primary"
-                              >Download COI</a>) : <button className="btn btn-primary" disabled>COI generating</button>}
-
-
+							{data.COI_file ? (
+								<a
+									target="_blank"
+									rel="noopener noreferrer"
+									href={data.COI_file}
+									className="btn btn-primary"
+								>Download COI</a>
+							) : (
+								<button className="btn btn-primary" disabled type="button" >COI generating</button>
+							)}
 							<a
 								target="_blank"
 								rel="noopener noreferrer"
@@ -239,9 +236,9 @@ class Proposal extends React.Component {
 							<span className={`badge ${this.getComplianceClassName(data.compliance_WC)}`}>WC</span>&nbsp;
 							<span className={`badge ${this.getComplianceClassName(data.compliance_DB)}`}>DB</span>&nbsp;
 						</div>
-                        <div style={{ displat: 'flex', flexDirection: 'row' }} hidden={!showStatus}>
-                          <span className="text-info"> Status: </span> <span className='badge badge-primary' >{ status }</span>
-                        </div>
+						<div style={{ displat: 'flex', flexDirection: 'row' }} hidden={!showStatus}>
+							<span className="text-info"> Status: </span> <span className='badge badge-primary' >{ status }</span>
+						</div>
 						<div style={{ display: 'flex', flexDirection: 'row' }} hidden={hideDeclineAccept}>
 							<button type="button" className="btn btn-primary" onClick={() => this.changeBidStatus('accepted')}>
 								Accept

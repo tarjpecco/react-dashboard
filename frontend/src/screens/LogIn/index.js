@@ -81,7 +81,7 @@ class LogIn extends React.PureComponent {
 												<div className="form-group">
 													<button
 														type="button"
-														className="btn btn-block btn-hero-lg btn-hero-primary"
+														className="btn btn-block btn-hero-lg btn-hero-primary ml-0"
 														onClick={() => {
 															signIn({
 																username,

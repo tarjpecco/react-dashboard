@@ -97,9 +97,10 @@ class SubmitQuote extends React.Component {
 		return 'badge-danger';
 	}
 
-	getAddressStr = address =>
-	`${address.line_1 || ''} ${address.line_2 || ''} ${address.town || ''}, ${address.state || ''} ${address.zip_code || ''}`;
-	
+	getAddressStr = address => {
+      return `${address.line_1 || ''} ${address.line_2 || ''} ${address.town || ''}, ${address.state || ''} ${address.zip_code || ''}`;
+    }
+
 	getProjectInfo = jobList => {
 		const jobs = cloneDeep(jobList);
 		let project = {
@@ -121,7 +122,8 @@ class SubmitQuote extends React.Component {
 			reset();
 			setTimeout(() => history.push('/dashboard'), 500);
 		}
-		const projectInfo = this.getProjectInfo(rfqJobList);
+        const projectInfo = this.getProjectInfo(rfqJobList);
+        const jobs = (rfqJobList || []).filter(j => !j.sub_bid.id)
 		return (
 			<div id="main">
 				{error && showError &&
@@ -172,7 +174,7 @@ class SubmitQuote extends React.Component {
 					</Table>
 				</div>
 				<div className="content settings">
-					{rfqJobList && rfqJobList.map((job, index) =>
+					{ jobs.map((job, index) =>
 						<React.Fragment key={index}>
 							<div className="wrap align-items-start">
 								<div style={{ flex: 1 }}>

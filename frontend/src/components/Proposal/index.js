@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import { includes, capitalize } from 'lodash';
 
 import './index.scss';
 import { getDataFromUrl, getUserLicensesForUser, getPoliciesForUser } from '../../api';
@@ -75,8 +76,10 @@ class Proposal extends React.Component {
 	render() {
 		const { subUserInfo, address, userLicenses, userPolicies, showContingentBox, contingencyDescription } = this.state;
 		const { data, jobInProgress } = this.props;
+        const hideDeclineAccept = data.status !== 'pending'
         const classname = `table table-vcenter table-bordered`;
-
+        const showStatus = !includes(['pending', 'accepted'], data.status);
+        const status = capitalize(data.status.split('_').join(' '));
 
 		return (
 			<div className="block block-rounded block-bordered">
@@ -145,7 +148,7 @@ class Proposal extends React.Component {
 								<td colSpan="3">
 									<p>{(subUserInfo.company && subUserInfo.company.ein) || ''}</p>
 								</td>
-							</tr>
+                            </tr>
 							<tr className="text-left">
 								<td>
 									<p className="text-info">
@@ -235,7 +238,10 @@ class Proposal extends React.Component {
 							<span className={`badge ${this.getComplianceClassName(data.compliance_WC)}`}>WC</span>&nbsp;
 							<span className={`badge ${this.getComplianceClassName(data.compliance_DB)}`}>DB</span>&nbsp;
 						</div>
-						<div style={{ display: 'flex', flexDirection: 'row' }} hidden={jobInProgress}>
+                        <div style={{ displat: 'flex', flexDirection: 'row' }} hidden={!showStatus}>
+                          <span className="text-info"> Status: </span> <span className='badge badge-primary' >{ status }</span>
+                        </div>
+						<div style={{ display: 'flex', flexDirection: 'row' }} hidden={hideDeclineAccept}>
 							<button type="button" className="btn btn-primary" onClick={() => this.changeBidStatus('accepted')}>
 								Accept
 							</button>
@@ -282,7 +288,7 @@ class Proposal extends React.Component {
 								{userPolicies.map((policy, index) => (
 									<tr className="text-center" key={index}>
 										<td>
-											<p className="text-info">{(policy.agent[0] && policy.agent[0].first_name + policy.agent[0].last_name) || ''}</p>
+											<p className="text-info">{(policy.agent[0] && policy.agent[0].first_name + policy.agent[0].last_name) || 'Self uploaded'}</p>
 										</td>
 										<td>{policy.type}</td>
 										<td>{policy.number}</td>

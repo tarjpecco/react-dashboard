@@ -2,6 +2,7 @@ import { createDuck } from 'redux-duck';
 import { List, Map, fromJS } from 'immutable';
 import { takeLatest, call, put, all } from 'redux-saga/effects';
 import { createSelector } from 'reselect';
+import { includes } from 'lodash'
 
 import {
   getBids,
@@ -50,10 +51,12 @@ const initialState = fromJS({
 
 // Reducer
 const bidListReducer = bidsDuck.createReducer({
-  [actions.GET_BIDS_SUCCESS]: (state, { payload }) =>
-    state
-      .update('bids', () => List(payload.bidList))
-      .set('loading', false),
+  [actions.GET_BIDS_SUCCESS]: (state, { payload }) => {
+    const bidList = payload.bidList.filter(b => !includes(['declined'], b.status))
+    return state
+      .update('bids', () => List(bidList))
+      .set('loading', false)
+  },
   [actions.GET_BIDS_ERROR]: (state, { payload }) =>
     state
       .set('error', payload.error)
@@ -76,10 +79,11 @@ const bidListReducer = bidsDuck.createReducer({
     state
       .update('bidInfo', () => Map(payload.bidInfo))
       .set('loading', false),
-  [actions.GET_BID_SUCCESS]: (state, { payload }) =>
-    state
+  [actions.GET_BID_SUCCESS]: (state, { payload }) => {
+    return state
       .update('bidInfo', () => Map(payload.bidInfo))
-      .set('loading', false),
+      .set('loading', false)
+  },
   [actions.GET_BID_ERROR]: (state, { payload }) =>
     state
       .set('error', payload.error)
@@ -131,6 +135,7 @@ function* updateBidSaga({ payload }) {
   try {
     const bidInfo = yield call(updateBid, payload.id, payload.params);
     yield put(actions.get_bid_success({ bidInfo }));
+    yield put(actions.get_bids())
   } catch (err) {
     const errorMessage = 'Listing bids Failed';
     yield put(actions.get_bid_error({ error: errorMessage }));

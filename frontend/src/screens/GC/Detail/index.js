@@ -139,6 +139,7 @@ class Detail extends React.Component {
 	    const formData = new FormData();
 			formData.append('email', emailValue);
 			formData.append('user_type', 'sub');
+			formData.append('job', job.url);
 			createInvite(formData);
 			this.showInvitationSuccess(id);
       }

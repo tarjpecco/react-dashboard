@@ -233,7 +233,7 @@ class MyInsurance extends React.Component {
 							{policies.map((policy, index) => (
 								<tr className="text-center" key={index}>
 									<td>
-										<p className="text-info">{(policy.agent[0] && policy.agent[0].first_name + policy.agent[0].last_name) || ''}</p>
+										<p className="text-info">{(policy.agent[0] && policy.agent[0].first_name + policy.agent[0].last_name) || 'Self uploaded'}</p>
 									</td>
 									<td>{policy.type}</td>
 									<td>{policy.number}</td>

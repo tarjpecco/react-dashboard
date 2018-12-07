@@ -29,6 +29,7 @@ import { API_URL } from '../../../api';
 import { getIdFromUrl } from '../../../utils';
 
 import './index.scss';
+import {validateEmail} from "../../../utils/form";
 
 const customStyles = {
 	content: {
@@ -71,7 +72,7 @@ class Detail extends React.Component {
 				expected_start_date: '',
 				expected_end_date: '',
 				estimated_end_date: moment(new Date()).format('YYYY-MM-DD'),
-			}
+			},
 		};
 
 		const { user, getUserInfo } = props;
@@ -108,26 +109,63 @@ class Detail extends React.Component {
 		this.setState({ jobs, bids: newBids });
     }
 
-    onChangeSub = (jobId, subId) => {
-      const key = `job-friend-selector-${jobId}`
-      this.setState({
-        [key]: subId,
-      })
-    }
+    onChangeSub = (jobId, event, email=false) => {
+		const isValid = email ? validateEmail(event.target.value) : event.target.checkValidity();
+		if (!isValid) {
+			return;
+		}
 
-    onInviteSub = (job) => {
-			const { updateJob } = this.props;
-      const key = `job-friend-selector-${job.id}`
-      // eslint-disable-next-line react/destructuring-assignment
-      const subId = this.state[key];
-      const data = {
-        rfq_subs: [
-          subId,
-          ...job.rfq_subs,
-        ]
+      this.setState({
+        [event.target.name]: event.target.value,
+      });
+    };
+
+    onInviteSub = (job, id) => {
+	  const { updateJob, createInvite } = this.props;
+	  const selectorValue = this.addSubSelectorValue(job); // user from dropdown
+	  const emailValue = this.addSubEmailValue(job); // custom email
+	  if (selectorValue){
+        // eslint-disable-next-line react/destructuring-assignment
+        const subId = this.addSubSelectorValue(job);
+        const data = {
+          rfq_subs: [
+            subId,
+            ...job.rfq_subs,
+          ]
+        };
+        updateJob({id: job.id, data });
+        this.showInvitationSuccess(id);
+      } else if (emailValue) {
+	    const formData = new FormData();
+			formData.append('email', emailValue);
+			formData.append('user_type', 'sub');
+			createInvite(formData);
+			this.showInvitationSuccess(id);
       }
-      updateJob({id: job.id, data })
-    }
+    };
+
+    hideInvitationSuccces = (jobIndex) => {
+      const { jobs } = this.state;
+      jobs[jobIndex].invitationSent = false;
+      this.setState({
+        jobs: [...jobs],
+      });
+    };
+
+    showInvitationSuccess = (jobIndex) => {
+      const { jobs } = this.state;
+      jobs[jobIndex].invitationSent = true;
+      this.setState({
+        jobs: [...jobs],
+      });
+      setTimeout(this.hideInvitationSuccces.bind(this, jobIndex), 3000);
+    };
+
+    addSubEmailValue = job =>  this.state[`job-friend-email-${job.id}`];
+    addSubSelectorValue = job =>  this.state[`job-friend-selector-${job.id}`];
+    addSubEnabled = (job) => {
+      return this.addSubEmailValue(job) || this.addSubSelectorValue(job);
+    };
 
 	onClickTabHandler = tabname => {
 		this.setState({ [tabname]: 'nav-link active' });
@@ -135,9 +173,8 @@ class Detail extends React.Component {
 
 	onClickDetail = id => {
 		const { jobs } = this.state;
-		const temp = jobs;
-		temp[id].showdetail = !temp[id].showdetail;
-		this.setState({ jobs: temp });
+		jobs[id].showdetail = !jobs[id].showdetail;
+		this.setState({ jobs: [...jobs] });
 	};
 
 	openModal = () => {
@@ -369,30 +406,55 @@ class Detail extends React.Component {
 															hidden: bids[jobs[id].id].length !== 0 || !jobs[id].showdetail,
 														})}
 													>
-														<td colSpan="6">
-															<select
-																name="sub-friend"
-																placeholder="Sub"
-																// eslint-disable-next-line react/destructuring-assignment
-																value={this.state[`job-friend-selector-${item.id}`] || ''}
-																onChange={e => this.onChangeSub(item.id, e.target.value)}
-															>
-																<option value='' disabled selected> --- </option>
-																{friends.subs.map((sub, index) =>
-																	<option value={sub.url} key={index} disabled={includes(item.rfq_subs, sub.url)}>
-																		{ sub.company && sub.company.name } { includes(item.rfq_subs, sub.url) ? '- (invited)' : '' }
-																	</option>
-																)}
-															</select>
+														<td colSpan="3">
+                                                          <div className="form-group row">
+                                                            <div className="col-md-4">
+                                                              <select
+                                                                  name="sub-friend"
+                                                                  placeholder="Sub"
+                                                                  className={"form-control"}
+                                                                  // eslint-disable-next-line react/destructuring-assignment
+                                                                  value={this.state[`job-friend-selector-${item.id}`] || ''}
+                                                                  onChange={e => this.onChangeSub(item.id, e)}
+                                                              >
+                                                                <option value='' disabled> --- </option>
+                                                                  {friends.subs.map((sub, index) =>
+                                                                      <option value={sub.url} key={index} disabled={includes(item.rfq_subs, sub.url)}>
+                                                                          { sub.company && sub.company.name } { includes(item.rfq_subs, sub.url) ? '- (invited)' : '' }
+                                                                </option>
+                                                                  )}
+                                                              </select>
+                                                            </div>
+                                                            <div className="col-md-4">
+                                                          <input
+															type="email"
+                                                            className={"form-control"}
+															name={`job-friend-email-${item.id}`}
+															onChange={e => this.onChangeSub(item.id, e, true)}
+														  />
+                                                            </div>
+                                                            <div className="col-md-4">
 															<button
 																type="button"
 																// eslint-disable-next-line react/destructuring-assignment
-																disabled={!this.state[`job-friend-selector-${item.id}`]}
-																className="btn btn-sm btn-success"
-																onClick={() => this.onInviteSub(item)}
-															>Invite Sub</button>
+																disabled={!this.addSubEnabled(item)}
+																className="btn btn-success"
+																onClick={() => this.onInviteSub(item, id)}
+															>
+                                                              Invite Sub
+                                                            </button>
+                                                            </div>
+
+                                                          </div>
 														</td>
 													</tr>
+                                                    <tr className={classnames({hidden: !jobs[id].invitationSent})}>
+                                                      <td colSpan="3">
+                                                        <div className="alert alert-success" role="alert">
+                                                          Invitation has been sent!
+                                                        </div>
+                                                      </td>
+                                                    </tr>
 
 													<tr
 														className={classnames({
@@ -683,6 +745,7 @@ const mapDispatchToProps = dispatch => ({
 	getUserInfo: () => dispatch(userActions.get_user()),
 	updateBidInfo: params => dispatch(bidActions.update_bid(params)),
 	listFriends: () => dispatch(inviteActions.get_friends()),
+  	createInvite: params => dispatch(inviteActions.create_invite(params)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Detail);

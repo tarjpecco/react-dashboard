@@ -19,6 +19,7 @@ import {
 import Table from '../../../components/Table';
 import './index.scss';
 import { getIdFromUrl } from '../../../utils';
+import {validateEmail} from '../../../utils/form';
 
 const customStyles = {
 	content: {
@@ -94,12 +95,6 @@ class MyInsurance extends React.Component {
 		this.setState({ coiModalIsOpen: false });
 	}
 
-	validateEmail = (email) => {
-    // eslint-disable-next-line no-useless-escape
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
-	}
-
 	changeInviteEmail = (e) => {
 		const { invitation } = this.state;
 		invitation.email = e.target.value;
@@ -116,7 +111,7 @@ class MyInsurance extends React.Component {
 
 		let isInvalid = false;
 		const newInvitation = cloneDeep(invitation);
-		if (!this.validateEmail(newInvitation.email)) {
+		if (!validateEmail(newInvitation.email)) {
 			inValid.email = true;
 			inValid.errorMessage = 'Invalid Email';
 			isInvalid = true;
